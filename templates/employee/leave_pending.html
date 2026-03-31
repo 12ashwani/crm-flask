@@ -1,0 +1,754 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <!-- Enhanced Header with Gradient Background -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <div class="card shadow-xl border-0 overflow-hidden position-relative" style="border-radius: 24px;">
+        <div class="card-body py-5 px-4 position-relative" 
+             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          
+          <!-- Animated Background Elements -->
+          <div class="position-absolute top-0 start-0 w-100 h-100 overflow-hidden">
+            <div class="position-absolute" style="top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: float 8s ease-in-out infinite;"></div>
+            <div class="position-absolute" style="bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: float 10s ease-in-out infinite reverse;"></div>
+            <div class="position-absolute" style="top: 50%; left: 20%; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%; animation: float 12s ease-in-out infinite;"></div>
+          </div>
+          
+          <div class="d-flex justify-content-between align-items-center position-relative flex-wrap gap-3">
+            <div>
+              <div class="d-flex align-items-center gap-3 mb-2">
+                <div class="glass-icon">
+                  <i class="bi bi-hourglass-split fs-1 text-white"></i>
+                </div>
+                <div>
+                  <h1 class="display-6 fw-bold mb-1 text-white">Pending Leave Requests</h1>
+                  <p class="mb-0 fs-5 text-white-90">Requests awaiting HR approval</p>
+                </div>
+              </div>
+              <div class="mt-3 d-flex gap-2">
+                <span class="badge bg-white text-primary px-3 py-2 rounded-pill shadow-sm">
+                  <i class="bi bi-clock-history me-1"></i> {{ pending_requests|length }} Request(s) Pending
+                </span>
+              </div>
+            </div>
+            <a href="{{ url_for('employee.leave_status') }}" class="btn btn-light shadow-lg rounded-pill px-4 py-3 fw-semibold hover-lift">
+              <i class="bi bi-arrow-left me-2"></i> Back to Leave Status
+              <i class="bi bi-arrow-return-left ms-2"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced Pending Requests Card -->
+  <div class="card shadow-lg border-0" style="border-radius: 20px;">
+    <div class="card-header bg-transparent py-4 border-0">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="pulse-icon">
+            <i class="bi bi-hourglass-split text-warning fs-2"></i>
+          </div>
+          <div>
+            <h5 class="mb-0 fw-semibold">Pending Requests</h5>
+            <small class="text-muted">Awaiting HR review and approval</small>
+          </div>
+        </div>
+        <div class="pending-badge">
+          <span class="badge bg-warning text-dark rounded-pill px-4 py-2 fs-6">
+            <i class="bi bi-clock me-1"></i> {{ pending_requests|length }} Pending
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card-body p-0">
+      {% if pending_requests %}
+      <div class="table-responsive">
+        <table class="table premium-table mb-0" id="pendingTable">
+          <thead>
+            <tr>
+              <th class="ps-4 py-3"><i class="bi bi-tag me-2"></i>Leave Type</th>
+              <th class="py-3"><i class="bi bi-calendar3 me-2"></i>Start Date</th>
+              <th class="py-3"><i class="bi bi-calendar3 me-2"></i>End Date</th>
+              <th class="py-3"><i class="bi bi-calculator me-2"></i>Days</th>
+              <th class="py-3"><i class="bi bi-file-text me-2"></i>Reason</th>
+              <th class="py-3 text-center pe-4"><i class="bi bi-check-circle me-2"></i>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for req in pending_requests %}
+            <tr class="premium-row pending-row" data-request-id="{{ req.id }}">
+              <td class="ps-4 py-3">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="type-icon 
+                    {% if req.leave_type == 'casual' %}type-casual
+                    {% elif req.leave_type == 'sick' %}type-sick
+                    {% elif req.leave_type == 'annual' %}type-annual
+                    {% elif req.leave_type == 'maternity' %}type-maternity
+                    {% elif req.leave_type == 'paternity' %}type-paternity
+                    {% else %}type-emergency{% endif %}">
+                    <i class="bi 
+                      {% if req.leave_type == 'casual' %}bi-emoji-smile
+                      {% elif req.leave_type == 'sick' %}bi-thermometer-half
+                      {% elif req.leave_type == 'annual' %}bi-suitcase-lg
+                      {% elif req.leave_type == 'maternity' %}bi-heart-pulse
+                      {% elif req.leave_type == 'paternity' %}bi-person-heart
+                      {% else %}bi-exclamation-triangle{% endif %}"></i>
+                  </div>
+                  <div>
+                    <span class="fw-semibold">{{ req.leave_type|title }}</span>
+                    <br>
+                    <small class="text-muted">
+                      {% if req.leave_type == 'casual' %}Personal
+                      {% elif req.leave_type == 'sick' %}Medical
+                      {% elif req.leave_type == 'annual' %}Vacation
+                      {% elif req.leave_type == 'maternity' %}Maternity
+                      {% elif req.leave_type == 'paternity' %}Paternity
+                      {% else %}Emergency{% endif %}
+                    </small>
+                  </div>
+                </div>
+              </td>
+              <td class="py-3">
+                <div class="date-badge">
+                  <i class="bi bi-calendar-check me-1 text-success"></i>
+                  {{ req.start_date }}
+                </div>
+              </td>
+              <td class="py-3">
+                <div class="date-badge">
+                  <i class="bi bi-calendar-x me-1 text-danger"></i>
+                  {{ req.end_date }}
+                </div>
+              </td>
+              <td class="py-3">
+                <div class="days-badge">
+                  <span class="days-number">{{ req.total_days }}</span>
+                  <small class="text-muted">day{% if req.total_days != 1 %}s{% endif %}</small>
+                </div>
+              </td>
+              <td class="py-3">
+                <div class="reason-cell" title="{{ req.reason }}">
+                  <i class="bi bi-chat-quote me-1 text-muted"></i>
+                  {{ req.reason|truncate(60) }}
+                </div>
+                {% if req.reason|length > 60 %}
+                <small class="text-muted click-hint">
+                  <i class="bi bi-mouse"></i> Click to read more
+                </small>
+                {% endif %}
+              </td>
+              <td class="py-3 text-center pe-4">
+                <div class="status-pending-wrapper">
+                  <span class="status-badge status-pending">
+                    <i class="bi bi-clock-fill me-1"></i> Pending
+                  </span>
+                  <div class="pending-progress">
+                    <div class="progress-ring"></div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <!-- Enhanced Empty State -->
+      <div class="empty-state-enhanced">
+        <div class="empty-state-icon mx-auto mb-4">
+          <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <h5 class="fw-bold mb-2">No Pending Requests</h5>
+        <p class="text-muted mb-4">You don't have any leave requests waiting for approval.</p>
+        <a href="{{ url_for('employee.leave_request') }}" class="btn btn-primary-gradient rounded-pill px-5 py-3">
+          <i class="bi bi-plus-circle me-2"></i> Apply for Leave
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Enhanced Helpful Note with Animation -->
+  {% if pending_requests %}
+  <div class="mt-4 animate-slide-up">
+    <div class="alert alert-enhanced border-0 shadow-lg">
+      <div class="d-flex align-items-center gap-3">
+        <div class="alert-icon">
+          <i class="bi bi-info-circle-fill fs-3"></i>
+        </div>
+        <div>
+          <strong class="d-block mb-1">Status Update</strong>
+          <p class="mb-0">These requests are currently under review by HR. You will be notified once a decision is made.</p>
+        </div>
+        <div class="ms-auto">
+          <div class="notification-pulse"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Quick Stats Section (Optional) -->
+  {% if pending_requests %}
+  <div class="row g-4 mt-2">
+    <div class="col-md-4">
+      <div class="quick-stat-card">
+        <div class="stat-content">
+          <i class="bi bi-calendar-week fs-2 text-primary"></i>
+          <div>
+            <div class="stat-value">{{ pending_requests|length }}</div>
+            <div class="stat-label">Pending Requests</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="quick-stat-card">
+        <div class="stat-content">
+          <i class="bi bi-clock-history fs-2 text-warning"></i>
+          <div>
+            <div class="stat-value">{{ pending_requests|map(attribute='total_days')|sum }}</div>
+            <div class="stat-label">Total Days Pending</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="quick-stat-card">
+        <div class="stat-content">
+          <i class="bi bi-calendar-range fs-2 text-info"></i>
+          <div>
+            <div class="stat-value">{{ pending_requests|map(attribute='start_date')|min|default('N/A') }}</div>
+            <div class="stat-label">Earliest Request</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Enhanced Custom Styles -->
+<style>
+  :root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  }
+
+  /* Floating Animation */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+  /* Slide Up Animation */
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+
+  /* Glass Icon */
+  .glass-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .text-white-90 {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  /* Hover Lift */
+  .hover-lift {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Pulse Icon */
+  .pulse-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 193, 7, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 15px rgba(255, 193, 7, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+    }
+  }
+
+  /* Pending Badge */
+  .pending-badge {
+    position: relative;
+  }
+
+  /* Premium Table */
+  .premium-table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .premium-table thead th {
+    background: linear-gradient(135deg, #f8f9fa, #ffffff);
+    border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .premium-row {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .premium-row:hover {
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.05), transparent);
+    transform: translateX(4px);
+  }
+
+  /* Type Icons */
+  .type-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+  }
+
+  .type-casual {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    color: #667eea;
+  }
+
+  .type-sick {
+    background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.1));
+    color: #4facfe;
+  }
+
+  .type-annual {
+    background: linear-gradient(135deg, rgba(67, 233, 123, 0.1), rgba(56, 249, 215, 0.1));
+    color: #43e97b;
+  }
+
+  .type-maternity {
+    background: linear-gradient(135deg, rgba(250, 112, 154, 0.1), rgba(254, 225, 64, 0.1));
+    color: #fa709a;
+  }
+
+  .type-paternity {
+    background: linear-gradient(135deg, rgba(240, 147, 251, 0.1), rgba(245, 87, 108, 0.1));
+    color: #f093fb;
+  }
+
+  .type-emergency {
+    background: linear-gradient(135deg, rgba(108, 117, 125, 0.1), rgba(134, 143, 150, 0.1));
+    color: #6c757d;
+  }
+
+  /* Date Badge */
+  .date-badge {
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 4px 0;
+  }
+
+  /* Days Badge */
+  .days-badge {
+    text-align: center;
+  }
+
+  .days-number {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #667eea;
+  }
+
+  /* Reason Cell */
+  .reason-cell {
+    max-width: 280px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .reason-cell:hover {
+    color: #667eea;
+  }
+
+  .click-hint {
+    font-size: 0.7rem;
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* Status Badge */
+  .status-pending-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    gap: 5px;
+  }
+
+  .status-pending {
+    background: linear-gradient(135deg, #fed7aa, #fde68a);
+    color: #92400e;
+    animation: pulse-badge 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-badge {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  .pending-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+  }
+
+  .progress-ring {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: 50px;
+    border: 2px solid rgba(255, 193, 7, 0.3);
+    animation: ring-pulse 1.5s ease-out infinite;
+  }
+
+  @keyframes ring-pulse {
+    0% {
+      transform: scale(0.9);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(1.2);
+      opacity: 0;
+    }
+  }
+
+  /* Empty State Enhanced */
+  .empty-state-enhanced {
+    padding: 80px 20px;
+    text-align: center;
+  }
+
+  .empty-state-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #10b981;
+    font-size: 3rem;
+    animation: scale-in 0.5s ease-out;
+  }
+
+  @keyframes scale-in {
+    from {
+      transform: scale(0);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Alert Enhanced */
+  .alert-enhanced {
+    background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.05));
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+  }
+
+  .alert-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(79, 172, 254, 0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4facfe;
+  }
+
+  .notification-pulse {
+    width: 12px;
+    height: 12px;
+    background: #4facfe;
+    border-radius: 50%;
+    animation: notification-pulse 1.5s ease-out infinite;
+  }
+
+  @keyframes notification-pulse {
+    0% {
+      transform: scale(0.8);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+  }
+
+  /* Quick Stat Cards */
+  .quick-stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+  }
+
+  .quick-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  .stat-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1f2937;
+    line-height: 1.2;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+  }
+
+  /* Button Gradient */
+  .btn-primary-gradient {
+    background: var(--primary-gradient);
+    border: none;
+    color: white;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    color: white;
+  }
+
+  /* Shadow XL */
+  .shadow-xl {
+    box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .glass-icon {
+      width: 45px;
+      height: 45px;
+    }
+    
+    .display-6 {
+      font-size: 1.5rem;
+    }
+    
+    .premium-table th, 
+    .premium-table td {
+      white-space: nowrap;
+    }
+    
+    .quick-stat-card {
+      margin-bottom: 1rem;
+    }
+  }
+</style>
+
+<!-- Enhanced JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Add click-to-expand functionality for reason cells
+  const reasonCells = document.querySelectorAll('.reason-cell');
+  reasonCells.forEach(cell => {
+    cell.addEventListener('click', function(e) {
+      const fullReason = this.getAttribute('title');
+      if (fullReason && this.textContent.trim() !== fullReason) {
+        // Create a modal-like alert (can be replaced with a proper modal)
+        const modal = document.createElement('div');
+        modal.className = 'reason-modal-overlay';
+        modal.innerHTML = `
+          <div class="reason-modal">
+            <div class="reason-modal-header">
+              <h6>Reason for Leave</h6>
+              <button class="close-modal">&times;</button>
+            </div>
+            <div class="reason-modal-body">
+              <p>${fullReason}</p>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // Add styles for modal
+        const style = document.createElement('style');
+        style.textContent = `
+          .reason-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+          }
+          .reason-modal {
+            background: white;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: auto;
+            animation: slideUp 0.3s ease;
+          }
+          .reason-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+          }
+          .reason-modal-header h6 {
+            margin: 0;
+            font-weight: 600;
+          }
+          .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6c757d;
+            transition: color 0.2s;
+          }
+          .close-modal:hover {
+            color: #000;
+          }
+          .reason-modal-body {
+            padding: 1.5rem;
+          }
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          @keyframes slideUp {
+            from {
+              opacity: 0;
+              transform: translateY(20px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `;
+        document.head.appendChild(style);
+        
+        // Close modal functionality
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal || e.target.classList.contains('close-modal')) {
+            modal.remove();
+          }
+        });
+      }
+    });
+  });
+  
+  // Add hover animation to rows
+  const rows = document.querySelectorAll('.premium-row');
+  rows.forEach(row => {
+    row.addEventListener('mouseenter', function() {
+      this.style.cursor = 'pointer';
+    });
+  });
+  
+  // Animate stats on load
+  const statValues = document.querySelectorAll('.stat-value');
+  statValues.forEach(stat => {
+    if (stat.textContent !== 'N/A') {
+      const value = stat.textContent;
+      stat.textContent = '0';
+      setTimeout(() => {
+        stat.textContent = value;
+      }, 100);
+    }
+  });
+});
+</script>
+{% endblock %}

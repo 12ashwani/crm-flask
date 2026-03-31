@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <!-- Header -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h1 class="display-6 fw-bold mb-1">Attendance Management</h1>
+          <p class="text-muted fs-5 mb-0">Mark and monitor daily employee attendance</p>
+        </div>
+        <a href="{{ url_for('hr.dashboard') }}" class="btn btn-outline-secondary shadow-sm">
+          <i class="bi bi-arrow-left me-2"></i> Back to HR Panel
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mark Attendance Section -->
+  <div class="card shadow border-0 mb-5">
+    <div class="card-header bg-light py-4">
+      <h5 class="mb-0 fw-semibold d-flex align-items-center">
+        <i class="bi bi-clipboard-check me-3 text-primary"></i>
+        Mark Today's Attendance
+      </h5>
+    </div>
+    <div class="card-body p-5">
+      <form method="POST" action="{{ url_for('hr.mark_employee_attendance') }}">
+
+        <!-- Date Selector -->
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <label class="form-label fw-medium">Attendance Date</label>
+            <input type="date" name="date" class="form-control form-control-lg" 
+                   value="{{ today.strftime('%Y-%m-%d') }}" required>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-4">Employee</th>
+                <th>Status</th>
+                <th>Check In</th>
+                <th>Check Out</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for employee in employees %}
+              <tr>
+                <td class="ps-4">
+                  <div class="fw-medium">{{ employee.name }}</div>
+                  <div class="small text-muted">{{ employee.department }} • {{ employee.role }}</div>
+                  <input type="hidden" name="employee_id[]" value="{{ employee.id }}">
+                </td>
+                <td>
+                  <select name="status[]" class="form-select">
+                    <option value="present">Present</option>
+                    <option value="half_day">Half Day</option>
+                    <option value="absent">Absent</option>
+                  </select>
+                </td>
+                <td>
+                  <input type="time" name="check_in_time[]" class="form-control">
+                </td>
+                <td>
+                  <input type="time" name="check_out_time[]" class="form-control">
+                </td>
+                <td>
+                  <input type="text" name="remarks[]" class="form-control" 
+                         placeholder="Optional remarks...">
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-4">
+          <button type="submit" class="btn btn-primary btn-lg px-5">
+            <i class="bi bi-save me-2"></i> Save Attendance Records
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Today's Attendance Records -->
+  <div class="card shadow border-0">
+    <div class="card-header bg-light py-4 d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 fw-semibold">
+        <i class="bi bi-calendar-check me-3"></i>
+        Today's Attendance Overview
+      </h5>
+      <span class="badge bg-primary fs-6">{{ today_records|length }} Records</span>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Employee</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Check In</th>
+              <th>Check Out</th>
+              <th>Working Hours</th>
+              <th>Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for record in today_records %}
+            <tr>
+              <td class="ps-4 fw-medium">{{ record.employee_name }}</td>
+              <td>{{ record.date }}</td>
+              <td>
+                {% if record.status == 'present' %}
+                  <span class="badge bg-success">Present</span>
+                {% elif record.status == 'half_day' %}
+                  <span class="badge bg-warning">Half Day</span>
+                {% elif record.status == 'absent' %}
+                  <span class="badge bg-danger">Absent</span>
+                {% else %}
+                  <span class="badge bg-secondary">{{ record.status|title }}</span>
+                {% endif %}
+              </td>
+              <td>{{ record.check_in_time or '—' }}</td>
+              <td>{{ record.check_out_time or '—' }}</td>
+              <td>
+                {% if record.working_hours %}
+                  <strong>{{ record.working_hours }}</strong>
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              <td class="text-muted">{{ record.remarks or '—' }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7" class="text-center py-5">
+                <i class="bi bi-calendar-x display-1 text-muted opacity-25"></i>
+                <h5 class="text-muted mt-3">No Attendance Records Yet</h5>
+                <p class="text-muted">Mark attendance for today using the form above.</p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Enhanced Custom Styles -->
+<style>
+  .card {
+    border-radius: 16px;
+  }
+
+  .form-control, .form-select {
+    border-radius: 12px;
+  }
+
+  .form-control-lg {
+    font-size: 1.05rem;
+  }
+
+  table th {
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+  }
+
+  .table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.04);
+  }
+
+  .badge {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+  }
+
+  .table td {
+    vertical-align: middle;
+    padding: 16px 12px;
+  }
+</style>
+{% endblock %}

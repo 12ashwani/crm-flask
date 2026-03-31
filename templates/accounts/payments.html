@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Accounts · Payments Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"/>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #fafbfe;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f8f9fc;
+      --accent: #6366f1;
+      --accent-light: #818cf8;
+      --accent-dark: #4f46e5;
+      --accent-glow: rgba(99, 102, 241, 0.2);
+      --success: #10b981;
+      --success-light: #34d399;
+      --success-glow: rgba(16, 185, 129, 0.2);
+      --warning: #f59e0b;
+      --warning-light: #fbbf24;
+      --warning-glow: rgba(245, 158, 11, 0.2);
+      --danger: #ef4444;
+      --danger-light: #f87171;
+      --danger-glow: rgba(239, 68, 68, 0.2);
+      --info: #3b82f6;
+      --info-light: #60a5fa;
+      --text-primary: #111827;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --border-light: #e5e7eb;
+      --border-lighter: #f3f4f6;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --radius-2xl: 32px;
+    }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      font-smoothing: antialiased;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Animated Background */
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .bg-animation::before {
+      content: '';
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      top: -50%;
+      left: -50%;
+      background: radial-gradient(circle at 30% 50%, rgba(99, 102, 241, 0.03) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(16, 185, 129, 0.02) 0%, transparent 50%);
+      animation: bgMove 20s ease-in-out infinite;
+    }
+
+    @keyframes bgMove {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(2%, 1%); }
+    }
+
+    /* SIDEBAR - Fixed Logo Overlap */
+    .sidebar {
+      width: 280px;
+      min-height: 100vh;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-sm);
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      padding: 28px 24px;
+      border-bottom: 1px solid var(--border-lighter);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.02) 0%, rgba(99, 102, 241, 0.05) 100%);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 20px;
+      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .brand-mark:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 28px rgba(99, 102, 241, 0.4);
+    }
+
+    .brand-text {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-dark) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .sidebar-logo p {
+      margin-top: 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.04em;
+    }
+
+    /* Navigation */
+    nav {
+      padding: 28px 20px;
+      flex: 1;
+    }
+
+    .nav-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      padding: 0 12px;
+    }
+
+    nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: var(--radius-md);
+      margin-bottom: 6px;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    nav a .icon {
+      font-size: 20px;
+      width: 24px;
+      text-align: center;
+      transition: all 0.25s ease;
+    }
+
+    nav a:hover {
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.08);
+      transform: translateX(4px);
+    }
+
+    nav a.active {
+      color: var(--accent);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+      font-weight: 600;
+    }
+
+    nav a.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+      border-radius: 0 4px 4px 0;
+    }
+
+    /* Sidebar Footer */
+    .sidebar-footer {
+      margin: 20px;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(99, 102, 241, 0.02) 100%);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-lighter);
+    }
+
+    .sf-name {
+      font-size: 14px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-dark) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .sf-role {
+      font-size: 10px;
+      color: var(--accent);
+      font-family: 'Space Mono', monospace;
+      margin-top: 4px;
+      letter-spacing: 0.02em;
+    }
+
+    .logout-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      padding: 10px 16px;
+      border-radius: 40px;
+      border: 1px solid var(--border-light);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--bg-secondary);
+      transition: all 0.25s ease;
+    }
+
+    .logout-link:hover {
+      color: var(--danger);
+      border-color: var(--danger);
+      background: rgba(239, 68, 68, 0.05);
+      transform: translateX(4px);
+    }
+
+    /* MAIN */
+    .main {
+      margin-left: 280px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Topbar */
+    .topbar {
+      padding: 16px 32px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.95);
+    }
+
+    .topbar-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: var(--bg-tertiary);
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      padding: 6px 20px 6px 12px;
+      border-radius: 60px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .user-badge:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-1px);
+    }
+
+    .user-badge .av {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    /* CONTENT */
+    .content {
+      padding: 32px 32px 40px;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Page Header */
+    .page-header {
+      margin-bottom: 40px;
+    }
+
+    .page-header h1 {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-dark) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-header h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+    }
+
+    .download-csv-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--bg-tertiary);
+      padding: 8px 20px;
+      border-radius: 40px;
+      text-decoration: none;
+      color: var(--accent);
+      border: 1px solid var(--border-light);
+      transition: all 0.25s ease;
+    }
+
+    .download-csv-link:hover {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .page-header p {
+      margin-top: 12px;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* FLASH MESSAGES */
+    .flash-messages {
+      margin-bottom: 32px;
+    }
+
+    .flash {
+      padding: 14px 20px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      border-left: 4px solid;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .flash.success {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .flash.danger {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .flash.warning {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+      border-color: var(--warning);
+      color: var(--warning);
+    }
+
+    /* STAT CARDS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      margin-bottom: 36px;
+    }
+
+    .stat-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-xl);
+      padding: 24px;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      transform: scaleX(0);
+      transition: transform 0.4s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-xl);
+      border-color: transparent;
+    }
+
+    .stat-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .stat-card.sc-total::before { background: linear-gradient(90deg, var(--accent), var(--accent-light)); }
+    .stat-card.sc-received::before { background: linear-gradient(90deg, var(--success), var(--success-light)); }
+    .stat-card.sc-pending::before { background: linear-gradient(90deg, var(--warning), var(--warning-light)); }
+    .stat-card.sc-failed::before { background: linear-gradient(90deg, var(--danger), var(--danger-light)); }
+
+    .stat-icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 26px;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover .stat-icon-wrap {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .sc-total .stat-icon-wrap { background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05)); }
+    .sc-received .stat-icon-wrap { background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05)); }
+    .sc-pending .stat-icon-wrap { background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05)); }
+    .sc-failed .stat-icon-wrap { background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05)); }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      font-family: 'Space Mono', monospace;
+    }
+
+    .stat-num {
+      font-size: 44px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    .sc-total .stat-num { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .sc-received .stat-num { background: linear-gradient(135deg, var(--success), var(--success-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .sc-pending .stat-num { background: linear-gradient(135deg, var(--warning), var(--warning-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .sc-failed .stat-num { background: linear-gradient(135deg, var(--danger), var(--danger-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    .stat-sub {
+      margin-top: 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* TOOLBAR */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .filter-pills {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      color: var(--text-secondary);
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 8px 20px;
+      border-radius: 60px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .pill:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+      border-color: var(--accent);
+    }
+
+    .pill.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    .search-form {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      min-width: 260px;
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-light);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      transition: all 0.25s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .search-btn, .clear-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .search-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .search-btn:hover {
+      background: var(--accent-dark);
+      transform: translateY(-1px);
+    }
+
+    .clear-btn {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-light);
+    }
+
+    .clear-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .vis-count {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'Space Mono', monospace;
+    }
+
+    .vis-count span {
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    /* TABLE CARD */
+    .table-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s ease;
+    }
+
+    .table-card:hover {
+      box-shadow: var(--shadow-lg);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 13px;
+    }
+
+    thead tr {
+      background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(99, 102, 241, 0.02) 100%);
+    }
+
+    th {
+      padding: 16px 18px;
+      text-align: left;
+      font-size: 10px;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-weight: 700;
+      white-space: nowrap;
+      border-bottom: 2px solid var(--border-light);
+    }
+
+    tbody tr {
+      transition: all 0.25s ease;
+      animation: fadeInRow 0.3s ease backwards;
+      animation-delay: calc(var(--row-index, 0) * 0.02s);
+    }
+
+    @keyframes fadeInRow {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    tbody tr:hover {
+      background: linear-gradient(90deg, rgba(99, 102, 241, 0.04) 0%, transparent 100%);
+      transform: scale(1.01);
+    }
+
+    td {
+      padding: 16px 18px;
+      vertical-align: middle;
+      font-weight: 500;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-lighter);
+    }
+
+    /* Company Cell */
+    .company-cell {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .co-av {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--accent-glow), rgba(99, 102, 241, 0.05));
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 800;
+      flex-shrink: 0;
+      transition: all 0.25s ease;
+    }
+
+    tbody tr:hover .co-av {
+      transform: scale(1.05) rotate(3deg);
+      background: var(--accent);
+      color: white;
+    }
+
+    .co-name {
+      font-weight: 800;
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    .co-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-family: 'Space Mono', monospace;
+      margin-top: 2px;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 60px;
+      white-space: nowrap;
+    }
+
+    .badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .badge-received { background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05)); color: var(--success); }
+    .badge-pending { background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05)); color: var(--warning); }
+    .badge-failed { background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05)); color: var(--danger); }
+    .badge-new { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.05)); color: var(--accent); }
+
+    /* Amount */
+    .amt {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--success);
+      background: rgba(16, 185, 129, 0.1);
+      padding: 4px 12px;
+      border-radius: 20px;
+      display: inline-block;
+    }
+
+    /* Person Cell */
+    .person-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .p-av {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--info), var(--info-light));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    /* Assign Form */
+    .assign-form {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .mini-select {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      border-radius: 40px;
+      color: var(--text-primary);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      padding: 7px 12px;
+      outline: none;
+      cursor: pointer;
+      max-width: 130px;
+    }
+
+    .mini-select:focus {
+      border-color: var(--accent);
+    }
+
+    .mini-btn {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+      border: none;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 7px 14px;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .mini-btn:hover {
+      transform: scale(0.96);
+    }
+
+    /* Action Buttons */
+    .act-cell {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .act-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      color: var(--text-secondary);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 40px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .act-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .act-btn.received:hover { border-color: var(--success); color: var(--success); background: rgba(16, 185, 129, 0.1); }
+    .act-btn.pending:hover { border-color: var(--warning); color: var(--warning); background: rgba(245, 158, 11, 0.1); }
+    .act-btn.failed:hover { border-color: var(--danger); color: var(--danger); background: rgba(239, 68, 68, 0.1); }
+    .act-btn.remark:hover { border-color: var(--accent); color: var(--accent); background: rgba(99, 102, 241, 0.1); }
+    .act-btn.view:hover { border-color: var(--info); color: var(--info); background: rgba(59, 130, 246, 0.1); }
+
+    /* Table Footer */
+    .table-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-light);
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'Space Mono', monospace;
+      display: flex;
+      justify-content: space-between;
+      background: var(--bg-tertiary);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state .ei {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    /* MODALS */
+    .modal-bd {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-box {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-2xl);
+      width: 90%;
+      max-width: 480px;
+      overflow: hidden;
+      animation: modalSlideUp 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
+      box-shadow: var(--shadow-xl);
+    }
+
+    @keyframes modalSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .modal-hdr {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-tertiary);
+    }
+
+    .modal-hdr h3 {
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-dark) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .modal-close {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      color: var(--text-muted);
+      width: 34px;
+      height: 34px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+      color: var(--danger);
+      border-color: var(--danger);
+      transform: rotate(90deg);
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border-light);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      background: var(--bg-tertiary);
+    }
+
+    .fl {
+      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .fi {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      padding: 12px 16px;
+      outline: none;
+      width: 100%;
+      transition: all 0.25s ease;
+      margin-bottom: 20px;
+    }
+
+    .fi:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    textarea.fi {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .btn-m {
+      display: inline-flex;
+      align-items: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 10px 24px;
+      border-radius: 40px;
+      border: none;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.25s ease;
+    }
+
+    .btn-m:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-cancel {
+      background: none;
+      border: 1px solid var(--border-light);
+      color: var(--text-muted);
+    }
+
+    .btn-cancel:hover {
+      color: var(--text-primary);
+      background: var(--bg-tertiary);
+    }
+
+    .btn-green {
+      background: linear-gradient(135deg, var(--success) 0%, var(--success-light) 100%);
+      color: #fff;
+    }
+
+    .btn-red {
+      background: linear-gradient(135deg, var(--danger) 0%, var(--danger-light) 100%);
+      color: #fff;
+    }
+
+    .btn-yellow {
+      background: linear-gradient(135deg, var(--warning) 0%, var(--warning-light) 100%);
+      color: #fff;
+    }
+
+    #pending-form {
+      display: none;
+    }
+
+    #no-results {
+      display: none;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-tertiary);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-light);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 200;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main {
+        margin-left: 0;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      .content {
+        padding: 20px;
+      }
+    }
+  </style>
+  {% include 'partials/theme_toggle.html' %}
+</head>
+<body>
+
+<div class="bg-animation"></div>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">
+      <div class="brand-mark">A</div>
+      <div class="brand-text">AccPanel</div>
+    </div>
+    <p>v2.0 · premium accounts</p>
+  </div>
+  <nav>
+    <div class="nav-label">Main</div>
+    <a href="{{ url_for('accounts.payments') }}" class="active">
+      <span class="icon">💰</span> Payments
+    </a>
+    <a href="{{ url_for('accounts.all_leads') }}">
+      <span class="icon">📋</span> All Leads
+    </a>
+    <a href="{{ url_for('attendance') }}">
+      <span class="icon">📅</span> Attendance
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sf-name">{{ current_user.name or current_user.username }}</div>
+    <div class="sf-role">● Accounts Lead</div>
+    <a href="{{ url_for('auth.logout') }}" class="logout-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </a>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <button id="menuToggle" style="background: none; border: none; font-size: 24px; cursor: pointer; display: none; color: var(--text-primary);" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i>
+      </button>
+      <span class="topbar-title">PAYMENTS DASHBOARD</span>
+    </div>
+    <div class="topbar-right">
+      <div class="user-badge">
+        <div class="av">{{ (current_user.name or current_user.username)[0].upper() }}</div>
+        {{ current_user.name or current_user.username }}
+      </div>
+    </div>
+  </header>
+
+  <div class="content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="page-header">
+      <h1>Hello, <em>{{ current_user.name or current_user.username }}</em>.</h1>
+      <div style="margin-top: 12px;">
+        <a href="{{ url_for('accounts.download_leads') }}" class="download-csv-link">
+          <i class="bi bi-download"></i> Download CSV
+        </a>
+      </div>
+      <p>// accounts · payment tracking & reconciliation</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card sc-total">
+        <div class="stat-icon-wrap"><i class="bi bi-currency-dollar"></i></div>
+        <div class="stat-label">Total Leads</div>
+        <div class="stat-num">{{ summary.total }}</div>
+        <div class="stat-sub">active in accounts</div>
+      </div>
+      <div class="stat-card sc-received">
+        <div class="stat-icon-wrap"><i class="bi bi-check-lg"></i></div>
+        <div class="stat-label">Received</div>
+        <div class="stat-num">{{ summary.received }}</div>
+        <div class="stat-sub">fully collected</div>
+      </div>
+      <div class="stat-card sc-pending">
+        <div class="stat-icon-wrap"><i class="bi bi-hourglass-split"></i></div>
+        <div class="stat-label">Pending</div>
+        <div class="stat-num">{{ summary.pending }}</div>
+        <div class="stat-sub">awaiting payment</div>
+      </div>
+      <div class="stat-card sc-failed">
+        <div class="stat-icon-wrap"><i class="bi bi-x-lg"></i></div>
+        <div class="stat-label">Failed</div>
+        <div class="stat-num">{{ summary.failed }}</div>
+        <div class="stat-sub">payment errors</div>
+      </div>
+      <div class="stat-card sc-pending">
+        <div class="stat-icon-wrap"><i class="bi bi-wallet2"></i></div>
+        <div class="stat-label">Pending Amount</div>
+        <div class="stat-num">₹ {{ summary.pending_amount | round(2) }}</div>
+        <div class="stat-sub">total due value</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="filter-pills">
+        <span class="pill active" onclick="filterPill('all',this)">All ({{ summary.total }})</span>
+        <span class="pill received" onclick="filterPill('received',this)">Received ({{ summary.received }})</span>
+        <span class="pill pending" onclick="filterPill('pending',this)">Pending ({{ summary.pending }})</span>
+        <span class="pill failed" onclick="filterPill('failed',this)">Failed ({{ summary.failed }})</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <form method="GET" action="{{ url_for('accounts.payments') }}" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <input
+            type="text"
+            name="q"
+            value="{{ query or '' }}"
+            placeholder="Search company, contact, executive..."
+            class="search-input"
+          >
+          <button type="submit" class="search-btn"><i class="bi bi-search"></i> Search</button>
+          {% if query %}
+          <a href="{{ url_for('accounts.payments') }}" class="clear-btn"><i class="bi bi-x-lg"></i> Clear</a>
+          {% endif %}
+        </form>
+        <div class="vis-count">
+          <i class="bi bi-eye"></i> <span id="vis-count">{{ leads | length }}</span> visible
+        </div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Company</th><th>Service</th><th>Login ID</th><th>Password</th><th>Ops Remark</th><th>Accounts Remark</th><th>Assigned To</th><th>Total Fee</th><th>Govt Paid</th><th>Prof Paid</th><th>Collected Fee</th><th>Pending Amount</th><th>Payment Status</th><th>Assign Exec</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="leads-tbody">
+            {% if leads %}
+              {% for lead in leads %}
+              {% set govt_status = lead.govt_payment_status | lower if lead.govt_payment_status else '' %}
+              {% set prof_status = lead.professional_payment_status | lower if lead.professional_payment_status else '' %}
+              {% if govt_status == 'received' and prof_status == 'received' %}
+                {% set overall_status = 'received' %}
+              {% elif govt_status == 'failed' or prof_status == 'failed' %}
+                {% set overall_status = 'failed' %}
+              {% elif govt_status == 'pending' or prof_status == 'pending' %}
+                {% set overall_status = 'pending' %}
+              {% else %}
+                {% set overall_status = 'new' %}
+              {% endif %}
+              <tr data-status="{{ lead.dashboard_status }}" style="--row-index: {{ loop.index }}">
+                <td style="color:var(--text-muted);">{{ loop.index }}</td>
+                <td>
+                  <div class="company-cell">
+                    <div class="co-av">{{ lead.company_name[0].upper() if lead.company_name else 'C' }}</div>
+                    <div>
+                      <div class="co-name">{{ lead.company_name or '—' }}</div>
+                      <div class="co-sub">{{ lead.service or 'No service' }}</div>
+                      <div class="co-sub">Marketing: {{ lead.marketing_executive_name or '—' }}</div>
+                      <div class="co-sub">Operations: {{ lead.operation_executive_name or '—' }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="font-family:'Space Mono',monospace;color:var(--text-muted);">{{ lead.service or '—' }}</td>
+                <td style="font-family:'Space Mono',monospace;font-size:11px;">{{ lead.client_login or '—' }}</td>
+                <td style="font-family:'Space Mono',monospace;font-size:11px;">{{ lead.client_password or '—' }}</td>
+                <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ lead.operation_remark or '—' }}</td>
+                <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ lead.account_remark or '—' }}</td>
+                <td>
+                  {% if lead.get('account_executive_name') %}
+                  <div class="person-cell">
+                    <div class="p-av">{{ lead.account_executive_name[0].upper() }}</div>
+                    <span>{{ lead.account_executive_name }}</span>
+                  </div>
+                  {% else %}
+                  <span style="font-size:11px;color:var(--text-muted);">— unassigned</span>
+                  {% endif %}
+                </td>
+                <td>{% if lead.total_amount %}<span class="amt">₹ {{ lead.total_amount }}</span>{% else %}—{% endif %}</td>
+                <td>{% if lead.govt_amount is not none and lead.govt_amount != 0 %}<span class="amt">₹ {{ lead.govt_amount }}</span>{% else %}—{% endif %}</td>
+                <td>{% if lead.professional_amount is not none and lead.professional_amount != 0 %}<span class="amt">₹ {{ lead.professional_amount }}</span>{% else %}—{% endif %}</td>
+                <td>{% set collected_total = (lead.govt_amount or 0) + (lead.professional_amount or 0) %}{% if collected_total %}<span class="amt">₹ {{ collected_total }}</span>{% else %}—{% endif %}</td>
+                <td>{% set pending_amount = ((lead.total_amount or 0) - collected_total) if (lead.total_amount is not none) else 0 %}{% if pending_amount > 0 %}<span class="amt">₹ {{ pending_amount }}</span>{% else %}₹ 0{% endif %}</td>
+                <td>
+                  {% if lead.status == 'Completed' %}
+                    <span class="badge badge-received">Received</span>
+                  {% elif lead.status == 'Failed' %}
+                    <span class="badge badge-failed">Failed</span>
+                  {% elif lead.status == 'Pending' %}
+                    <span class="badge badge-pending">Pending</span>
+                  {% else %}
+                    <span class="badge badge-new">New</span>
+                  {% endif %}
+                  <div style="margin-top:5px;font-size:10px;">Govt: {{ lead.govt_payment_status or '—' }}<br>Prof: {{ lead.professional_payment_status or '—' }}</div>
+                </td>
+                <td>
+                  <form method="POST" action="{{ url_for('accounts.assign', lead_id=lead.id) }}" class="assign-form">
+                    <select name="account_executive" class="mini-select" required>
+                      <option value="" disabled selected>Pick exec…</option>
+                      {% for emp in accounts_employees %}
+                      <option value="{{ emp.id }}" {% if lead.get('account_executive') == emp.id %}selected{% endif %}>{{ emp.name }}</option>
+                      {% endfor %}
+                    </select>
+                    <button type="submit" class="mini-btn"><i class="bi bi-arrow-right"></i></button>
+                  </form>
+                </td>
+                <td>
+                  <div class="act-cell">
+                    <a href="{{ url_for('accounts.payment_detail', lead_id=lead.id) }}" class="act-btn view"><i class="bi bi-eye"></i> View</a>
+                    <button class="act-btn received" onclick="openReceived({{ lead.id }})"><i class="bi bi-check-lg"></i></button>
+                    <button class="act-btn pending" onclick="submitPending({{ lead.id }})"><i class="bi bi-hourglass"></i></button>
+                    <button class="act-btn failed" onclick="openFailed({{ lead.id }})"><i class="bi bi-x-lg"></i></button>
+                    <button class="act-btn remark" onclick="openRemark({{ lead.id }})"><i class="bi bi-chat"></i></button>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr><td colspan="16"><div class="empty-state"><div class="ei">📭</div><p>No leads ready for accounts yet.</p></div></td></tr>
+            {% endif %}
+            <tr id="no-results"><td colspan="16" style="text-align:center;padding:32px;"><i class="bi bi-search"></i> No leads match this filter.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <span><i class="bi bi-database"></i> {{ leads | length }} total leads</span>
+        <span id="footer-count">{{ leads | length }} showing</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<form id="pending-form" method="POST" action=""></form>
+
+<div id="received-modal" class="modal-bd">
+  <div class="modal-box">
+    <div class="modal-hdr"><h3><i class="bi bi-check-circle-fill"></i> Mark Payment Received</h3><button class="modal-close" onclick="closeModal('received-modal')">✕</button></div>
+    <form method="POST" id="received-form" action="">
+      <div class="modal-body">
+        <label class="fl">Total Fee</label>
+        <input type="number" name="total_amount" class="fi" placeholder="e.g. 20000" step="0.01" min="0"/>
+        <label class="fl">Government Fee</label>
+        <input type="number" name="govt_amount" class="fi" placeholder="e.g. 15000" step="0.01" min="0"/>
+        <label class="fl">Professional Fee</label>
+        <input type="number" name="professional_amount" class="fi" placeholder="e.g. 5000" step="0.01" min="0"/>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-m btn-cancel" onclick="closeModal('received-modal')">Cancel</button>
+        <button type="submit" class="btn-m btn-green">Save Details</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="failed-modal" class="modal-bd">
+  <div class="modal-box">
+    <div class="modal-hdr"><h3><i class="bi bi-x-circle-fill"></i> Mark Payment Failed</h3><button class="modal-close" onclick="closeModal('failed-modal')">✕</button></div>
+    <form method="POST" id="failed-form" action="">
+      <div class="modal-body">
+        <label class="fl">Reason <span style="color:var(--danger);">*</span></label>
+        <textarea name="reason" class="fi" placeholder="Why did the payment fail?" required></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-m btn-cancel" onclick="closeModal('failed-modal')">Cancel</button>
+        <button type="submit" class="btn-m btn-red">Mark Failed</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="remark-modal" class="modal-bd">
+  <div class="modal-box">
+    <div class="modal-hdr"><h3><i class="bi bi-chat-text"></i> Add Remark</h3><button class="modal-close" onclick="closeModal('remark-modal')">✕</button></div>
+    <form method="POST" id="remark-form" action="">
+      <div class="modal-body">
+        <label class="fl">Remark <span style="color:var(--accent);">*</span></label>
+        <textarea name="remark" class="fi" placeholder="Enter your remark…" required></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-m btn-cancel" onclick="closeModal('remark-modal')">Cancel</button>
+        <button type="submit" class="btn-m btn-yellow">Save Remark</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+  
+  @media (max-width: 900px) {
+    document.getElementById('menuToggle').style.display = 'block';
+  }
+
+  function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+  function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+  
+  document.querySelectorAll('.modal-bd').forEach(m => { 
+    m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); }); 
+  });
+  
+  function openReceived(id) { document.getElementById('received-form').action = `/accounts/payment/received/${id}`; openModal('received-modal'); }
+  function openFailed(id) { document.getElementById('failed-form').action = `/accounts/payment/failed/${id}`; openModal('failed-modal'); }
+  function openRemark(id) { document.getElementById('remark-form').action = `/accounts/payment/remark/${id}`; openModal('remark-modal'); }
+  function submitPending(id) { const f = document.getElementById('pending-form'); f.action = `/accounts/payment/pending/${id}`; f.submit(); }
+  
+  function filterPill(status, el) {
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    const rows = document.querySelectorAll('#leads-tbody tr[data-status]');
+    let vis = 0;
+    rows.forEach(r => { 
+      const show = status === 'all' || r.dataset.status === status; 
+      r.style.display = show ? '' : 'none'; 
+      if(show) vis++; 
+    });
+    document.getElementById('vis-count').textContent = vis;
+    document.getElementById('footer-count').textContent = vis + ' showing';
+    const noResult = document.getElementById('no-results');
+    if(noResult) noResult.style.display = vis === 0 ? 'table-row' : 'none';
+  }
+  
+  // Mobile menu
+  if(window.innerWidth <= 900) {
+    document.getElementById('menuToggle').style.display = 'block';
+  }
+  window.addEventListener('resize', () => {
+    if(window.innerWidth <= 900) {
+      document.getElementById('menuToggle').style.display = 'block';
+    } else {
+      document.getElementById('menuToggle').style.display = 'none';
+      document.getElementById('sidebar').classList.remove('open');
+    }
+  });
+</script>
+</body>
+</html>

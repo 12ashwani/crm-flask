@@ -1,0 +1,53 @@
+{% if lead %}
+  <td>{{ lead.id }}</td>
+  <td><strong>{{ lead.company_name }}</strong></td>
+  <td>{{ lead.service or '-' }}</td>
+  <td>{{ lead.auth_person_name or '-' }}</td>
+  <td>
+    {{ lead.auth_person_number or '-' }}<br>
+    <small class="text-muted">{{ lead.auth_person_email or '-' }}</small>
+  </td>
+  <td>{{ lead.marketing_executive or '—' }}</td>
+  <td>
+    {{ lead.created_at|truncate(10, True, '') }}<br>
+    <small class="text-muted">Ops assigned: {{ lead.created_at_ops or '—' }}</small>
+  </td>
+  <td class="text-end">
+
+    {% if lead.file_status == 'done' %}
+      <span class="badge bg-success px-3 py-2">Completed</span>
+    {% else %}
+      <!-- Inline update form with HTMX -->
+      <form hx-post="{{ url_for('mark_done', op_id=lead.operations_id) }}" 
+            hx-target="#ops-row-{{ lead.id }}" 
+            hx-swap="outerHTML" 
+            hx-indicator="#done-indicator-{{ lead.id }}"
+            hx-confirm="Are you sure this lead is fully processed and ready for Accounts?"
+            class="d-flex align-items-center gap-2 justify-content-end flex-wrap">
+
+        <input type="date" name="filing_date" class="form-control form-control-sm" 
+               style="width: 140px;" placeholder="Filing date" 
+               value="{{ lead.filing_date or '' }}" required>
+
+        <input type="text" name="client_login" class="form-control form-control-sm" 
+               style="width: 130px;" placeholder="Client Login" 
+               value="{{ lead.client_login or '' }}">
+
+        <input type="text" name="client_password" class="form-control form-control-sm" 
+               style="width: 130px;" placeholder="Password" 
+               value="{{ lead.client_password or '' }}">
+
+        <button type="submit" class="btn btn-sm btn-success">
+          Mark Done
+        </button>
+
+        <span id="done-indicator-{{ lead.id }}" class="htmx-indicator text-muted small ms-2">
+          Processing...
+        </span>
+      </form>
+    {% endif %}
+
+  </td>
+{% else %}
+  <td colspan="8" class="text-center text-danger py-3">Lead data unavailable</td>
+{% endif %}

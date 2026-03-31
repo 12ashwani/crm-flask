@@ -1,0 +1,6 @@
+flask==3.0.*
+flask-login==0.6.*
+mysql-connector-python
+werkzeug==3.*
+python-dotenv
+waitress

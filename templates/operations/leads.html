@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>My Leads · Operations | OpsPanel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Light Theme (default) */
+    :root {
+      --bg: #fafcff;
+      --surface: #ffffff;
+      --surface2: #f8fafd;
+      --surface3: #f1f4f9;
+      --border: #e9edf2;
+      --border-light: #dfe3ea;
+      --accent: #4361ee;
+      --accent2: #06b6d4;
+      --accent-glow: rgba(67, 97, 238, 0.08);
+      --text: #0a0c12;
+      --text-secondary: #2d3a4b;
+      --muted: #6c7a8e;
+      --muted-light: #8e9aae;
+      --danger: #f43f5e;
+      --danger-glow: rgba(244, 63, 94, 0.1);
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.1);
+      --warning: #f59e0b;
+      --warning-glow: rgba(245, 158, 11, 0.1);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.02);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02);
+      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s cubic-bezier(0.2, 0.95, 0.4, 1);
+      --transition-bounce: all 0.5s cubic-bezier(0.34, 1.2, 0.64, 1);
+    }
+
+    /* Dark Theme */
+    [data-theme="dark"] {
+      --bg: #01010a;
+      --surface: #0c0c14;
+      --surface2: #12121c;
+      --surface3: #181824;
+      --border: #22222e;
+      --border-light: #2a2a38;
+      --accent: #c0ff4e;
+      --accent2: #4dd4ff;
+      --accent-glow: rgba(77, 212, 255, 0.12);
+      --text: #f0f3ff;
+      --text-secondary: #cbd5ff;
+      --muted: #8b8ca8;
+      --muted-light: #6b6d89;
+      --danger: #ff6b6b;
+      --danger-glow: rgba(255, 107, 107, 0.15);
+      --success: #6effa8;
+      --success-glow: rgba(110, 255, 168, 0.12);
+      --warning: #ffbe5e;
+      --warning-glow: rgba(255, 190, 94, 0.12);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(77, 212, 255, 0.05);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(77, 212, 255, 0.08);
+      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 30% 20%, var(--accent-glow) 0%, transparent 60%);
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 0;
+      animation: bgPulse 10s ease-in-out infinite;
+    }
+
+    @keyframes bgPulse {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.02); }
+    }
+
+    /* ========= SIDEBAR ========= */
+    .sidebar {
+      width: 280px;
+      min-height: 100vh;
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      transition: var(--transition);
+      animation: slideInLeft 0.5s ease-out;
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .sidebar-logo {
+      padding: 32px 28px 28px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo span {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      color: var(--bg);
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      padding: 8px 18px;
+      border-radius: 60px;
+      transition: var(--transition-bounce);
+    }
+    .sidebar-logo span i {
+      font-size: 14px;
+    }
+    .sidebar-logo span:hover {
+      transform: scale(1.02);
+    }
+    .sidebar-logo p {
+      margin-top: 14px;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+    }
+
+    nav {
+      padding: 28px 20px;
+      flex: 1;
+    }
+    nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 14px;
+      margin-bottom: 6px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    nav a::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 0;
+      height: 100%;
+      background: var(--accent-glow);
+      transition: width 0.3s ease;
+      z-index: -1;
+    }
+    nav a:hover::before {
+      width: 100%;
+    }
+    nav a i {
+      width: 24px;
+      font-size: 1.2rem;
+    }
+    nav a:hover {
+      color: var(--accent2);
+      transform: translateX(6px);
+    }
+    nav a.active {
+      color: var(--accent2);
+      background: var(--accent-glow);
+      border-left: 3px solid var(--accent2);
+      border-radius: 14px 12px 12px 14px;
+    }
+
+    .sidebar-footer {
+      padding: 24px 28px 32px;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+      animation: fadeInUp 0.5s ease-out 0.2s both;
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .sf-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sf-name i {
+      color: var(--accent2);
+    }
+    .sf-role {
+      font-size: 10px;
+      color: var(--accent2);
+      font-family: 'Space Mono', monospace;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .logout-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 18px;
+      padding: 10px 16px;
+      border-radius: 60px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    .logout-link i {
+      font-size: 13px;
+    }
+    .logout-link:hover {
+      color: var(--danger);
+      border-color: var(--danger);
+      background: var(--danger-glow);
+      transform: translateX(4px);
+    }
+
+    /* ========= MAIN ========= */
+    .main {
+      margin-left: 280px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 2;
+    }
+
+    .topbar {
+      padding: 18px 44px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      transition: var(--transition);
+      animation: slideInDown 0.5s ease-out;
+    }
+
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .topbar-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      background: var(--accent-glow);
+      padding: 5px 14px;
+      border-radius: 40px;
+      font-family: 'Space Mono', monospace;
+    }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border-light);
+      padding: 6px 18px 6px 10px;
+      border-radius: 60px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+    .user-badge:hover {
+      border-color: var(--accent2);
+      transform: translateY(-2px);
+    }
+    .user-badge .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      color: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      animation: gentleFloat 3s ease-in-out infinite;
+    }
+    @keyframes gentleFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-2px); }
+    }
+
+    /* Theme Toggle Button */
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 8px 22px;
+      border-radius: 60px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      transition: var(--transition-bounce);
+      position: relative;
+      overflow: hidden;
+    }
+    .theme-toggle::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: var(--accent-glow);
+      transform: translate(-50%, -50%);
+      transition: width 0.5s, height 0.5s;
+    }
+    .theme-toggle:hover::before {
+      width: 150px;
+      height: 150px;
+    }
+    .theme-toggle i {
+      font-size: 14px;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.4s ease;
+    }
+    .theme-toggle span {
+      position: relative;
+      z-index: 1;
+    }
+    .theme-toggle:hover {
+      border-color: var(--accent2);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px var(--accent-glow);
+    }
+    .theme-toggle:hover i {
+      transform: rotate(180deg);
+    }
+
+    /* ========= CONTENT ========= */
+    .content {
+      padding: 40px 48px 60px;
+    }
+
+    .page-header {
+      margin-bottom: 28px;
+      animation: fadeInUp 0.5s ease-out;
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .page-header h1 {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--text) 0%, var(--accent2) 70%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+    .page-header h1 em {
+      font-style: normal;
+      color: var(--accent);
+      background: none;
+      -webkit-background-clip: unset;
+      background-clip: unset;
+    }
+    .page-header p {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: 'Space Mono', monospace;
+      border-left: 2px solid var(--accent2);
+      padding-left: 14px;
+    }
+    .download-csv {
+      margin-top: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent-glow);
+      border: 1px solid var(--accent2);
+      border-radius: 60px;
+      padding: 8px 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent2);
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    .download-csv i {
+      font-size: 12px;
+    }
+    .download-csv:hover {
+      background: var(--accent2);
+      color: var(--bg);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    .flash-messages {
+      margin-bottom: 24px;
+    }
+    .flash {
+      padding: 14px 22px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideInRight 0.4s ease-out;
+    }
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    .flash i {
+      font-size: 18px;
+    }
+    .flash.success {
+      background: var(--success-glow);
+      border-left: 3px solid var(--success);
+      color: var(--success);
+    }
+    .flash.danger {
+      background: var(--danger-glow);
+      border-left: 3px solid var(--danger);
+      color: var(--danger);
+    }
+    .flash.warning {
+      background: var(--warning-glow);
+      border-left: 3px solid var(--warning);
+      color: var(--warning);
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+      animation: fadeInUp 0.5s ease-out 0.05s both;
+    }
+    .filter-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 7px 18px;
+      border-radius: 60px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .pill:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+      transform: translateY(-1px);
+    }
+    .pill.active {
+      border-color: var(--accent2);
+      color: var(--accent2);
+      background: var(--accent-glow);
+    }
+    .pill.done.active {
+      border-color: var(--success);
+      color: var(--success);
+      background: var(--success-glow);
+    }
+    .pill.pending.active {
+      border-color: var(--warning);
+      color: var(--warning);
+      background: var(--warning-glow);
+    }
+    .pill.failed.active {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: var(--danger-glow);
+    }
+    .vis-count {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      background: var(--surface2);
+      padding: 6px 14px;
+      border-radius: 40px;
+      border: 1px solid var(--border);
+    }
+    .vis-count span {
+      color: var(--accent2);
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    /* Table - IMPROVED FONTS */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      overflow: hidden;
+      transition: var(--transition);
+      animation: fadeInUp 0.5s ease-out 0.1s both;
+      box-shadow: var(--shadow-sm);
+    }
+    .table-card:hover {
+      box-shadow: var(--shadow-md);
+    }
+    .table-wrap {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+    }
+    thead tr {
+      border-bottom: 1px solid var(--border-light);
+      background: var(--surface2);
+    }
+    th {
+      padding: 14px 20px;
+      text-align: left;
+      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted-light);
+      font-weight: 600;
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: var(--transition);
+    }
+    tbody tr:hover {
+      background: var(--accent-glow);
+      transform: scale(1.002);
+    }
+    td {
+      padding: 16px 20px;
+      vertical-align: middle;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+    }
+    /* Index column - monospace for numbers */
+    td:first-child {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .company-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .co-av {
+      width: 40px;
+      height: 40px;
+      border-radius: 16px;
+      background: var(--accent-glow);
+      border: 1px solid var(--accent2);
+      color: var(--accent2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 800;
+      flex-shrink: 0;
+      transition: var(--transition);
+      font-family: 'Inter', sans-serif;
+    }
+    tbody tr:hover .co-av {
+      transform: scale(1.05) rotate(2deg);
+      border-color: var(--accent);
+    }
+    .co-name {
+      font-weight: 700;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+    }
+    .co-sub {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      margin-top: 3px;
+    }
+    /* Service column */
+    .service-cell {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    /* Contact column */
+    .contact-name {
+      font-weight: 600;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+    }
+    .contact-phone {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      margin-top: 2px;
+    }
+    /* Login/Password columns - monospace for credentials */
+    .login-cell, .password-cell {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 60px;
+      white-space: nowrap;
+    }
+    .badge i {
+      font-size: 10px;
+    }
+    .badge-done {
+      background: var(--success-glow);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+    .badge-pending {
+      background: var(--warning-glow);
+      color: var(--warning);
+      border: 1px solid var(--warning);
+    }
+    .badge-failed {
+      background: var(--danger-glow);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+    .badge-new {
+      background: var(--accent-glow);
+      color: var(--accent2);
+      border: 1px solid var(--accent2);
+    }
+    /* Remarks column */
+    .remarks-cell {
+      font-size: 12px;
+      color: var(--muted-light);
+      font-family: 'Inter', sans-serif;
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .act-cell {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .act-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 40px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: var(--transition);
+    }
+    .act-btn i {
+      font-size: 11px;
+    }
+    .act-btn:hover {
+      transform: translateY(-2px);
+    }
+    .act-btn.view:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+      background: var(--accent-glow);
+    }
+    .act-btn.done:hover {
+      border-color: var(--success);
+      color: var(--success);
+      background: var(--success-glow);
+    }
+    .act-btn.pending:hover {
+      border-color: var(--warning);
+      color: var(--warning);
+      background: var(--warning-glow);
+    }
+    .act-btn.failed:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: var(--danger-glow);
+    }
+    .act-btn.remark:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(192, 255, 78, 0.1);
+    }
+    .table-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      background: var(--surface2);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 70px 24px;
+    }
+    .empty-state i {
+      font-size: 64px;
+      opacity: 0.3;
+      margin-bottom: 20px;
+    }
+    .empty-state p {
+      font-size: 13px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+    }
+    #no-results {
+      display: none;
+    }
+    #no-results td {
+      text-align: center;
+      padding: 48px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+    }
+
+    /* Modals */
+    .modal-backdrop-custom {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      width: 90%;
+      max-width: 460px;
+      overflow: hidden;
+      animation: modalSlideUp 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
+    }
+    @keyframes modalSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    .modal-hdr {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface2);
+    }
+    .modal-hdr h3 {
+      font-size: 16px;
+      font-weight: 800;
+      font-family: 'Inter', sans-serif;
+    }
+    .modal-close {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 32px;
+      height: 32px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    .modal-close:hover {
+      color: var(--danger);
+      border-color: var(--danger);
+      transform: rotate(90deg);
+    }
+    .modal-body {
+      padding: 24px;
+    }
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+    .fl {
+      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted-light);
+      display: block;
+      margin-bottom: 6px;
+    }
+    .fi {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 12px 16px;
+      outline: none;
+      width: 100%;
+      transition: var(--transition);
+      margin-bottom: 16px;
+    }
+    .fi:focus {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    textarea.fi {
+      resize: vertical;
+      min-height: 100px;
+    }
+    .btn-modal {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 10px 22px;
+      border-radius: 60px;
+      border: none;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      transition: var(--transition);
+    }
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .btn-cancel:hover {
+      color: var(--text);
+      border-color: var(--muted-light);
+    }
+    .btn-success {
+      background: var(--success);
+      color: #0a0c12;
+    }
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--success-glow);
+    }
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--danger-glow);
+    }
+    .btn-accent {
+      background: var(--accent);
+      color: #0a0c12;
+    }
+    .btn-accent:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(192, 255, 78, 0.3);
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { width: 260px; }
+      .main { margin-left: 260px; }
+      .content { padding: 28px 24px; }
+      .topbar { padding: 14px 24px; }
+      .page-header h1 { font-size: 28px; }
+    }
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span><i class="fas fa-cubes"></i> OpsPanel</span>
+    <p><i class="fas fa-chart-line"></i> v3.0 · operations core</p>
+  </div>
+  <nav>
+    <a href="{{ url_for('operations.dashboard') }}"><i class="fas fa-chart-line"></i> Dashboard</a>
+    <a href="{{ url_for('operations.my_leads') }}" class="active"><i class="fas fa-folder-open"></i> My Leads</a>
+    <a href="{{ url_for('attendance') }}"><i class="fas fa-calendar-check"></i> Attendance</a>
+    <a href="{{ url_for('operations.leave_management') }}"><i class="fas fa-umbrella-beach"></i> Leave Management</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sf-name"><i class="fas fa-user-astronaut"></i> {{ current_user.name or current_user.username }}</div>
+    <div class="sf-role"><i class="fas fa-bolt"></i> ● Operations Lead</div>
+    <a href="{{ url_for('auth.logout') }}" class="logout-link">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-title"><i class="fas fa-folder-open"></i> MY LEADS</span>
+    </div>
+    <div class="topbar-right">
+      <div class="user-badge">
+        <div class="avatar">{{ (current_user.name or current_user.username)[0].upper() }}</div>
+        {{ current_user.name or current_user.username }}
+      </div>
+      <button class="theme-toggle" id="themeToggleBtn">
+        <i class="fas fa-moon" id="themeIcon"></i>
+        <span id="themeText">Dark</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">
+              {% if category == 'success' %}<i class="fas fa-check-circle"></i>
+              {% elif category == 'danger' %}<i class="fas fa-exclamation-triangle"></i>
+              {% else %}<i class="fas fa-info-circle"></i>{% endif %}
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="page-header">
+      <h1>My <em>Leads</em></h1>
+      <p><i class="fas fa-chart-simple"></i> // {{ leads | length }} leads assigned to you</p>
+      <div>
+        <a href="{{ url_for('operations.download_leads') }}" class="download-csv"><i class="fas fa-download"></i> Export CSV</a>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="filter-pills">
+        <span class="pill active" onclick="filterPill('all',this)"><i class="fas fa-list"></i> All ({{ leads | length }})</span>
+        <span class="pill pending" onclick="filterPill('pending',this)"><i class="fas fa-hourglass-half"></i> Pending</span>
+        <span class="pill done" onclick="filterPill('done',this)"><i class="fas fa-check-circle"></i> Done</span>
+        <span class="pill failed" onclick="filterPill('failed',this)"><i class="fas fa-times-circle"></i> Failed</span>
+      </div>
+      <div class="vis-count"><i class="fas fa-eye"></i> <span id="vis-count">{{ leads | length }}</span> showing</div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-wrap">
+         <table>
+          <thead>
+             <tr>
+              <th>#</th>
+              <th>Company</th>
+              <th>Service</th>
+              <th>Contact</th>
+              <th>Login ID</th>
+              <th>Password</th>
+              <th>Status</th>
+              <th>Remarks</th>
+              <th>Actions</th>
+             </tr>
+          </thead>
+          <tbody id="leads-tbody">
+            {% if leads %}
+              {% for lead in leads %}
+              <tr data-status="{{ lead.file_status | lower if lead.file_status else 'new' }}">
+                <td>{{ loop.index }}</td>
+                <td>
+                  <div class="company-cell">
+                    <div class="co-av">{{ lead.company_name[0].upper() if lead.company_name else '?' }}</div>
+                    <div>
+                      <div class="co-name">{{ lead.company_name or '—' }}</div>
+                      <div class="co-sub"><i class="fas fa-envelope"></i> {{ lead.auth_person_email or lead.email or '' }}</div>
+                      <div class="co-sub"><i class="fas fa-user-check"></i> {{ lead.marketing_executive_name or '—' }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="service-cell"><i class="fas fa-cog"></i> {{ lead.service or '—' }}</td>
+                <td>
+                  <div class="contact-name">{{ lead.auth_person_name or '—' }}</div>
+                  <div class="contact-phone"><i class="fas fa-phone"></i> {{ lead.auth_person_number or '' }}</div>
+                </td>
+                <td class="login-cell"><i class="fas fa-user-lock"></i> {{ lead.client_login or '—' }}</td>
+                <td class="password-cell"><i class="fas fa-key"></i> {{ lead.client_password or '—' }}</td>
+                <td>
+                  {% set st = lead.file_status | lower if lead.file_status else '' %}
+                  {% if st == 'done' %}    <span class="badge badge-done"><i class="fas fa-check-circle"></i> Done</span>
+                  {% elif st == 'failed' %}<span class="badge badge-failed"><i class="fas fa-times-circle"></i> Failed</span>
+                  {% elif st == 'pending' %}<span class="badge badge-pending"><i class="fas fa-clock"></i> Pending</span>
+                  {% else %}              <span class="badge badge-new"><i class="fas fa-sparkles"></i> New</span>
+                  {% endif %}
+                </td>
+                <td class="remarks-cell">
+                  <i class="fas fa-comment-dots"></i> {{ lead.operation_remark or '—' }}
+                </td>
+                <td>
+                  <div class="act-cell">
+                    <a href="{{ url_for('operations.lead_details', lead_id=lead.id) }}" class="act-btn view"><i class="fas fa-eye"></i> View</a>
+                    <button class="act-btn done" onclick="openModal('done-modal'); document.getElementById('done-form').action='/operations/done/{{ lead.id }}'"><i class="fas fa-check"></i> Done</button>
+                    <button class="act-btn pending" onclick="submitForm('/operations/pending/{{ lead.id }}')"><i class="fas fa-hourglass-start"></i> Pending</button>
+                    <button class="act-btn failed" onclick="openModal('fail-modal'); document.getElementById('fail-form').action='/operations/failed/{{ lead.id }}'"><i class="fas fa-times"></i> Failed</button>
+                    <button class="act-btn remark" onclick="openModal('remark-modal'); document.getElementById('remark-form').action='/operations/remark/{{ lead.id }}'"><i class="fas fa-comment"></i> Remark</button>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr><td colspan="9">
+                <div class="empty-state">
+                  <i class="fas fa-inbox"></i>
+                  <p>No leads assigned to you yet.</p>
+                </div>
+              </td></tr>
+            {% endif %}
+            <tr id="no-results"><td colspan="9"><i class="fas fa-filter"></i> No leads match this filter.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-footer"><i class="fas fa-chart-simple"></i> {{ leads | length }} total leads assigned</div>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden form for Pending -->
+<form id="pending-quick-form" method="POST" action="" style="display:none;"></form>
+
+<!-- DONE MODAL -->
+<div id="done-modal" class="modal-backdrop-custom">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3><i class="fas fa-check-circle" style="color: var(--success);"></i> Mark as Done</h3>
+      <button class="modal-close" onclick="closeModal('done-modal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form method="POST" id="done-form" action="">
+      <div class="modal-body">
+        <label class="fl"><i class="fas fa-user"></i> Client Login</label>
+        <input type="text" name="client_login" class="fi" placeholder="Username / Email"/>
+        <label class="fl"><i class="fas fa-lock"></i> Client Password</label>
+        <input type="text" name="client_password" class="fi" placeholder="Password"/>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal btn-cancel" onclick="closeModal('done-modal')">Cancel</button>
+        <button type="submit" class="btn-modal btn-success"><i class="fas fa-check"></i> Mark Done</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- FAILED MODAL -->
+<div id="fail-modal" class="modal-backdrop-custom">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3 style="color: var(--danger);"><i class="fas fa-exclamation-triangle"></i> Mark as Failed</h3>
+      <button class="modal-close" onclick="closeModal('fail-modal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form method="POST" id="fail-form" action="">
+      <div class="modal-body">
+        <label class="fl"><i class="fas fa-comment"></i> Reason <span style="color: var(--danger);">*</span></label>
+        <textarea name="reason" class="fi" placeholder="Why did this lead fail?" required></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal btn-cancel" onclick="closeModal('fail-modal')">Cancel</button>
+        <button type="submit" class="btn-modal btn-danger"><i class="fas fa-times"></i> Mark Failed</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- REMARK MODAL -->
+<div id="remark-modal" class="modal-backdrop-custom">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3><i class="fas fa-pen"></i> Add Remark</h3>
+      <button class="modal-close" onclick="closeModal('remark-modal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form method="POST" id="remark-form" action="">
+      <div class="modal-body">
+        <label class="fl"><i class="fas fa-sticky-note"></i> Remark <span style="color: var(--accent);">*</span></label>
+        <textarea name="remark" class="fi" placeholder="Enter your remark…" required></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal btn-cancel" onclick="closeModal('remark-modal')">Cancel</button>
+        <button type="submit" class="btn-modal btn-accent"><i class="fas fa-save"></i> Save Remark</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openModal(id) {
+    document.getElementById(id).style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  document.querySelectorAll('.modal-backdrop-custom').forEach(m => {
+    m.addEventListener('click', e => {
+      if (e.target === m) closeModal(m.id);
+    });
+  });
+
+  function submitForm(action) {
+    const f = document.getElementById('pending-quick-form');
+    f.action = action;
+    f.submit();
+  }
+
+  let active = 'all';
+  function filterPill(status, el) {
+    active = status;
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    const rows = document.querySelectorAll('#leads-tbody tr[data-status]');
+    let vis = 0;
+    rows.forEach(r => {
+      const show = status === 'all' || r.dataset.status === status;
+      r.style.display = show ? '' : 'none';
+      if (show) vis++;
+    });
+    document.getElementById('vis-count').textContent = vis;
+    const noResults = document.getElementById('no-results');
+    if (noResults) {
+      noResults.style.display = vis === 0 ? 'table-row' : 'none';
+    }
+  }
+
+  // Theme Toggle
+  (function() {
+    const savedTheme = localStorage.getItem('opsPanelTheme') || 'light';
+    const root = document.documentElement;
+    const themeIcon = document.getElementById('themeIcon');
+    const themeText = document.getElementById('themeText');
+    
+    function setTheme(theme) {
+      if (theme === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+        if (themeIcon) themeIcon.className = 'fas fa-sun';
+        if (themeText) themeText.textContent = 'Light';
+        localStorage.setItem('opsPanelTheme', 'dark');
+      } else {
+        root.removeAttribute('data-theme');
+        if (themeIcon) themeIcon.className = 'fas fa-moon';
+        if (themeText) themeText.textContent = 'Dark';
+        localStorage.setItem('opsPanelTheme', 'light');
+      }
+    }
+    
+    setTheme(savedTheme);
+    
+    const toggleBtn = document.getElementById('themeToggleBtn');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', function() {
+        const currentTheme = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+      });
+    }
+  })();
+</script>
+</body>
+</html>

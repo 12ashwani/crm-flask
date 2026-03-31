@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard | CRM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* Dark Theme (Default) */
+      --bg-primary: #0f0f12;
+      --bg-secondary: #18181b;
+      --bg-tertiary: #1f1f24;
+      --sidebar-bg: #0a0a0c;
+      --card-bg: #1a1a1f;
+      --text-primary: #ffffff;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --border: #27272a;
+      --accent-primary: #6366f1;
+      --accent-secondary: #8b5cf6;
+      --accent-success: #10b981;
+      --accent-warning: #f59e0b;
+      --accent-danger: #ef4444;
+      --accent-info: #3b82f6;
+      --gradient-1: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      --gradient-2: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f5f9;
+      --sidebar-bg: #ffffff;
+      --card-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      display: flex;
+      transition: all 0.3s ease;
+    }
+
+    /* Modern Sidebar */
+    .sidebar {
+      width: 280px;
+      min-height: 100vh;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      left: 0;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .logo-section {
+      padding: 32px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 800;
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-badge {
+      display: inline-block;
+      background: var(--gradient-1);
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    .nav-menu {
+      flex: 1;
+      padding: 32px 16px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+      border-radius: 12px;
+      margin-bottom: 6px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .nav-item i {
+      font-size: 20px;
+      width: 24px;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      transform: translateX(4px);
+    }
+
+    .nav-item.active {
+      background: var(--gradient-1);
+      color: white;
+      box-shadow: var(--shadow-md);
+    }
+
+    .nav-item.active i {
+      color: white;
+    }
+
+    .user-section {
+      padding: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      background: var(--gradient-1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 20px;
+      color: white;
+    }
+
+    .user-details {
+      flex: 1;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    .user-role {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      background: var(--bg-tertiary);
+      border-radius: 10px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .logout-btn:hover {
+      background: var(--accent-danger);
+      color: white;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 280px;
+      flex: 1;
+      min-height: 100vh;
+    }
+
+    /* Modern Top Bar */
+    .top-bar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(10px);
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .theme-toggle {
+      width: 42px;
+      height: 42px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--text-secondary);
+    }
+
+    .theme-toggle:hover {
+      background: var(--gradient-1);
+      color: white;
+      transform: rotate(15deg);
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-tertiary);
+      padding: 8px 20px;
+      border-radius: 40px;
+      border: 1px solid var(--border);
+    }
+
+    .user-badge-initial {
+      width: 32px;
+      height: 32px;
+      background: var(--gradient-1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: white;
+    }
+
+    /* Content Area */
+    .content-area {
+      padding: 40px;
+    }
+
+    /* Welcome Section */
+    .welcome-section {
+      margin-bottom: 40px;
+    }
+
+    .welcome-title {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .welcome-title span {
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .welcome-subtitle {
+      color: var(--text-secondary);
+      font-size: 16px;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 28px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient-1);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: transparent;
+    }
+
+    .stat-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--bg-tertiary);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .stat-icon i {
+      font-size: 28px;
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .stat-number {
+      font-size: 42px;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-trend {
+      font-size: 13px;
+      color: var(--accent-success);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Section Title */
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title i {
+      font-size: 24px;
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Actions Grid */
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .action-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .action-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent-primary);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .action-icon {
+      width: 52px;
+      height: 52px;
+      background: var(--bg-tertiary);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .action-card:hover .action-icon {
+      background: var(--gradient-1);
+    }
+
+    .action-icon i {
+      font-size: 24px;
+      color: var(--accent-primary);
+      transition: all 0.3s ease;
+    }
+
+    .action-card:hover .action-icon i {
+      color: white;
+    }
+
+    .action-content {
+      flex: 1;
+    }
+
+    .action-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .action-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .action-arrow {
+      color: var(--text-muted);
+      transition: all 0.3s ease;
+    }
+
+    .action-card:hover .action-arrow {
+      transform: translateX(4px);
+      color: var(--accent-primary);
+    }
+
+    /* Flash Messages */
+    .flash-messages {
+      margin-bottom: 24px;
+    }
+
+    .flash {
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.3s ease;
+    }
+
+    .flash.success {
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 3px solid var(--accent-success);
+      color: var(--accent-success);
+    }
+
+    .flash.error {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 3px solid var(--accent-danger);
+      color: var(--accent-danger);
+    }
+
+    .flash.info {
+      background: rgba(59, 130, 246, 0.1);
+      border-left: 3px solid var(--accent-info);
+      color: var(--accent-info);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 200;
+      }
+      
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .content-area {
+        padding: 24px;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .global-footer {
+      background: rgba(15, 15, 18, 0.95);
+      border-top: 1px solid rgba(100, 100, 120, 0.25);
+      color: #d4d4dd;
+      padding: 0.85rem 20px;
+      text-align: center;
+      font-size: 0.9rem;
+      position: sticky;
+      bottom: 0;
+      margin-top: 32px;
+      z-index: 10;
+      backdrop-filter: blur(6px);
+    }
+  </style>
+</head>
+<body data-theme="dark">
+
+<!-- Modern Sidebar -->
+<aside class="sidebar">
+  <div class="logo-section">
+    <div class="logo">
+      CRM<span class="logo-badge">ADMIN</span>
+    </div>
+    <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
+      Enterprise Control Center
+    </div>
+  </div>
+
+  <div class="nav-menu">
+    <a href="{{ url_for('admin.admin_dashboard') }}" class="nav-item active">
+      <i class="bi bi-grid-1x2-fill"></i>
+      <span>Dashboard</span>
+    </a>
+    <a href="{{ url_for('admin.employees_list') }}" class="nav-item">
+      <i class="bi bi-people-fill"></i>
+      <span>Employees</span>
+    </a>
+    <a href="{{ url_for('admin.leads_dashboard') }}" class="nav-item">
+      <i class="bi bi-diagram-3-fill"></i>
+      <span>Leads Dashboard</span>
+    </a>
+    <a href="{{ url_for('admin.create_employee') }}" class="nav-item">
+      <i class="bi bi-person-plus-fill"></i>
+      <span>Add Employee</span>
+    </a>
+    <a href="{{ url_for('attendance') }}" class="nav-item">
+      <i class="bi bi-calendar-check-fill"></i>
+      <span>Attendance</span>
+    </a>
+    <a href="{{ url_for('admin.leave_management') }}" class="nav-item">
+      <i class="bi bi-envelope-paper-fill"></i>
+      <span>Leave Management</span>
+    </a>
+  </div>
+
+  <div class="user-section">
+    <div class="user-info">
+      <div class="user-avatar">
+        {{ (current_user.name or current_user.username)[0].upper() }}
+      </div>
+      <div class="user-details">
+        <div class="user-name">{{ current_user.name or current_user.username }}</div>
+        <div class="user-role">Administrator</div>
+      </div>
+    </div>
+    <a href="{{ url_for('auth.logout') }}" class="logout-btn">
+      <i class="bi bi-box-arrow-right"></i>
+      <span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+  <!-- Top Bar -->
+  <header class="top-bar">
+    <div class="page-title">Admin Dashboard</div>
+    <div class="header-actions">
+      <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
+        <i class="bi bi-moon-fill" id="themeIcon"></i>
+      </button>
+      <div class="user-badge">
+        <div class="user-badge-initial">
+          {{ (current_user.name or current_user.username)[0].upper() }}
+        </div>
+        <span style="font-weight: 500;">{{ current_user.name or current_user.username }}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content Area -->
+  <div class="content-area">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">
+              <i class="bi bi-{% if category == 'success' %}check-circle-fill{% elif category == 'error' %}exclamation-triangle-fill{% else %}info-circle-fill{% endif %}"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+      <div class="welcome-title">
+        Hello, <span>{{ current_user.name or current_user.username }}</span> 👋
+      </div>
+      <div class="welcome-subtitle">
+        Welcome to your admin dashboard. Here's what's happening with your organization today.
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="bi bi-graph-up"></i>
+        </div>
+        <div class="stat-label">Total Leads</div>
+        <div class="stat-number">{{ total_leads }}</div>
+        <div class="stat-trend">
+          <i class="bi bi-arrow-up-short"></i>
+          <span>+12% this month</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="bi bi-people"></i>
+        </div>
+        <div class="stat-label">Total Employees</div>
+        <div class="stat-number">{{ total_employees }}</div>
+        <div class="stat-trend">
+          <i class="bi bi-arrow-up-short"></i>
+          <span>+3 new this month</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="section-title">
+      <i class="bi bi-lightning-charge-fill"></i>
+      <span>Quick Actions</span>
+    </div>
+    
+    <div class="actions-grid">
+      <a href="{{ url_for('admin.employees_list') }}" class="action-card">
+        <div class="action-icon">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <div class="action-content">
+          <div class="action-title">View All Employees</div>
+          <div class="action-desc">Manage employee records and information</div>
+        </div>
+        <div class="action-arrow">
+          <i class="bi bi-arrow-right"></i>
+        </div>
+      </a>
+
+      <a href="{{ url_for('admin.create_employee') }}" class="action-card">
+        <div class="action-icon">
+          <i class="bi bi-person-plus-fill"></i>
+        </div>
+        <div class="action-content">
+          <div class="action-title">Add New Employee</div>
+          <div class="action-desc">Create new employee profile and credentials</div>
+        </div>
+        <div class="action-arrow">
+          <i class="bi bi-arrow-right"></i>
+        </div>
+      </a>
+
+      <a href="{{ url_for('admin.leads_dashboard') }}" class="action-card">
+        <div class="action-icon">
+          <i class="bi bi-diagram-3-fill"></i>
+        </div>
+        <div class="action-content">
+          <div class="action-title">Lead Overview</div>
+          <div class="action-desc">View all leads by team, employee, and status</div>
+        </div>
+        <div class="action-arrow">
+          <i class="bi bi-arrow-right"></i>
+        </div>
+      </a>
+
+      <a href="{{ url_for('attendance') }}" class="action-card">
+        <div class="action-icon">
+          <i class="bi bi-calendar-check-fill"></i>
+        </div>
+        <div class="action-content">
+          <div class="action-title">View Attendance</div>
+          <div class="action-desc">Monitor daily employee attendance</div>
+        </div>
+        <div class="action-arrow">
+          <i class="bi bi-arrow-right"></i>
+        </div>
+      </a>
+
+      <a href="{{ url_for('admin.leave_management') }}" class="action-card">
+        <div class="action-icon">
+          <i class="bi bi-envelope-paper-fill"></i>
+        </div>
+        <div class="action-content">
+          <div class="action-title">Leave Requests</div>
+          <div class="action-desc">Review and manage leave applications</div>
+        </div>
+        <div class="action-arrow">
+          <i class="bi bi-arrow-right"></i>
+        </div>
+      </a>
+    </div>
+
+    <footer class="global-footer">
+      © 2026 | Designed, Developed & Maintained by Ashwani Kumar
+    </footer>
+  </main>
+
+<script>
+  // Theme Toggle with localStorage persistence
+  const html = document.documentElement;
+  const themeToggle = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+
+  function setTheme(theme) {
+    html.setAttribute('data-theme', theme);
+    localStorage.setItem('admin_theme', theme);
+    
+    if (theme === 'light') {
+      themeIcon.className = 'bi bi-sun-fill';
+    } else {
+      themeIcon.className = 'bi bi-moon-fill';
+    }
+  }
+
+  // Load saved theme
+  const savedTheme = localStorage.getItem('admin_theme') || 'dark';
+  setTheme(savedTheme);
+
+  // Toggle theme
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+  });
+
+  // Optional: Auto-dismiss flash messages
+  setTimeout(() => {
+    const flashes = document.querySelectorAll('.flash');
+    flashes.forEach(flash => {
+      flash.style.opacity = '0';
+      flash.style.transform = 'translateY(-20px)';
+      setTimeout(() => flash.remove(), 300);
+    });
+  }, 5000);
+</script>
+
+</body>
+</html>

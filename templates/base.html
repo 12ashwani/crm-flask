@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="{{ current_user.theme if current_user and current_user.theme else 'light' }}">
+<head>
+  <meta charset="utf-8">
+  <script>
+    // Apply persisted theme as early as possible to avoid flicker
+    (function() {
+      try {
+        var stored = localStorage.getItem('theme');
+        if (stored === 'dark' || stored === 'light') {
+          document.documentElement.setAttribute('data-bs-theme', stored);
+        }
+      } catch (e) {
+        // localStorage not available
+      }
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CRM - Attendance Management System</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <script src="https://unpkg.com/htmx.org@2.0.1"></script>
+  <style>
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f9fa;
+      --text-primary: #000000;
+      --text-secondary: #666666;
+      --border-color: #dee2e6;
+      --card-bg: #ffffff;
+      --sidebar-bg: #f8f9fa;
+      --hover-bg: #e9ecef;
+    }
+
+    [data-bs-theme="dark"] {
+      --bg-primary: #1a1a1a;
+      --bg-secondary: #2d2d2d;
+      --text-primary: #ffffff;
+      --text-secondary: #aaaaaa;
+      --border-color: #444444;
+      --card-bg: #2d2d2d;
+      --sidebar-bg: #1a1a1a;
+      --hover-bg: #3d3d3d;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background-color 0.3s ease;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      background-color: var(--sidebar-bg) !important;
+      color: var(--text-primary) !important;
+      min-height: 100vh;
+      width: 280px;
+      position: sticky;
+      top: 0;
+      transition: all 0.3s ease;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+    }
+
+    .sidebar .nav-link {
+      color: var(--text-primary) !important;
+      padding: 10px 15px;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .sidebar .nav-link:hover {
+      background-color: var(--hover-bg) !important;
+      transform: translateX(5px);
+    }
+
+    .sidebar .nav-link.active {
+      background-color: var(--hover-bg) !important;
+      font-weight: 600;
+      border-left: 3px solid #0d6efd;
+    }
+
+    .dropdown-menu {
+      background-color: var(--card-bg) !important;
+      border-color: var(--border-color) !important;
+    }
+
+    .dropdown-item {
+      color: var(--text-primary) !important;
+      padding: 8px 20px;
+    }
+
+    .dropdown-item:hover {
+      background-color: var(--hover-bg) !important;
+    }
+
+    /* Card Styles */
+    .card {
+      background-color: var(--card-bg) !important;
+      border-color: var(--border-color) !important;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    /* Form Controls */
+    .form-control,
+    .form-select {
+      background-color: var(--card-bg) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-primary) !important;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 0.25rem rgba(13,110,253,0.25);
+    }
+
+    /* Alert Styles */
+    .alert {
+      background-color: var(--card-bg) !important;
+      border-color: var(--border-color) !important;
+      color: var(--text-primary) !important;
+    }
+
+    /* Theme Toggle */
+    .theme-toggle {
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      transition: all 0.2s ease;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.05);
+    }
+
+    /* Table Styles */
+    .table {
+      color: var(--text-primary) !important;
+    }
+
+    .table-striped > tbody > tr:nth-of-type(odd) {
+      background-color: var(--bg-secondary);
+    }
+
+    .table-hover tbody tr:hover {
+      background-color: var(--hover-bg) !important;
+    }
+
+    /* Button Styles */
+    .btn {
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    /* Badge Styles */
+    .badge {
+      padding: 6px 12px;
+      font-weight: 500;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        min-height: auto;
+        position: relative;
+      }
+      
+      .d-flex {
+        flex-direction: column;
+      }
+      
+      .flex-grow-1 {
+        width: 100%;
+      }
+    }
+
+    /* Loading Spinner */
+    .htmx-indicator {
+      opacity: 0;
+      transition: opacity 500ms ease-in;
+    }
+    
+    .htmx-request .htmx-indicator {
+      opacity: 1;
+    }
+    
+    .htmx-request.htmx-indicator {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+<div class="d-flex">
+  <!-- Sidebar Navigation -->
+  <div class="sidebar p-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h4 class="mb-0">
+          <i class="bi bi-building"></i> CRM
+        </h4>
+        <small class="text-muted">{{ current_user.department|title if current_user else 'Guest' }}</small>
+      </div>
+      <button id="themeToggleBtn" class="theme-toggle" type="button" title="Toggle theme">
+        <i id="themeIcon" class="bi bi-moon-stars-fill"></i>
+      </button>
+    </div>
+    <hr>
+
+    <ul class="nav flex-column gap-1">
+      <li>
+        <a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">
+        </a>
+      </li>
+
+      {% if current_user.department == 'admin' %}
+      <li>
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="nav-link {% if request.path.startswith('/admin') %}active{% endif %}">
+          <i class="bi bi-shield-lock-fill me-2"></i>Admin Panel
+        </a>
+      </li>
+      {% endif %}
+
+      {% if current_user.department == 'hr' %}
+      <li>
+        <a href="{{ url_for('hr.dashboard') }}" class="nav-link {% if request.path.startswith('/hr') %}active{% endif %}">
+          <i class="bi bi-people-fill me-2"></i>HR Panel
+        </a>
+      </li>
+      <li>
+        <a href="{{ url_for('hr.payroll') }}" class="nav-link {% if request.path.startswith('/hr/payroll') %}active{% endif %}">
+          <i class="bi bi-cash-coin me-2"></i>Payroll
+        </a>
+      </li>
+      <li>
+        <a href="{{ url_for('hr.holidays') }}" class="nav-link {% if request.path.startswith('/hr/holidays') %}active{% endif %}">
+          <i class="bi bi-calendar2-week me-2"></i>Holiday Calendar
+        </a>
+      </li>
+      {% endif %}
+
+      <!-- My Profile Dropdown -->
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-person-circle me-2"></i>My Profile
+        </a>
+        <ul class="dropdown-menu">
+          {% if current_user.department in ['employee', 'hr', 'marketing', 'operations', 'accounts'] %}
+          <li><h6 class="dropdown-header">Employee Section</h6></li>
+          <li>
+            <a href="{{ url_for('employee.dashboard') }}" class="dropdown-item">
+              <i class="bi bi-grid-3x3-gap-fill me-2"></i>Dashboard
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('employee.attendance') }}" class="dropdown-item {% if request.path in ['/attendance', '/employee/attendance'] %}active{% endif %}">
+              <i class="bi bi-calendar-check-fill me-2"></i>Attendance
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('employee.leave_request') }}" class="dropdown-item">
+              <i class="bi bi-envelope-paper-fill me-2"></i>Apply Leave
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('employee.leave_status') }}" class="dropdown-item">
+              <i class="bi bi-clock-history me-2"></i>Leave Status
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('employee.leave_balance') }}" class="dropdown-item">
+              <i class="bi bi-pie-chart-fill me-2"></i>Leave Balance
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('employee.holidays') }}" class="dropdown-item">
+              <i class="bi bi-calendar-event-fill me-2"></i>Holiday List
+            </a>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          {% endif %}
+
+          <li><h6 class="dropdown-header">Department Access</h6></li>
+          {% if current_user.department in ['admin', 'marketing'] %}
+          <li>
+            <a href="{{ url_for('marketing.marketing_leads') }}" class="dropdown-item">
+              <i class="bi bi-megaphone-fill me-2"></i>Marketing
+            </a>
+          </li>
+          {% endif %}
+          {% if current_user.department in ['admin', 'operations'] %}
+          <li>
+            <a href="{{ url_for('operations.dashboard') }}" class="dropdown-item">
+              <i class="bi bi-gear-fill me-2"></i>Operations
+            </a>
+          </li>
+          {% endif %}
+          {% if current_user.department in ['admin', 'accounts'] %}
+          <li>
+            <a href="{{ url_for('accounts.payments') }}" class="dropdown-item">
+              <i class="bi bi-calculator-fill me-2"></i>Accounts
+            </a>
+          </li>
+          {% endif %}
+          
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <a href="{{ url_for('auth.change_password') }}" class="dropdown-item">
+              <i class="bi bi-key-fill me-2"></i>Change Password
+            </a>
+          </li>
+        </ul>
+      </li>
+
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <a href="{{ url_for('auth.logout') }}" class="nav-link text-danger">
+          <i class="bi bi-box-arrow-right me-2"></i>Logout
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="flex-grow-1 p-4" style="background-color: var(--bg-primary);">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show animate__animated animate__fadeInDown" role="alert">
+            <i class="bi bi-{% if category == 'success' %}check-circle-fill{% elif category == 'danger' %}exclamation-triangle-fill{% else %}info-circle-fill{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Main Content Block -->
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+<footer class="footer text-center py-3 mt-4" style="background-color: var(--bg-secondary); color: var(--text-secondary); border-top: 1px solid var(--border-color); position: relative; width: 100%;">
+  © 2026 | Designed, Developed & Maintained by Ashwani Kumar
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function showToast(message, type = 'info') {
+    const toastContainer = document.createElement('div');
+    toastContainer.className = 'position-fixed bottom-0 end-0 p-3';
+    toastContainer.style.zIndex = '9999';
+    toastContainer.innerHTML = `
+      <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : type === 'danger' ? 'danger' : 'info'} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="3000">
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'info-circle-fill'} me-2"></i>
+            ${message}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(toastContainer);
+    const toast = new bootstrap.Toast(toastContainer.querySelector('.toast'));
+    toast.show();
+    toastContainer.addEventListener('hidden.bs.toast', () => toastContainer.remove());
+  }
+
+  function getCsrfToken() {
+    const token = document.querySelector('meta[name="csrf-token"]');
+    return token ? token.getAttribute('content') : '';
+  }
+
+  function updateThemeIcon(theme, iconElement) {
+    if (!iconElement) return;
+    iconElement.className = theme === 'dark' ? 'bi bi-brightness-high-fill' : 'bi bi-moon-stars-fill';
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Theme Toggle Functionality
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const htmlElement = document.documentElement;
+    
+    // Get saved theme or default
+    let currentTheme = localStorage.getItem('theme') || htmlElement.getAttribute('data-bs-theme') || 'light';
+    htmlElement.setAttribute('data-bs-theme', currentTheme);
+    updateThemeIcon(currentTheme, themeIcon);
+
+    if (themeToggleBtn) {
+      themeToggleBtn.addEventListener('click', function() {
+        const activeTheme = htmlElement.getAttribute('data-bs-theme');
+        const nextTheme = activeTheme === 'light' ? 'dark' : 'light';
+
+        fetch('/toggle-theme', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken()
+          },
+          body: JSON.stringify({ theme: nextTheme })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success || data.status === 'success') {
+            htmlElement.setAttribute('data-bs-theme', nextTheme);
+            localStorage.setItem('theme', nextTheme);
+            updateThemeIcon(nextTheme, themeIcon);
+            showToast('Theme changed to ' + nextTheme + ' mode', 'success');
+          }
+        })
+        .catch(error => {
+          console.error('Error changing theme:', error);
+          htmlElement.setAttribute('data-bs-theme', nextTheme);
+          localStorage.setItem('theme', nextTheme);
+          updateThemeIcon(nextTheme, themeIcon);
+        });
+      });
+    }
+    
+    // Auto-dismiss alerts after 5 seconds
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+      setTimeout(() => {
+        if (alert && alert.remove) {
+          const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+          if (bsAlert) bsAlert.close();
+        }
+      }, 5000);
+    });
+  });
+  
+  // HTMX Event Handlers
+  document.body.addEventListener('htmx:beforeRequest', function(evt) {
+    // Show loading indicator
+    const target = evt.target;
+    if (target) {
+      target.classList.add('opacity-50');
+    }
+  });
+  
+  document.body.addEventListener('htmx:afterRequest', function(evt) {
+    // Hide loading indicator
+    const target = evt.target;
+    if (target) {
+      target.classList.remove('opacity-50');
+    }
+    
+    // Show success message if needed
+    if (evt.detail.successful) {
+      const response = evt.detail.xhr.response;
+      if (response && response.includes('success')) {
+        showToast('Operation completed successfully!', 'success');
+      }
+    }
+  });
+  
+  // Attendance Form Submission Handler
+  window.submitAttendanceForm = function(actionUrl) {
+    if (!actionUrl) {
+      console.error('No action URL provided');
+      return false;
+    }
+    
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = actionUrl;
+    
+    // Add CSRF token if available
+    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+    if (csrfToken) {
+      const csrfInput = document.createElement('input');
+      csrfInput.type = 'hidden';
+      csrfInput.name = 'csrf_token';
+      csrfInput.value = csrfToken.getAttribute('content');
+      form.appendChild(csrfInput);
+    }
+    
+    document.body.appendChild(form);
+    form.submit();
+    return true;
+  };
+  
+  // Export to CSV function for attendance
+  window.exportAttendanceCSV = function() {
+    const table = document.getElementById('attendanceTable');
+    if (!table) return;
+    
+    const rows = table.querySelectorAll('tr');
+    const csvData = [];
+    
+    rows.forEach(row => {
+      const rowData = [];
+      const cells = row.querySelectorAll('th, td');
+      cells.forEach(cell => {
+        let text = cell.innerText.trim();
+        if (text.includes(',')) {
+          text = `"${text}"`;
+        }
+        rowData.push(text);
+      });
+      if (rowData.length > 0) {
+        csvData.push(rowData.join(','));
+      }
+    });
+    
+    const blob = new Blob([csvData.join('\n')], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `attendance_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    showToast('Attendance data exported successfully!', 'success');
+  };
+</script>
+
+<!-- Add CSRF Token Meta Tag -->
+<meta name="csrf-token" content="{{ csrf_token() if csrf_token else '' }}">
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

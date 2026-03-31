@@ -1,0 +1,726 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <!-- Enhanced Header with Gradient Background -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <div class="card shadow-xl border-0 overflow-hidden position-relative" style="border-radius: 24px;">
+        <div class="card-body py-5 px-4 position-relative" 
+             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          
+          <!-- Animated Background Elements -->
+          <div class="position-absolute top-0 start-0 w-100 h-100 overflow-hidden">
+            <div class="position-absolute" style="top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: float 8s ease-in-out infinite;"></div>
+            <div class="position-absolute" style="bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: float 10s ease-in-out infinite reverse;"></div>
+            <div class="position-absolute" style="top: 50%; left: 20%; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%; animation: float 12s ease-in-out infinite;"></div>
+          </div>
+          
+          <div class="d-flex justify-content-between align-items-center position-relative flex-wrap gap-3">
+            <div>
+              <div class="d-flex align-items-center gap-3 mb-2">
+                <div class="glass-icon">
+                  <i class="bi bi-journal-check fs-1 text-white"></i>
+                </div>
+                <div>
+                  <h1 class="display-6 fw-bold mb-1 text-white">Leave Status</h1>
+                  <p class="mb-0 fs-5 text-white-90">Track all your submitted leave requests</p>
+                </div>
+              </div>
+              <div class="mt-3 d-flex gap-2">
+                <span class="badge bg-white text-primary px-3 py-2 rounded-pill shadow-sm">
+                  <i class="bi bi-calendar-check me-1"></i> {{ total_requests|length }} Total Requests
+                </span>
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <a href="{{ url_for('employee.pending_leaves') }}" class="btn btn-light shadow-lg rounded-pill px-4 py-3 fw-semibold hover-lift">
+                <i class="bi bi-hourglass-split me-2"></i> Pending Only
+                {% if pending_requests|length > 0 %}
+                <span class="badge bg-warning text-dark ms-2">{{ pending_requests|length }}</span>
+                {% endif %}
+              </a>
+              <a href="{{ url_for('employee.leave_request') }}" class="btn btn-primary-gradient shadow-lg rounded-pill px-4 py-3 fw-semibold hover-lift">
+                <i class="bi bi-plus-circle me-2"></i> Apply New Leave
+                <i class="bi bi-arrow-right-short ms-2"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced Summary Stats Cards -->
+  <div class="row g-4 mb-5">
+    <!-- Pending Card -->
+    <div class="col-md-4">
+      <div class="stats-card pending-card border-0 shadow-lg hover-card">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <p class="text-muted mb-1 fw-semibold text-uppercase small">Pending Requests</p>
+              <div class="stats-number text-warning" data-count="{{ pending_requests|length }}">0</div>
+            </div>
+            <div class="stats-icon bg-warning-glow">
+              <i class="bi bi-hourglass-split fs-1 text-warning"></i>
+            </div>
+          </div>
+          <div class="progress-stats mt-3">
+            <div class="progress-label d-flex justify-content-between small mb-1">
+              <span>Awaiting approval</span>
+              <span class="fw-semibold">{{ pending_requests|length }} / {{ total_requests|length }}</span>
+            </div>
+            <div class="progress-custom">
+              <div class="progress-fill bg-warning" style="width: {{ (pending_requests|length / total_requests|length * 100) if total_requests|length > 0 else 0 }}%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Approved Card -->
+    <div class="col-md-4">
+      <div class="stats-card approved-card border-0 shadow-lg hover-card">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <p class="text-muted mb-1 fw-semibold text-uppercase small">Approved</p>
+              <div class="stats-number text-success" data-count="{{ approved_requests|length }}">0</div>
+            </div>
+            <div class="stats-icon bg-success-glow">
+              <i class="bi bi-check-circle fs-1 text-success"></i>
+            </div>
+          </div>
+          <div class="progress-stats mt-3">
+            <div class="progress-label d-flex justify-content-between small mb-1">
+              <span>Approved requests</span>
+              <span class="fw-semibold">{{ approved_requests|length }} / {{ total_requests|length }}</span>
+            </div>
+            <div class="progress-custom">
+              <div class="progress-fill bg-success" style="width: {{ (approved_requests|length / total_requests|length * 100) if total_requests|length > 0 else 0 }}%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rejected Card -->
+    <div class="col-md-4">
+      <div class="stats-card rejected-card border-0 shadow-lg hover-card">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <p class="text-muted mb-1 fw-semibold text-uppercase small">Rejected</p>
+              <div class="stats-number text-danger" data-count="{{ rejected_requests|length }}">0</div>
+            </div>
+            <div class="stats-icon bg-danger-glow">
+              <i class="bi bi-x-circle fs-1 text-danger"></i>
+            </div>
+          </div>
+          <div class="progress-stats mt-3">
+            <div class="progress-label d-flex justify-content-between small mb-1">
+              <span>Rejected requests</span>
+              <span class="fw-semibold">{{ rejected_requests|length }} / {{ total_requests|length }}</span>
+            </div>
+            <div class="progress-custom">
+              <div class="progress-fill bg-danger" style="width: {{ (rejected_requests|length / total_requests|length * 100) if total_requests|length > 0 else 0 }}%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced All Requests Table -->
+  <div class="card shadow-lg border-0" style="border-radius: 20px;">
+    <div class="card-header bg-transparent py-4 border-0">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <h5 class="mb-0 fw-semibold d-flex align-items-center">
+          <div class="gradient-icon me-3">
+            <i class="bi bi-list-ul text-white"></i>
+          </div>
+          All Leave Requests
+        </h5>
+        <div class="search-wrapper">
+          <i class="bi bi-search search-icon"></i>
+          <input type="text" id="searchRequests" class="form-control" placeholder="Search by type, reason or status...">
+        </div>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table premium-table mb-0" id="leaveRequestsTable">
+          <thead>
+            <tr>
+              <th class="ps-4 py-3"><i class="bi bi-tag me-2"></i>Leave Type</th>
+              <th class="py-3"><i class="bi bi-calendar3 me-2"></i>Start Date</th>
+              <th class="py-3"><i class="bi bi-calendar3 me-2"></i>End Date</th>
+              <th class="py-3"><i class="bi bi-file-text me-2"></i>Reason</th>
+              <th class="py-3"><i class="bi bi-check-circle me-2"></i>Status</th>
+              <th class="py-3 pe-4"><i class="bi bi-clock-history me-2"></i>Applied On</th>
+             </tr>
+          </thead>
+          <tbody>
+            {% for req in requests %}
+            <tr class="premium-row request-row" data-leave-type="{{ req.leave_type }}" data-status="{{ req.status }}" data-reason="{{ req.reason.lower() }}">
+              <td class="ps-4 py-3">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="type-icon 
+                    {% if req.leave_type == 'casual' %}type-casual
+                    {% elif req.leave_type == 'sick' %}type-sick
+                    {% elif req.leave_type == 'annual' %}type-annual
+                    {% elif req.leave_type in ['maternity', 'paternity'] %}type-special
+                    {% else %}type-emergency{% endif %}">
+                    <i class="bi 
+                      {% if req.leave_type == 'casual' %}bi-emoji-smile
+                      {% elif req.leave_type == 'sick' %}bi-thermometer-half
+                      {% elif req.leave_type == 'annual' %}bi-suitcase-lg
+                      {% elif req.leave_type == 'maternity' %}bi-heart-pulse
+                      {% elif req.leave_type == 'paternity' %}bi-person-heart
+                      {% else %}bi-exclamation-triangle{% endif %}"></i>
+                  </div>
+                  <span class="fw-semibold">{{ req.leave_type|title }}</span>
+                </div>
+              </td>
+              <td class="py-3">
+                <div class="date-badge">
+                  <i class="bi bi-calendar3 me-1 text-muted"></i>
+                  {{ req.start_date }}
+                </div>
+              </td>
+              <td class="py-3">
+                <div class="date-badge">
+                  <i class="bi bi-calendar3 me-1 text-muted"></i>
+                  {{ req.end_date }}
+                </div>
+              </td>
+              <td class="py-3">
+                <div class="reason-cell" title="{{ req.reason }}">
+                  <i class="bi bi-chat-text me-1 text-muted"></i>
+                  {{ req.reason|truncate(50) }}
+                </div>
+              </td>
+              <td class="py-3">
+                {% if req.status == 'approved' %}
+                  <span class="status-badge status-approved">
+                    <i class="bi bi-check-circle-fill me-1"></i> Approved
+                  </span>
+                {% elif req.status == 'rejected' %}
+                  <span class="status-badge status-rejected">
+                    <i class="bi bi-x-circle-fill me-1"></i> Rejected
+                  </span>
+                {% else %}
+                  <span class="status-badge status-pending">
+                    <i class="bi bi-clock-fill me-1"></i> Pending
+                  </span>
+                {% endif %}
+              </td>
+              <td class="py-3 pe-4">
+                <div class="applied-date">
+                  <i class="bi bi-calendar2-week me-1 text-muted"></i>
+                  <small class="text-muted">{{ req.applied_on }}</small>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="6" class="text-center py-5">
+                <div class="empty-state">
+                  <div class="empty-state-icon mx-auto mb-3">
+                    <i class="bi bi-journal-x display-1"></i>
+                  </div>
+                  <h5 class="text-muted mt-3 fw-semibold">No Leave Requests Found</h5>
+                  <p class="text-muted mb-4">You haven't applied for any leave yet.</p>
+                  <a href="{{ url_for('employee.leave_request') }}" class="btn btn-primary-gradient rounded-pill px-5 py-3">
+                    <i class="bi bi-plus-circle me-2"></i> Apply for Leave Now
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    {% if requests|length > 10 %}
+    <div class="card-footer bg-transparent border-0 py-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <small class="text-muted">
+          <i class="bi bi-database me-1"></i> Showing <span id="visibleCount">{{ requests|length }}</span> of {{ requests|length }} records
+        </small>
+        <nav>
+          <ul class="pagination pagination-sm mb-0" id="pagination">
+            <!-- Pagination will be dynamically generated if needed -->
+          </ul>
+        </nav>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- Enhanced Custom Styles -->
+<style>
+  :root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    --danger-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+
+  /* Floating Animation */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+  /* Glass Icon */
+  .glass-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .text-white-90 {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  /* Hover Card Effect */
+  .hover-card {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .hover-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 25px 40px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .hover-lift {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Stats Cards */
+  .stats-card {
+    border-radius: 20px;
+    background: white;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient);
+  }
+
+  .pending-card::before {
+    background: var(--warning-gradient);
+  }
+
+  .approved-card::before {
+    background: var(--success-gradient);
+  }
+
+  .rejected-card::before {
+    background: var(--danger-gradient);
+  }
+
+  .stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .stats-card:hover .stats-icon {
+    transform: scale(1.1) rotate(5deg);
+  }
+
+  .bg-warning-glow {
+    background: linear-gradient(135deg, rgba(250, 112, 154, 0.1), rgba(254, 225, 64, 0.1));
+  }
+
+  .bg-success-glow {
+    background: linear-gradient(135deg, rgba(67, 233, 123, 0.1), rgba(56, 249, 215, 0.1));
+  }
+
+  .bg-danger-glow {
+    background: linear-gradient(135deg, rgba(240, 147, 251, 0.1), rgba(245, 87, 108, 0.1));
+  }
+
+  .stats-number {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  /* Progress Bar */
+  .progress-custom {
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease;
+  }
+
+  /* Gradient Icon */
+  .gradient-icon {
+    width: 45px;
+    height: 45px;
+    background: var(--primary-gradient);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-primary-gradient {
+    background: var(--primary-gradient);
+    border: none;
+    color: white;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    color: white;
+  }
+
+  /* Search Wrapper */
+  .search-wrapper {
+    position: relative;
+    width: 250px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    z-index: 1;
+  }
+
+  .search-wrapper input {
+    padding-left: 35px;
+    border-radius: 50px;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+  }
+
+  .search-wrapper input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+  }
+
+  /* Premium Table */
+  .premium-table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .premium-table thead th {
+    background: linear-gradient(135deg, #f8f9fa, #ffffff);
+    border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .premium-row {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .premium-row:hover {
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.05), transparent);
+    transform: translateX(4px);
+  }
+
+  /* Type Icons */
+  .type-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+
+  .type-casual {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+  }
+
+  .type-sick {
+    background: rgba(79, 172, 254, 0.1);
+    color: #4facfe;
+  }
+
+  .type-annual {
+    background: rgba(67, 233, 123, 0.1);
+    color: #43e97b;
+  }
+
+  .type-special {
+    background: rgba(250, 112, 154, 0.1);
+    color: #fa709a;
+  }
+
+  .type-emergency {
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+  }
+
+  /* Date Badge */
+  .date-badge {
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  /* Reason Cell */
+  .reason-cell {
+    max-width: 260px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.9rem;
+  }
+
+  /* Status Badges */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    gap: 5px;
+  }
+
+  .status-approved {
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    color: #065f46;
+  }
+
+  .status-rejected {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    color: #991b1b;
+  }
+
+  .status-pending {
+    background: linear-gradient(135deg, #fed7aa, #fde68a);
+    color: #92400e;
+    animation: pulse-badge 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-badge {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  /* Applied Date */
+  .applied-date {
+    font-size: 0.85rem;
+  }
+
+  /* Empty State */
+  .empty-state {
+    padding: 60px 20px;
+    text-align: center;
+  }
+
+  .empty-state-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .glass-icon {
+      width: 45px;
+      height: 45px;
+    }
+    
+    .display-6 {
+      font-size: 1.5rem;
+    }
+    
+    .stats-number {
+      font-size: 2rem;
+    }
+    
+    .stats-icon {
+      width: 45px;
+      height: 45px;
+    }
+    
+    .search-wrapper {
+      width: 100%;
+    }
+    
+    .premium-table th, .premium-table td {
+      white-space: nowrap;
+    }
+  }
+
+  /* Shadow XL */
+  .shadow-xl {
+    box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.2);
+  }
+</style>
+
+<!-- Enhanced JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Animate stats numbers counting up
+  const statsNumbers = document.querySelectorAll('.stats-number');
+  statsNumbers.forEach(number => {
+    const finalValue = parseInt(number.getAttribute('data-count'));
+    let currentValue = 0;
+    const duration = 1000;
+    const increment = finalValue / (duration / 16);
+    
+    const updateNumber = () => {
+      currentValue += increment;
+      if (currentValue < finalValue) {
+        number.textContent = Math.ceil(currentValue);
+        requestAnimationFrame(updateNumber);
+      } else {
+        number.textContent = finalValue;
+      }
+    };
+    
+    updateNumber();
+  });
+  
+  // Animate progress bars
+  const progressFills = document.querySelectorAll('.progress-fill');
+  progressFills.forEach(fill => {
+    const width = fill.style.width;
+    fill.style.width = '0%';
+    setTimeout(() => {
+      fill.style.width = width;
+    }, 100);
+  });
+  
+  // Search functionality
+  const searchInput = document.getElementById('searchRequests');
+  const table = document.getElementById('leaveRequestsTable');
+  const visibleCountSpan = document.getElementById('visibleCount');
+  
+  if (searchInput && table) {
+    searchInput.addEventListener('keyup', function() {
+      const searchTerm = this.value.toLowerCase();
+      const rows = table.querySelectorAll('tbody .premium-row');
+      let visibleCount = 0;
+      
+      rows.forEach(row => {
+        const leaveType = row.getAttribute('data-leave-type') || '';
+        const status = row.getAttribute('data-status') || '';
+        const reason = row.getAttribute('data-reason') || '';
+        
+        if (leaveType.includes(searchTerm) || 
+            status.includes(searchTerm) || 
+            reason.includes(searchTerm) || 
+            searchTerm === '') {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      
+      if (visibleCountSpan) {
+        visibleCountSpan.textContent = visibleCount;
+      }
+      
+      // Show empty state if no results
+      const noResults = visibleCount === 0;
+      const existingNoResult = document.querySelector('.no-results-row');
+      
+      if (noResults && !existingNoResult) {
+        const tbody = table.querySelector('tbody');
+        const noResultRow = document.createElement('tr');
+        noResultRow.className = 'no-results-row';
+        noResultRow.innerHTML = `
+          <td colspan="6" class="text-center py-5">
+            <div class="empty-state-mini">
+              <i class="bi bi-search fs-1 text-muted mb-2"></i>
+              <p class="text-muted mb-0">No leave requests match your search</p>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(noResultRow);
+      } else if (!noResults && existingNoResult) {
+        existingNoResult.remove();
+      }
+    });
+  }
+  
+  // Add hover effect to table rows
+  const rows = document.querySelectorAll('.premium-row');
+  rows.forEach(row => {
+    row.addEventListener('mouseenter', function() {
+      this.style.cursor = 'pointer';
+    });
+  });
+  
+  // Tooltip for reason cells (shows full reason on click)
+  const reasonCells = document.querySelectorAll('.reason-cell');
+  reasonCells.forEach(cell => {
+    cell.addEventListener('click', function(e) {
+      const fullReason = this.getAttribute('title');
+      if (fullReason && this.textContent.trim() !== fullReason) {
+        alert(fullReason);
+      }
+    });
+    cell.style.cursor = 'pointer';
+  });
+});
+</script>
+{% endblock %}

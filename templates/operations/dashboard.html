@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Nexus Ops | Operations Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Light theme (default) */
+    :root {
+      --bg: #fafcff;
+      --surface: #ffffff;
+      --surface2: #f8fafd;
+      --surface3: #f1f4f9;
+      --border: #e9edf2;
+      --border-light: #dfe3ea;
+      --accent: #4361ee;
+      --accent2: #06b6d4;
+      --accent-glow: rgba(67, 97, 238, 0.08);
+      --text: #0a0c12;
+      --text-secondary: #2d3a4b;
+      --muted: #6c7a8e;
+      --muted-light: #8e9aae;
+      --danger: #f43f5e;
+      --danger-glow: rgba(244, 63, 94, 0.1);
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.1);
+      --warning: #f59e0b;
+      --warning-glow: rgba(245, 158, 11, 0.1);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.02);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02);
+      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.08);
+      --shadow-glow: 0 0 20px rgba(67, 97, 238, 0.15);
+      --transition: all 0.4s cubic-bezier(0.2, 0.95, 0.4, 1);
+      --transition-bounce: all 0.5s cubic-bezier(0.34, 1.2, 0.64, 1);
+    }
+
+    /* Dark theme */
+    [data-theme="dark"] {
+      --bg: #01010a;
+      --surface: #0c0c14;
+      --surface2: #12121c;
+      --surface3: #181824;
+      --border: #22222e;
+      --border-light: #2a2a38;
+      --accent: #c0ff4e;
+      --accent2: #4dd4ff;
+      --accent-glow: rgba(77, 212, 255, 0.12);
+      --text: #f0f3ff;
+      --text-secondary: #cbd5ff;
+      --muted: #8b8ca8;
+      --muted-light: #6b6d89;
+      --danger: #ff6b6b;
+      --danger-glow: rgba(255, 107, 107, 0.15);
+      --success: #6effa8;
+      --success-glow: rgba(110, 255, 168, 0.12);
+      --warning: #ffbe5e;
+      --warning-glow: rgba(255, 190, 94, 0.12);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(77, 212, 255, 0.05);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(77, 212, 255, 0.08);
+      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.5);
+      --shadow-glow: 0 0 30px rgba(77, 212, 255, 0.2);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    /* Animated gradient background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 30%, var(--accent-glow) 0%, transparent 50%);
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 0;
+      animation: pulseBg 8s ease-in-out infinite;
+    }
+
+    @keyframes pulseBg {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.02); }
+    }
+
+    /* ========= SIDEBAR ========= */
+    .sidebar {
+      width: 290px;
+      min-height: 100vh;
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      transition: var(--transition);
+      animation: slideInLeft 0.6s ease-out;
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .sidebar-logo {
+      padding: 36px 28px 28px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo span {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      color: var(--bg);
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      border-radius: 60px;
+      box-shadow: var(--shadow-glow);
+      transition: var(--transition-bounce);
+    }
+    .sidebar-logo span:hover {
+      transform: scale(1.02);
+    }
+    .sidebar-logo span i {
+      font-size: 16px;
+    }
+    .sidebar-logo p {
+      margin-top: 16px;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.02em;
+    }
+
+    nav {
+      padding: 32px 20px;
+      flex: 1;
+    }
+    nav a {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 18px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      border-radius: 16px;
+      margin-bottom: 8px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    nav a::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 0;
+      height: 100%;
+      background: var(--accent-glow);
+      transition: width 0.3s ease;
+      z-index: -1;
+    }
+    nav a:hover::before {
+      width: 100%;
+    }
+    nav a i {
+      width: 24px;
+      font-size: 1.2rem;
+      text-align: center;
+      transition: var(--transition);
+    }
+    nav a:hover {
+      color: var(--accent2);
+      transform: translateX(6px);
+    }
+    nav a:hover i {
+      transform: scale(1.1);
+    }
+    nav a.active {
+      color: var(--accent2);
+      background: var(--accent-glow);
+      border-left: 3px solid var(--accent2);
+      border-radius: 16px 12px 12px 16px;
+    }
+
+    .sidebar-footer {
+      padding: 24px 28px 32px;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+      animation: fadeInUp 0.5s ease-out 0.3s both;
+    }
+    .sidebar-footer .sf-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sidebar-footer .sf-name i {
+      color: var(--accent2);
+      font-size: 12px;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .sidebar-footer .sf-role {
+      font-size: 10px;
+      color: var(--accent2);
+      font-family: 'Space Mono', monospace;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .logout-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 20px;
+      padding: 10px 16px;
+      border-radius: 60px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: var(--transition);
+      background: rgba(255,255,255,0.02);
+    }
+    .logout-link i {
+      font-size: 14px;
+      transition: var(--transition);
+    }
+    .logout-link:hover {
+      color: var(--danger);
+      border-color: var(--danger);
+      background: var(--danger-glow);
+      transform: translateX(4px);
+    }
+    .logout-link:hover i {
+      transform: translateX(-2px);
+    }
+
+    /* ========= MAIN ========= */
+    .main {
+      margin-left: 290px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 2;
+    }
+
+    .topbar {
+      padding: 20px 48px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      transition: var(--transition);
+      animation: slideInDown 0.5s ease-out;
+    }
+
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .topbar-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      background: var(--accent-glow);
+      padding: 6px 14px;
+      border-radius: 40px;
+      font-family: 'Space Mono', monospace;
+      transition: var(--transition);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border-light);
+      padding: 6px 20px 6px 12px;
+      border-radius: 60px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    .user-badge:hover {
+      border-color: var(--accent2);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    .user-badge .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      color: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      transition: var(--transition);
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-2px); }
+    }
+
+    /* Theme Toggle Button - Enhanced */
+    .theme-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 8px 22px;
+      border-radius: 60px;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      transition: var(--transition-bounce);
+      color: var(--text);
+      position: relative;
+      overflow: hidden;
+    }
+    .theme-toggle-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: var(--accent-glow);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    .theme-toggle-btn:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+    .theme-toggle-btn i {
+      font-size: 14px;
+      transition: transform 0.4s ease;
+      position: relative;
+      z-index: 1;
+    }
+    .theme-toggle-btn span {
+      position: relative;
+      z-index: 1;
+    }
+    .theme-toggle-btn:hover {
+      border-color: var(--accent2);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: var(--shadow-glow);
+    }
+    .theme-toggle-btn:hover i {
+      transform: rotate(180deg);
+    }
+
+    /* ========= CONTENT ========= */
+    .content {
+      padding: 44px 48px 60px;
+    }
+
+    .page-header {
+      margin-bottom: 40px;
+      position: relative;
+      animation: fadeInUp 0.6s ease-out;
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .page-header h1 {
+      font-size: 44px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      background: linear-gradient(135deg, var(--text) 0%, var(--accent2) 70%, var(--accent) 100%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      animation: gradientShift 4s ease infinite;
+      background-size: 200% 200%;
+    }
+    @keyframes gradientShift {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .page-header h1 em {
+      font-style: normal;
+      color: var(--accent);
+      background: none;
+      -webkit-background-clip: unset;
+      background-clip: unset;
+    }
+    .page-header p {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      font-family: 'Space Mono', monospace;
+      border-left: 3px solid var(--accent2);
+      padding-left: 18px;
+    }
+    .download-csv-btn {
+      margin-top: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--accent-glow);
+      border: 1px solid var(--accent2);
+      border-radius: 60px;
+      padding: 10px 24px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent2);
+      text-decoration: none;
+      transition: var(--transition-bounce);
+      position: relative;
+      overflow: hidden;
+    }
+    .download-csv-btn::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    .download-csv-btn:hover::after {
+      left: 100%;
+    }
+    .download-csv-btn:hover {
+      background: var(--accent2);
+      color: var(--bg);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-glow);
+    }
+
+    /* FLASH MESSAGES */
+    .flash-messages {
+      margin-bottom: 32px;
+    }
+    .flash {
+      padding: 14px 22px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideInRight 0.4s ease-out;
+      transform-origin: right;
+    }
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    .flash i {
+      font-size: 18px;
+    }
+    .flash.success {
+      background: var(--success-glow);
+      border-left: 3px solid var(--success);
+      color: var(--success);
+    }
+    .flash.danger {
+      background: var(--danger-glow);
+      border-left: 3px solid var(--danger);
+      color: var(--danger);
+    }
+    .flash.warning {
+      background: var(--warning-glow);
+      border-left: 3px solid var(--warning);
+      color: var(--warning);
+    }
+
+    /* STAT CARDS - Enhanced with animations */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      margin-bottom: 52px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      padding: 26px 24px 22px;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition-bounce);
+      animation: cardFloat 0.6s ease-out backwards;
+      cursor: pointer;
+    }
+    .stat-card:nth-child(1) { animation-delay: 0.05s; }
+    .stat-card:nth-child(2) { animation-delay: 0.1s; }
+    .stat-card:nth-child(3) { animation-delay: 0.15s; }
+    .stat-card:nth-child(4) { animation-delay: 0.2s; }
+    @keyframes cardFloat {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .stat-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: var(--accent2);
+      box-shadow: var(--shadow-lg);
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.5s ease;
+    }
+    .stat-card:hover::before {
+      transform: scaleX(1);
+    }
+    .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted-light);
+      margin-bottom: 18px;
+      font-family: 'Space Mono', monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .stat-label i {
+      font-size: 22px;
+      opacity: 0.4;
+      transition: var(--transition);
+    }
+    .stat-card:hover .stat-label i {
+      opacity: 1;
+      transform: rotate(5deg) scale(1.1);
+    }
+    .stat-num {
+      font-size: 56px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      transition: var(--transition);
+    }
+    .stat-card:hover .stat-num {
+      transform: scale(1.02);
+    }
+    .sc-total .stat-num { color: var(--accent2); }
+    .sc-pending .stat-num { color: var(--warning); }
+    .sc-done .stat-num { color: var(--success); }
+    .sc-failed .stat-num { color: var(--danger); }
+    .stat-sub {
+      margin-top: 14px;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+
+    /* TABLE SECTION */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      margin-bottom: 20px;
+      font-family: 'Space Mono', monospace;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: fadeInLeft 0.5s ease-out 0.2s both;
+    }
+    @keyframes fadeInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      overflow: hidden;
+      transition: var(--transition);
+      animation: fadeInUp 0.6s ease-out 0.25s both;
+      box-shadow: var(--shadow-sm);
+    }
+    .table-card:hover {
+      box-shadow: var(--shadow-md);
+    }
+    .table-card-header {
+      padding: 22px 30px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface2);
+    }
+    .table-card-header span {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .table-card-header span i {
+      color: var(--accent2);
+      font-size: 18px;
+    }
+    .table-card-header a {
+      font-size: 12px;
+      font-family: 'Space Mono', monospace;
+      color: var(--accent2);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition: var(--transition);
+      padding: 6px 12px;
+      border-radius: 30px;
+    }
+    .table-card-header a:hover {
+      background: var(--accent-glow);
+      transform: translateX(4px);
+    }
+    .table-wrap {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead tr {
+      border-bottom: 1px solid var(--border-light);
+      background: var(--surface2);
+    }
+    th {
+      padding: 16px 22px;
+      text-align: left;
+      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted-light);
+      font-weight: 600;
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: var(--transition);
+    }
+    tbody tr:hover {
+      background: var(--accent-glow);
+      transform: scale(1.002);
+    }
+    td {
+      padding: 18px 22px;
+      vertical-align: middle;
+      font-weight: 500;
+    }
+    .company-cell {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .co-av {
+      width: 44px;
+      height: 44px;
+      border-radius: 20px;
+      background: var(--accent-glow);
+      border: 1px solid var(--accent2);
+      color: var(--accent2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      font-weight: 800;
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+    tbody tr:hover .co-av {
+      transform: scale(1.05) rotate(3deg);
+      border-color: var(--accent);
+    }
+    .co-name {
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .co-service {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      margin-top: 3px;
+    }
+
+    /* BADGES */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 60px;
+      white-space: nowrap;
+      transition: var(--transition);
+      animation: badgePop 0.3s ease-out;
+    }
+    @keyframes badgePop {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    .badge i {
+      font-size: 10px;
+    }
+    .badge-done {
+      background: var(--success-glow);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+    .badge-pending {
+      background: var(--warning-glow);
+      color: var(--warning);
+      border: 1px solid var(--warning);
+    }
+    .badge-failed {
+      background: var(--danger-glow);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+    .badge-new {
+      background: var(--accent-glow);
+      color: var(--accent2);
+      border: 1px solid var(--accent2);
+    }
+    .badge:hover {
+      transform: translateY(-2px) scale(1.02);
+    }
+
+    /* ACTION BUTTONS */
+    .act-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 7px 16px;
+      border-radius: 40px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .act-btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.4s, height 0.4s;
+    }
+    .act-btn:hover::after {
+      width: 100px;
+      height: 100px;
+    }
+    .act-btn:hover {
+      transform: translateY(-2px);
+    }
+    .act-btn.done:hover {
+      border-color: var(--success);
+      color: var(--success);
+      background: var(--success-glow);
+    }
+    .act-btn.pending:hover {
+      border-color: var(--warning);
+      color: var(--warning);
+      background: var(--warning-glow);
+    }
+    .act-btn.view:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+      background: var(--accent-glow);
+    }
+    .table-footer {
+      padding: 18px 28px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface2);
+    }
+    .empty-state {
+      text-align: center;
+      padding: 70px 24px;
+      animation: fadeInUp 0.5s ease;
+    }
+    .empty-state i {
+      font-size: 64px;
+      opacity: 0.3;
+      margin-bottom: 20px;
+      animation: float 3s infinite;
+    }
+    .empty-state p {
+      font-size: 13px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+    }
+
+    @media (max-width: 1100px) {
+      .sidebar { width: 260px; }
+      .main { margin-left: 260px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 18px; }
+      .content { padding: 32px 28px; }
+      .topbar { padding: 16px 28px; }
+      .page-header h1 { font-size: 36px; }
+    }
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span><i class="fas fa-cubes"></i> OpsPanel</span>
+    <p><i class="fas fa-sync-alt"></i> v3.0 · operations core</p>
+  </div>
+  <nav>
+    <a href="{{ url_for('operations.dashboard') }}" class="active">
+      <i class="fas fa-chart-line"></i> Dashboard
+    </a>
+    <a href="{{ url_for('attendance') }}">
+      <i class="fas fa-calendar-check"></i> Attendance
+    </a>
+    <a href="{{ url_for('operations.leave_management') }}">
+      <i class="fas fa-umbrella-beach"></i> Leave Management
+    </a>
+    <a href="{{ url_for('operations.my_leads') }}">
+      <i class="fas fa-folder-open"></i> My Leads
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sf-name"><i class="fas fa-user-astronaut"></i> {{ current_user.name or current_user.username }}</div>
+    <div class="sf-role"><i class="fas fa-bolt"></i> ● Operations Lead</div>
+    <a href="{{ url_for('auth.logout') }}" class="logout-link">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <span class="topbar-title"><i class="fas fa-tachometer-alt"></i> DASHBOARD</span>
+    <div class="topbar-right">
+      <div class="user-badge">
+        <div class="avatar">{{ (current_user.name or current_user.username)[0].upper() }}</div>
+        {{ current_user.name or current_user.username }}
+      </div>
+      <button class="theme-toggle-btn" id="themeToggleBtn">
+        <i class="fas fa-moon" id="themeIcon"></i>
+        <span id="themeText">Dark</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">
+              {% if category == 'success' %}<i class="fas fa-check-circle"></i>
+              {% elif category == 'danger' %}<i class="fas fa-exclamation-triangle"></i>
+              {% else %}<i class="fas fa-info-circle"></i>{% endif %}
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="page-header">
+      <h1>Hello, <em>{{ current_user.name or current_user.username }}</em> <i class="fas fa-hand-peace" style="font-size: 38px;"></i></h1>
+      <p><i class="fas fa-code-branch"></i> // operations intelligence · real-time lead tracking & performance analytics</p>
+      <div>
+        <a href="{{ url_for('operations.download_leads') }}" class="download-csv-btn"><i class="fas fa-download"></i> Export CSV Report</a>
+      </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stats-grid">
+      <div class="stat-card sc-total">
+        <div class="stat-label"><span><i class="fas fa-layer-group"></i> TOTAL ASSIGNED</span> <i class="fas fa-chart-simple"></i></div>
+        <div class="stat-num">{{ leads | length }}</div>
+        <div class="stat-sub">active leads in pipeline</div>
+      </div>
+      <div class="stat-card sc-pending">
+        <div class="stat-label"><span><i class="fas fa-hourglass-half"></i> PENDING</span> <i class="fas fa-spinner"></i></div>
+        <div class="stat-num">{{ leads | selectattr('file_status', 'equalto', 'pending') | list | length }}</div>
+        <div class="stat-sub">awaiting completion</div>
+      </div>
+      <div class="stat-card sc-done">
+        <div class="stat-label"><span><i class="fas fa-check-double"></i> DONE</span> <i class="fas fa-trophy"></i></div>
+        <div class="stat-num">{{ leads | selectattr('file_status', 'equalto', 'done') | list | length }}</div>
+        <div class="stat-sub">successfully finished</div>
+      </div>
+      <div class="stat-card sc-failed">
+        <div class="stat-label"><span><i class="fas fa-exclamation-circle"></i> FAILED</span> <i class="fas fa-bug"></i></div>
+        <div class="stat-num">{{ leads | selectattr('file_status', 'equalto', 'failed') | list | length }}</div>
+        <div class="stat-sub">requires attention</div>
+      </div>
+    </div>
+
+    <!-- Recent Leads Table -->
+    <div class="section-label"><i class="fas fa-table-list"></i> RECENT LEADS</div>
+    <div class="table-card">
+      <div class="table-card-header">
+        <span><i class="fas fa-briefcase"></i> Your Assigned Leads</span>
+        <a href="{{ url_for('operations.my_leads') }}">View all leads <i class="fas fa-arrow-right"></i></a>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Service</th>
+              <th>Contact</th>
+              <th>Portal Login</th>
+              <th>Status</th>
+              <th>Remarks</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if leads %}
+              {% for lead in leads[:8] %}
+              <tr>
+                <td>
+                  <div class="company-cell">
+                    <div class="co-av">{{ lead.company_name[0].upper() if lead.company_name else '?' }}</div>
+                    <div>
+                      <div class="co-name">{{ lead.company_name or '—' }}</div>
+                      <div class="co-service">{{ lead.service or 'No service' }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="font-family:'Space Mono', monospace; font-size:12px; color:var(--muted);">
+                  <i class="fas fa-cog" style="font-size:10px;"></i> {{ lead.service or '—' }}
+                </td>
+                <td>
+                  <div style="font-size:13px;font-weight:600;">{{ lead.auth_person_name or '—' }}</div>
+                  <div style="font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;">{{ lead.auth_person_number or '' }}</div>
+                </td>
+                <td style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);">
+                  <div><i class="fas fa-user-lock"></i> {{ lead.client_login or '—' }}</div>
+                  <div><i class="fas fa-key"></i> {{ lead.client_password or '—' }}</div>
+                </td>
+                <td>
+                  {% set st = lead.file_status | lower if lead.file_status else '' %}
+                  {% if st == 'done' %}
+                    <span class="badge badge-done"><i class="fas fa-check-circle"></i> Done</span>
+                  {% elif st == 'failed' %}
+                    <span class="badge badge-failed"><i class="fas fa-times-circle"></i> Failed</span>
+                  {% elif st == 'pending' %}
+                    <span class="badge badge-pending"><i class="fas fa-clock"></i> Pending</span>
+                  {% else %}
+                    <span class="badge badge-new"><i class="fas fa-sparkles"></i> New</span>
+                  {% endif %}
+                </td>
+                <td style="font-size:12px;color:var(--muted-light);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                  <i class="fas fa-comment-dots"></i> {{ lead.operation_remark or '—' }}
+                </td>
+                <td>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <a href="{{ url_for('operations.lead_details', lead_id=lead.id) }}" class="act-btn view"><i class="fas fa-eye"></i> View</a>
+                    <form method="POST" action="{{ url_for('operations.mark_done', lead_id=lead.id) }}" style="margin:0;">
+                      <input type="hidden" name="client_login" value="">
+                      <input type="hidden" name="client_password" value="">
+                      <button type="submit" class="act-btn done"><i class="fas fa-check"></i> Done</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('operations.mark_pending', lead_id=lead.id) }}" style="margin:0;">
+                      <button type="submit" class="act-btn pending"><i class="fas fa-hourglass-start"></i> Pending</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="7">
+                  <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <p>No leads assigned to you yet.</p>
+                  </div>
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+      {% if leads %}
+      <div class="table-footer">
+        <span><i class="fas fa-chart-simple"></i> Showing {{ [leads | length, 8] | min }} of {{ leads | length }} total leads</span>
+        <a href="{{ url_for('operations.my_leads') }}" style="color:var(--accent2);text-decoration:none;display:flex;align-items:center;gap:8px;">View all <i class="fas fa-arrow-right"></i></a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Theme Toggle JavaScript -->
+<script>
+  (function() {
+    const savedTheme = localStorage.getItem('opsPanelTheme') || 'light';
+    const root = document.documentElement;
+    const themeIcon = document.getElementById('themeIcon');
+    const themeText = document.getElementById('themeText');
+    
+    function setTheme(theme) {
+      if (theme === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+        if (themeIcon) {
+          themeIcon.className = 'fas fa-sun';
+        }
+        if (themeText) {
+          themeText.textContent = 'Light';
+        }
+        localStorage.setItem('opsPanelTheme', 'dark');
+      } else {
+        root.removeAttribute('data-theme');
+        if (themeIcon) {
+          themeIcon.className = 'fas fa-moon';
+        }
+        if (themeText) {
+          themeText.textContent = 'Dark';
+        }
+        localStorage.setItem('opsPanelTheme', 'light');
+      }
+    }
+    
+    setTheme(savedTheme);
+    
+    const toggleBtn = document.getElementById('themeToggleBtn');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', function() {
+        const currentTheme = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
+      });
+    }
+  })();
+</script>
+</body>
+</html>

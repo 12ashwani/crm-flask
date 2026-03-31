@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="{{ current_user.theme if current_user and current_user.theme else 'light' }}">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Payment Detail · #{{ lead.id }}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: linear-gradient(135deg, #0a0a0c 0%, #0f0f12 100%);
+      --surface: #141416;
+      --surface2: #1c1c1f;
+      --border: rgba(255,255,255,0.08);
+      --border-soft: rgba(255,255,255,0.05);
+      --accent: #e8ff47;
+      --accent-glow: rgba(232,255,71,0.2);
+      --accent2: #47d4ff;
+      --accent2-glow: rgba(71,212,255,0.2);
+      --green: #4dff91;
+      --green-glow: rgba(77,255,145,0.2);
+      --red: #ff5353;
+      --red-glow: rgba(255,83,83,0.2);
+      --warning: #ffb347;
+      --warning-glow: rgba(255,179,71,0.2);
+      --purple: #c084fc;
+      --purple-glow: rgba(192,132,252,0.2);
+      --text: #f0f0f0;
+      --text-soft: #e0e0e0;
+      --muted: #888;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+      --shadow-md: 0 8px 24px rgba(0,0,0,0.4);
+      --shadow-lg: 0 20px 40px rgba(0,0,0,0.5);
+      --transition-default: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      font-smoothing: antialiased;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── SIDEBAR WITH GLOW EFFECT ── */
+    .sidebar {
+      width: 260px;
+      min-height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      transition: var(--transition-default);
+    }
+
+    .sidebar-logo {
+      padding: 32px 24px 28px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-logo span {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--purple) 0%, var(--accent2) 100%);
+      color: #0d0d0f;
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 8px 16px;
+      border-radius: 12px;
+      animation: logoGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes logoGlow {
+      0%, 100% { box-shadow: 0 0 0 0 var(--purple-glow); }
+      50% { box-shadow: 0 0 20px 2px var(--purple-glow); }
+    }
+
+    .sidebar-logo p {
+      margin-top: 12px;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.05em;
+    }
+
+    nav {
+      padding: 28px 16px;
+      flex: 1;
+    }
+
+    nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      transition: var(--transition-default);
+      position: relative;
+      overflow: hidden;
+    }
+
+    nav a::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, var(--purple) 0%, var(--accent2) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: -1;
+    }
+
+    nav a:hover {
+      color: var(--text);
+      transform: translateX(4px);
+    }
+
+    nav a:hover::before {
+      opacity: 0.1;
+    }
+
+    nav a .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+      transition: var(--transition-default);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    .sidebar-footer {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(192,132,252,0.05) 0%, rgba(71,212,255,0.05) 100%);
+      margin: 0 16px 20px;
+      border-radius: 16px;
+    }
+
+    .sf-name {
+      font-size: 13px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--text) 0%, var(--purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .sf-role {
+      font-size: 11px;
+      color: var(--purple);
+      font-family: 'DM Mono', monospace;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .logout-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 40px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(255,255,255,0.03);
+      transition: var(--transition-default);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logout-link::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,83,83,0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .logout-link:hover {
+      color: var(--red);
+      border-color: var(--red);
+      background: var(--red-glow);
+      transform: translateX(4px);
+    }
+
+    .logout-link:hover::before {
+      left: 100%;
+    }
+
+    .logout-link svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: 260px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      padding: 18px 40px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(20,20,22,0.95);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 80;
+      animation: slideDown 0.4s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .topbar-title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, var(--accent2) 0%, var(--purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 6px 16px 6px 10px;
+      border-radius: 60px;
+      font-size: 12px;
+      font-weight: 600;
+      transition: var(--transition-default);
+      cursor: pointer;
+    }
+
+    .user-badge:hover {
+      transform: translateY(-2px);
+      border-color: var(--purple);
+      box-shadow: 0 0 20px var(--purple-glow);
+    }
+
+    .user-badge .av {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple) 0%, var(--accent2) 100%);
+      color: #0d0d0f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      animation: rotate 4s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── CONTENT ── */
+    .content {
+      padding: 40px;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── FLASH MESSAGES ── */
+    .flash-messages {
+      margin-bottom: 28px;
+    }
+
+    .flash {
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      border-left: 4px solid;
+      backdrop-filter: blur(4px);
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .flash.success {
+      background: var(--green-glow);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .flash.danger {
+      background: var(--red-glow);
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .flash.warning {
+      background: var(--warning-glow);
+      border-color: var(--warning);
+      color: var(--warning);
+    }
+
+    /* ── BACK LINK ── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      padding: 8px 18px;
+      border-radius: 40px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      transition: var(--transition-default);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .back-link::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(192,132,252,0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .back-link:hover {
+      color: var(--purple);
+      border-color: var(--purple);
+      transform: translateX(-4px);
+    }
+
+    .back-link:hover::before {
+      left: 100%;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-bottom: 32px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .page-header h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+
+    .page-header h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--purple) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: relative;
+      display: inline-block;
+    }
+
+    .page-header p {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ── BADGE ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 60px;
+      transition: var(--transition-default);
+      animation: badgeGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes badgeGlow {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+
+    .badge::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .badge-received {
+      background: var(--green-glow);
+      color: var(--green);
+      border: 1px solid var(--green);
+    }
+
+    .badge-pending {
+      background: var(--warning-glow);
+      color: var(--warning);
+      border: 1px solid var(--warning);
+    }
+
+    .badge-failed {
+      background: var(--red-glow);
+      color: var(--red);
+      border: 1px solid var(--red);
+    }
+
+    .badge-new {
+      background: var(--purple-glow);
+      color: var(--purple);
+      border: 1px solid var(--purple);
+    }
+
+    /* ── LAYOUT ── */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 24px;
+    }
+
+    /* ── CARDS WITH GLOW EFFECTS ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      transition: var(--transition-default);
+      position: relative;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px -12px rgba(0,0,0,0.5);
+      border-color: rgba(192,132,252,0.3);
+    }
+
+    .card-hdr {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(192,132,252,0.05) 0%, rgba(71,212,255,0.05) 100%);
+    }
+
+    .card-hdr h3 {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+    }
+
+    .card-body {
+      padding: 24px;
+    }
+
+    /* ── KV ROWS ── */
+    .kv-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+      transition: var(--transition-default);
+    }
+
+    .kv-row:hover {
+      transform: translateX(4px);
+    }
+
+    .kv-row:last-child {
+      border-bottom: none;
+    }
+
+    .kv-key {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'DM Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      flex-shrink: 0;
+    }
+
+    .kv-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      text-align: right;
+    }
+
+    .kv-val.mono {
+      font-family: 'DM Mono', monospace;
+    }
+
+    .kv-val.green {
+      color: var(--green);
+    }
+
+    .kv-val.purple {
+      color: var(--purple);
+    }
+
+    .kv-val.blue {
+      color: var(--accent2);
+    }
+
+    .kv-val.muted {
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    /* ── AMOUNT HERO ── */
+    .amount-hero {
+      padding: 28px 24px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, rgba(77,255,145,0.05) 0%, rgba(71,212,255,0.05) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .amount-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(77,255,145,0.1) 0%, transparent 70%);
+      animation: rotateGlow 10s linear infinite;
+    }
+
+    @keyframes rotateGlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .amount-label {
+      font-size: 10px;
+      font-family: 'DM Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .amount-value {
+      font-size: 48px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, var(--green) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      position: relative;
+      z-index: 1;
+    }
+
+    .amount-value.no-amt {
+      font-size: 20px;
+      color: var(--muted);
+      -webkit-text-fill-color: var(--muted);
+      font-weight: 600;
+    }
+
+    /* ── REMARKS BOX ── */
+    .remarks-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 20px;
+      transition: var(--transition-default);
+    }
+
+    .remarks-box:hover {
+      border-color: var(--purple);
+      transform: translateY(-2px);
+    }
+
+    .remarks-box .rl {
+      font-size: 10px;
+      font-family: 'DM Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--purple);
+      margin-bottom: 8px;
+    }
+
+    .remarks-box p {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.6;
+      font-weight: 500;
+    }
+
+    /* ── PERSON CELL ── */
+    .person-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .p-av {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent2) 0%, var(--purple) 100%);
+      border: 1px solid rgba(71,212,255,0.3);
+      color: #0d0d0f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      flex-shrink: 0;
+      transition: var(--transition-default);
+    }
+
+    .person-cell:hover .p-av {
+      transform: scale(1.1);
+    }
+
+    /* ── ACTION BUTTONS ── */
+    .action-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 12px 20px;
+      border-radius: 40px;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition-default);
+      margin-bottom: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-btn:last-child {
+      margin-bottom: 0;
+    }
+
+    .action-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .action-btn:hover::before {
+      left: 100%;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+
+    .action-btn:active {
+      transform: translateY(0);
+    }
+
+    .action-btn.a-green {
+      background: linear-gradient(135deg, var(--green) 0%, #3bc86b 100%);
+      color: #0d0d0f;
+      box-shadow: 0 4px 15px var(--green-glow);
+    }
+
+    .action-btn.a-yellow {
+      background: linear-gradient(135deg, var(--warning) 0%, #ff9f2e 100%);
+      color: #0d0d0f;
+      box-shadow: 0 4px 15px var(--warning-glow);
+    }
+
+    .action-btn.a-red {
+      background: linear-gradient(135deg, var(--red) 0%, #ff3a3a 100%);
+      color: #fff;
+      box-shadow: 0 4px 15px var(--red-glow);
+    }
+
+    .action-btn.a-accent {
+      background: linear-gradient(135deg, var(--accent) 0%, #d4ff2e 100%);
+      color: #0d0d0f;
+      box-shadow: 0 4px 15px var(--accent-glow);
+    }
+
+    .action-btn.a-blue {
+      background: linear-gradient(135deg, var(--accent2) 0%, #2bb4ff 100%);
+      color: #0d0d0f;
+      box-shadow: 0 4px 15px var(--accent2-glow);
+    }
+
+    /* ── SECTION DIVIDERS ── */
+    .panel-section {
+      padding: 20px 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .section-label {
+      font-size: 10px;
+      font-family: 'DM Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .full-select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 10px 16px;
+      outline: none;
+      width: 100%;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: var(--transition-default);
+    }
+
+    .full-select:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px var(--purple-glow);
+    }
+
+    textarea.remark-ta {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 12px 16px;
+      outline: none;
+      width: 100%;
+      resize: vertical;
+      min-height: 100px;
+      transition: var(--transition-default);
+      margin-bottom: 12px;
+    }
+
+    textarea.remark-ta:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    textarea.remark-ta::placeholder {
+      color: #555;
+      font-weight: 400;
+    }
+
+    /* ── MODAL ── */
+    .modal-bd {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(12px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      width: 90%;
+      max-width: 460px;
+      overflow: hidden;
+      animation: modalSlideUp 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
+      box-shadow: var(--shadow-lg);
+    }
+
+    @keyframes modalSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .modal-hdr {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(135deg, rgba(192,132,252,0.1) 0%, rgba(71,212,255,0.1) 100%);
+    }
+
+    .modal-hdr h3 {
+      font-size: 17px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--text) 0%, var(--purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .modal-close {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 34px;
+      height: 34px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-default);
+    }
+
+    .modal-close:hover {
+      color: var(--red);
+      border-color: var(--red);
+      background: var(--red-glow);
+      transform: rotate(90deg);
+    }
+
+    .modal-body {
+      padding: 24px;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      background: var(--surface2);
+    }
+
+    .fl {
+      font-size: 10px;
+      font-family: 'DM Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .fi {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 12px 16px;
+      outline: none;
+      width: 100%;
+      transition: var(--transition-default);
+      margin-bottom: 0;
+    }
+
+    .fi:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 3px var(--purple-glow);
+    }
+
+    .fi::placeholder {
+      color: #555;
+      font-weight: 400;
+    }
+
+    textarea.fi {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .btn-m {
+      display: inline-flex;
+      align-items: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      padding: 10px 20px;
+      border-radius: 40px;
+      border: none;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: var(--transition-default);
+    }
+
+    .btn-m:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-cancel {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .btn-cancel:hover {
+      color: var(--text);
+      background: var(--surface2);
+    }
+
+    .btn-green {
+      background: linear-gradient(135deg, var(--green) 0%, #3bc86b 100%);
+      color: #0d0d0f;
+    }
+
+    .btn-red {
+      background: linear-gradient(135deg, var(--red) 0%, #ff3a3a 100%);
+      color: #fff;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        display: none;
+      }
+      .main {
+        margin-left: 0;
+      }
+      .content {
+        padding: 20px;
+      }
+      .detail-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      .topbar {
+        padding: 14px 20px;
+      }
+    }
+  </style>
+  {% include 'partials/theme_toggle.html' %}
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span>AccPanel</span>
+    <p>v2.0 · premium accounts</p>
+  </div>
+  <nav>
+    <a href="{{ url_for('accounts.payments') }}">
+      <span class="dot"></span> Payments
+    </a>
+    <a href="{{ url_for('accounts.all_leads') }}">
+      <span class="dot"></span> All Leads
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sf-name">{{ current_user.name or current_user.username }}</div>
+    <div class="sf-role">● Accounts Lead</div>
+    <a href="{{ url_for('auth.logout') }}" class="logout-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <span class="topbar-title">Payment Detail · #{{ lead.id }}</span>
+    <div class="topbar-right">
+      <div class="user-badge">
+        <div class="av">{{ (current_user.name or current_user.username)[0].upper() }}</div>
+        {{ current_user.name or current_user.username }}
+      </div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <a href="{{ url_for('accounts.payments') }}" class="back-link">← Back to Payments</a>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div>
+        <h1>{{ lead.company_name or 'Lead' }} <em>#{{ lead.id }}</em></h1>
+        <p>// payment detail · {{ lead.service or 'no service listed' }}</p>
+      </div>
+      <div>
+        {% set govt_status = lead.govt_payment_status | lower if lead.govt_payment_status else '' %}
+        {% set prof_status = lead.professional_payment_status | lower if lead.professional_payment_status else '' %}
+        {% if govt_status == 'received' and prof_status == 'received' %}
+          {% set ps = 'received' %}
+        {% elif govt_status == 'failed' or prof_status == 'failed' %}
+          {% set ps = 'failed' %}
+        {% elif govt_status == 'pending' or prof_status == 'pending' %}
+          {% set ps = 'pending' %}
+        {% else %}
+          {% set ps = 'new' %}
+        {% endif %}
+        {% if ps == 'received' %}<span class="badge badge-received">Received</span>
+        {% elif ps == 'pending' %}<span class="badge badge-pending">Pending</span>
+        {% elif ps == 'failed'  %}<span class="badge badge-failed">Failed</span>
+        {% else %}              <span class="badge badge-new">New</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- GRID -->
+    <div class="detail-grid">
+
+      <!-- LEFT -->
+      <div style="display:flex;flex-direction:column;gap:24px;">
+
+        <!-- Lead Info Card -->
+        <div class="card">
+          <div class="card-hdr"><h3>Lead Information</h3></div>
+          <div class="card-body">
+            <div class="kv-row">
+              <span class="kv-key">Lead ID</span>
+              <span class="kv-val mono purple">#{{ lead.id }}</span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Company</span>
+              <span class="kv-val">{{ lead.company_name or '—' }}</span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Service</span>
+              <span class="kv-val mono">{{ lead.service or '—' }}</span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Marketing Employee</span>
+              <span class="kv-val">{{ lead.marketing_executive_name or '—' }}</span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Operations Employee</span>
+              <span class="kv-val">{{ lead.operation_executive_name or '—' }}</span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Contact</span>
+              <span class="kv-val">{{ lead.contact_name or '—' }}</span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Email</span>
+              <span class="kv-val mono">{{ lead.email or '—' }}</span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Phone</span>
+              <span class="kv-val mono">{{ lead.phone or '—' }}</span>
+            </div>
+            {% if lead.source %}
+            <div class="kv-row">
+              <span class="kv-key">Source</span>
+              <span class="kv-val">{{ lead.source }}</span>
+            </div>
+            {% endif %}
+            <div class="kv-row">
+              <span class="kv-key">Assigned To</span>
+              {% if lead.get('account_executive_name') %}
+              <span class="kv-val">
+                <span class="person-cell">
+                  <span class="p-av">{{ lead.account_executive_name[0].upper() }}</span>
+                  <span style="color:var(--accent2);">{{ lead.account_executive_name }}</span>
+                </span>
+              </span>
+              {% else %}
+              <span class="kv-val muted">— unassigned</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Details Card -->
+        <div class="card">
+          <div class="card-hdr"><h3>Payment Details</h3></div>
+          <div class="amount-hero">
+            <div class="amount-label">Amount Collected</div>
+            {% set total_amount = (lead.govt_amount or 0) + (lead.professional_amount or 0) %}
+            {% if total_amount %}
+              <div class="amount-value">₹ {{ total_amount }}</div>
+            {% else %}
+              <div class="amount-value no-amt">No amount recorded</div>
+            {% endif %}
+          </div>
+          <div class="card-body">
+            <div class="kv-row">
+              <span class="kv-key">Status</span>
+              <span class="kv-val">
+                {% if ps == 'received' %}<span class="badge badge-received">Received</span>
+                {% elif ps == 'pending' %}<span class="badge badge-pending">Pending</span>
+                {% elif ps == 'failed'  %}<span class="badge badge-failed">Failed</span>
+                {% else %}              <span class="badge badge-new">New</span>
+                {% endif %}
+              </span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Total Fee</span>
+              <span class="kv-val mono">₹ {{ lead.total_amount or 0 }}</span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Government Fee</span>
+              <span class="kv-val mono">₹ {{ lead.govt_amount or 0 }} | {{ lead.govt_payment_status or 'pending' }}</span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Professional Fee</span>
+              <span class="kv-val mono">₹ {{ lead.professional_amount or 0 }} | {{ lead.professional_payment_status or 'pending' }}</span>
+            </div>
+            {% if lead.payment_date %}
+            <div class="kv-row">
+              <span class="kv-key">Payment Date</span>
+              <span class="kv-val mono">{{ lead.payment_date }}</span>
+            </div>
+            {% endif %}
+          </div>
+          {% if lead.remarks %}
+          <div style="padding:0 24px 24px;">
+            <div class="remarks-box">
+              <div class="rl">Remarks</div>
+              <p>{{ lead.remarks }}</p>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Actions Panel -->
+      <div style="display:flex;flex-direction:column;gap:24px;">
+        <div class="card">
+
+          <!-- Payment Status Actions -->
+          <div class="card-hdr"><h3>Update Payment</h3></div>
+          <div class="card-body">
+            <button class="action-btn a-green" onclick="openModal('received-modal')">
+              ✅ Mark as Received
+            </button>
+            <form method="POST" action="{{ url_for('accounts.mark_pending', lead_id=lead.id) }}" style="margin-bottom:10px;">
+              <button type="submit" class="action-btn a-yellow" style="margin-bottom:0;">
+                ⏳ Mark as Pending
+              </button>
+            </form>
+            <button class="action-btn a-red" onclick="openModal('failed-modal')" style="margin-bottom:0;">
+              ❌ Mark as Failed
+            </button>
+          </div>
+
+          <!-- Assign Exec -->
+          <div class="panel-section">
+            <div class="section-label">Assign Account Executive</div>
+            <form method="POST" action="{{ url_for('accounts.assign', lead_id=lead.id) }}">
+              <select name="account_executive" class="full-select" required>
+                <option value="" disabled {% if not lead.get('account_executive') %}selected{% endif %}>Pick executive…</option>
+                {% for emp in accounts_employees %}
+                <option value="{{ emp.id }}" {% if lead.get('account_executive') == emp.id %}selected{% endif %}>
+                  {{ emp.name }}
+                </option>
+                {% endfor %}
+              </select>
+              <button type="submit" class="action-btn a-blue" style="margin-bottom:0;">→ Assign</button>
+            </form>
+          </div>
+
+          <!-- Add Remark -->
+          <div class="panel-section">
+            <div class="section-label">Add Remark</div>
+            <form method="POST" action="{{ url_for('accounts.add_remark', lead_id=lead.id) }}">
+              <textarea name="remark" class="remark-ta" placeholder="Write a note or remark…" required></textarea>
+              <button type="submit" class="action-btn a-accent" style="margin-bottom:0;">📝 Save Remark</button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 💰 RECEIVED MODAL -->
+<div id="received-modal" class="modal-bd">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3>💰 Mark Payment Received</h3>
+      <button class="modal-close" onclick="closeModal('received-modal')">✕</button>
+    </div>
+    <form method="POST" action="{{ url_for('accounts.mark_received', lead_id=lead.id) }}">
+      <div class="modal-body">
+        <label class="fl">Total Fee</label>
+        <input type="number" name="total_amount" class="fi"
+               placeholder="e.g. 20000" step="0.01" min="0"
+               value="{{ lead.total_amount or '' }}"/>
+        <label class="fl" style="margin-top:16px;">Government Fee</label>
+        <input type="number" name="govt_amount" class="fi"
+               placeholder="e.g. 15000" step="0.01" min="0"
+               value="{{ lead.govt_amount or '' }}"/>
+        <label class="fl" style="margin-top:16px;">Professional Fee</label>
+        <input type="number" name="professional_amount" class="fi"
+               placeholder="e.g. 5000" step="0.01" min="0"
+               value="{{ lead.professional_amount or '' }}"/>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-m btn-cancel" onclick="closeModal('received-modal')">Cancel</button>
+        <button type="submit" class="btn-m btn-green">Save Details</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ❌ FAILED MODAL -->
+<div id="failed-modal" class="modal-bd">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3 style="color:var(--red);">❌ Mark Payment Failed</h3>
+      <button class="modal-close" onclick="closeModal('failed-modal')">✕</button>
+    </div>
+    <form method="POST" action="{{ url_for('accounts.mark_failed', lead_id=lead.id) }}">
+      <div class="modal-body">
+        <label class="fl">Reason <span style="color:var(--red);">*</span></label>
+        <textarea name="reason" class="fi" placeholder="Why did the payment fail?">{{ lead.remarks or '' }}</textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-m btn-cancel" onclick="closeModal('failed-modal')">Cancel</button>
+        <button type="submit" class="btn-m btn-red">❌ Mark Failed</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openModal(id)  { document.getElementById(id).style.display = 'flex'; }
+  function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+  document.querySelectorAll('.modal-bd').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title> CRM  portal| Secure Login</title>
+  
+  <!-- Bootstrap 5.3 + Icons + Fonts -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <!-- Google Fonts: Inter + Poppins for clean modern typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Animate.css for subtle entry animations -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 1.5rem;
+    }
+
+    /* animated background blobs (modern graphics) */
+    .bg-blob {
+      position: fixed;
+      width: 45vw;
+      height: 45vw;
+      background: radial-gradient(circle, rgba(66, 153, 225, 0.25) 0%, rgba(56, 178, 172, 0.1) 100%);
+      border-radius: 72% 28% 82% 18% / 36% 46% 54% 64%;
+      filter: blur(80px);
+      z-index: 0;
+      animation: floatBlob 18s infinite alternate ease-in-out;
+    }
+
+    .blob-1 {
+      top: -10%;
+      left: -5%;
+      background: radial-gradient(circle, rgba(0, 231, 255, 0.25), rgba(0, 150, 199, 0.1));
+      animation-duration: 22s;
+    }
+
+    .blob-2 {
+      bottom: -15%;
+      right: -8%;
+      width: 50vw;
+      height: 50vw;
+      background: radial-gradient(circle, rgba(255, 126, 95, 0.2), rgba(254, 180, 123, 0.08));
+      animation-duration: 25s;
+      animation-direction: alternate-reverse;
+      border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
+    }
+
+    @keyframes floatBlob {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      100% { transform: translate(4%, 6%) rotate(8deg) scale(1.08); }
+    }
+
+    /* glassmorphism card */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(0px);
+      border-radius: 2rem;
+      border: 1px solid rgba(255,255,255,0.4);
+      box-shadow: 0 30px 50px rgba(0, 0, 0, 0.2), 0 10px 25px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      overflow: hidden;
+      position: relative;
+      z-index: 2;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 35px 55px rgba(0, 0, 0, 0.25);
+    }
+
+    /* gradient accent header */
+    .card-header-glow {
+      background: linear-gradient(105deg, #1a2a3a 0%, #0f2c39 100%);
+      padding: 1.2rem 2rem;
+      border-bottom: none;
+    }
+
+    .crm-icon {
+      background: rgba(255,255,255,0.12);
+      width: 56px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 18px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+
+    .crm-icon i {
+      font-size: 2.2rem;
+      color: white;
+    }
+
+    .form-control-modern {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 1rem;
+      padding: 0.85rem 1.2rem;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      font-weight: 500;
+    }
+
+    .form-control-modern:focus {
+      background-color: #ffffff;
+      border-color: #2c7da0;
+      box-shadow: 0 0 0 4px rgba(44, 125, 160, 0.2);
+      outline: none;
+    }
+
+    .btn-login {
+      background: linear-gradient(95deg, #1f6e8c, #0e4e6b);
+      border: none;
+      padding: 0.85rem;
+      border-radius: 1rem;
+      font-weight: 600;
+      font-size: 1rem;
+      letter-spacing: 0.3px;
+      transition: all 0.25s;
+      color: white;
+      box-shadow: 0 8px 16px -6px rgba(15, 70, 90, 0.4);
+    }
+
+    .btn-login:hover {
+      background: linear-gradient(95deg, #2589ae, #0f5c7c);
+      transform: translateY(-2px);
+      box-shadow: 0 14px 24px -8px rgba(0, 90, 110, 0.5);
+    }
+
+    .btn-outline-forgot {
+      border-radius: 1rem;
+      border: 1px solid #cbd5e1;
+      background: white;
+      padding: 0.75rem;
+      font-weight: 500;
+      color: #2c3e50;
+      transition: all 0.2s;
+    }
+
+    .btn-outline-forgot:hover {
+      background-color: #f1f5f9;
+      border-color: #94a3b8;
+      color: #0f2c39;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: #7e8c8f;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin: 0.5rem 0 0.25rem;
+    }
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .divider::before {
+      margin-right: 0.75rem;
+    }
+    .divider::after {
+      margin-left: 0.75rem;
+    }
+
+    .alert-custom {
+      border-radius: 1rem;
+      border-left: 4px solid;
+      font-weight: 500;
+      background: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+
+    /* floating label effect for accessibility */
+    .input-group-float {
+      position: relative;
+      margin-bottom: 1.25rem;
+    }
+
+    /* responsive fine-tune */
+    @media (max-width: 576px) {
+      .glass-card {
+        margin: 0 0.5rem;
+      }
+      .card-header-glow {
+        padding: 1rem 1.2rem;
+      }
+    }
+
+    /* extra micro-interaction */
+    .forgot-link-decoration {
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Animated graphical blobs for depth and modern look -->
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+
+  <div class="container position-relative" style="z-index: 3;">
+    <div class="row justify-content-center">
+      <div class="col-12 col-sm-10 col-md-8 col-lg-5 col-xl-4">
+        
+        <!-- Glassmorphism Card with enhanced graphics and elegant spacing -->
+        <div class="glass-card animate__animated animate__fadeInUp animate__fast">
+          
+          <!-- Header area with CRM branding + icon -->
+          <div class="card-header-glow d-flex align-items-center gap-3">
+            <div class="crm-icon">
+              <i class="bi bi-building"></i>
+            </div>
+            <div>
+              <h3 class="mb-0 fw-bold" style="color: white; letter-spacing: -0.2px; font-family: 'Poppins', sans-serif;">CRM Portal</h3>
+              <p class="mb-0 small" style="color: rgba(255,255,240,0.8);">Secure access · Business Intelligence</p>
+            </div>
+          </div>
+          
+          <div class="p-4 p-md-5">
+            <!-- Flash messages with elegant styling (supports categories: danger, error, success, warning) -->
+            
+            <div id="flash-messages-container">
+              <!-- In a real Flask app, messages would be rendered here. We'll keep the exact Jinja2 syntax but with improved design -->
+              {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                  {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category in ['error', 'danger'] else 'warning' if category == 'warning' else 'success' if category == 'success' else 'info' }} alert-dismissible fade show alert-custom mb-3 animate__animated animate__fadeInDown" role="alert">
+                      <div class="d-flex align-items-center gap-2">
+                        {% if category in ['error', 'danger'] %}
+                          <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+                        {% elif category == 'success' %}
+                          <i class="bi bi-check-circle-fill text-success"></i>
+                        {% elif category == 'warning' %}
+                          <i class="bi bi-exclamation-circle-fill text-warning"></i>
+                        {% else %}
+                          <i class="bi bi-info-circle-fill text-info"></i>
+                        {% endif %}
+                        <span>{{ message }}</span>
+                      </div>
+                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                  {% endfor %}
+                {% endif %}
+              {% endwith %}
+            </div>
+
+            <!-- Enhanced Login Form -->
+            <form method="post" action="#" novalidate>
+              <!-- Username field with icon and better spacing -->
+              <div class="input-group-float">
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 rounded-4" style="border: 1px solid #e2e8f0; border-right: none; background: #f8fafc;">
+                    <i class="bi bi-person-fill text-secondary"></i>
+                  </span>
+                  <input type="text" name="username" class="form-control form-control-modern border-start-0 ps-2" 
+                         placeholder="Username or email" required autofocus
+                         style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                </div>
+              </div>
+              
+              <!-- Password field with toggle visibility option (graphics + UX) -->
+              <div class="input-group-float">
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 rounded-4" style="border: 1px solid #e2e8f0; border-right: none; background: #f8fafc;">
+                    <i class="bi bi-lock-fill text-secondary"></i>
+                  </span>
+                  <input type="password" name="password" id="password-field" class="form-control form-control-modern border-start-0 ps-2" 
+                         placeholder="Password" required>
+                  <button class="btn btn-outline-secondary border-start-0 rounded-end-4" type="button" id="togglePassword" 
+                          style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: none; color: #5f6c80;">
+                    <i class="bi bi-eye-slash" id="toggleIcon"></i>
+                  </button>
+                </div>
+                <div class="form-text text-end mt-1" style="font-size: 0.7rem;">
+                  <i class="bi bi-shield-check"></i> Enterprise-grade security
+                </div>
+              </div>
+              
+              <!-- Login button + subtle extra -->
+              <div class="d-grid gap-3 mt-4">
+                <button type="submit" class="btn btn-login">
+                  <i class="bi bi-box-arrow-in-right me-2"></i> Sign In
+                </button>
+                
+                <div class="divider">
+                  <span>or</span>
+                </div>
+                
+                <a href="{{ url_for('auth.forgot_password') }}" class="btn btn-outline-forgot forgot-link-decoration text-center justify-content-center">
+                  <i class="bi bi-key-fill"></i> Forgot your password?
+                </a>
+              </div>
+            </form>
+            
+            <!-- Additional info & help link - improves trust graphics -->
+            <div class="text-center mt-4 pt-2">
+              <p class="small text-muted mb-0 d-flex align-items-center justify-content-center gap-1 flex-wrap">
+                <i class="bi bi-question-circle"></i> 
+                <span>Need help? </span>
+                <a href="#" class="text-decoration-none fw-semibold" style="color: #1f6e8c;">Contact support</a>
+                <span class="mx-1">•</span>
+                <i class="bi bi-shield-lock-fill"></i> 
+                <span>SSL encrypted</span>
+              </p>
+              <p class="mt-2 mb-0 small text-secondary">
+                <i class="bi bi-database"></i> v4.0 · Intelligent CRM Suite
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Additional micro footer / branding (modern) -->
+        <footer class="login-footer text-center mt-4 animate__animated animate__fadeInUp animate__delay-1s">
+          <span class="fw-semibold"><i class="bi bi-c-circle"></i> © 2026 | Designed, Developed & Maintained by Ashwani Kumar</span>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS bundle + optional custom interactivity (password visibility & dynamic style) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    (function() {
+      // Password visibility toggle (improve graphics + usability)
+      const togglePasswordBtn = document.getElementById('togglePassword');
+      const passwordField = document.getElementById('password-field');
+      const toggleIcon = document.getElementById('toggleIcon');
+      
+      if (togglePasswordBtn && passwordField) {
+        togglePasswordBtn.addEventListener('click', function() {
+          const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+          passwordField.setAttribute('type', type);
+          // Toggle icon for better visual feedback
+          if (type === 'text') {
+            toggleIcon.classList.remove('bi-eye-slash');
+            toggleIcon.classList.add('bi-eye');
+          } else {
+            toggleIcon.classList.remove('bi-eye');
+            toggleIcon.classList.add('bi-eye-slash');
+          }
+        });
+      }
+      
+      // Optional: add subtle demo flash message simulation for visual showcase (only if no flash messages exist in real backend)
+      // But we respect original flask integration. We'll keep dummy just for demonstration, but we don't override existing flashes.
+      // For better page quality, we add client-side validation demo (just UI enhancement, not breaking server logic)
+      const loginForm = document.querySelector('form');
+      if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+          const username = loginForm.querySelector('[name="username"]');
+          const password = loginForm.querySelector('[name="password"]');
+          if (username && password) {
+            if (!username.value.trim()) {
+              e.preventDefault();
+              showDemoAlert('Please enter your username.', 'danger');
+              username.focus();
+              return false;
+            }
+            if (!password.value.trim()) {
+              e.preventDefault();
+              showDemoAlert('Please enter your password.', 'danger');
+              password.focus();
+              return false;
+            }
+          }
+          // If form has action url, proceed; otherwise if it's a demo we show success simulation
+          // But since the backend expects real post, we just validate and let it go.
+          return true;
+        });
+      }
+      
+      // Helper to show temporary alert (for validation only) – but doesn't conflict with flashed messages.
+      function showDemoAlert(message, type) {
+        // Check if there's an existing flash container; we create a temporary dismissible alert
+        const container = document.querySelector('#flash-messages-container');
+        if (container) {
+          const existingAlert = container.querySelector('.alert');
+          if (existingAlert && existingAlert.innerText.includes(message)) return;
+          const alertDiv = document.createElement('div');
+          alertDiv.className = `alert alert-${type === 'danger' ? 'danger' : type} alert-dismissible fade show alert-custom mb-3 animate__animated animate__fadeInDown`;
+          alertDiv.role = 'alert';
+          let icon = type === 'danger' ? 'bi-exclamation-triangle-fill' : 'bi-info-circle-fill';
+          alertDiv.innerHTML = `
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi ${icon} text-${type === 'danger' ? 'danger' : 'warning'}"></i>
+              <span>${message}</span>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          `;
+          container.prepend(alertDiv);
+          setTimeout(() => {
+            if (alertDiv && alertDiv.remove) alertDiv.remove();
+          }, 4000);
+        }
+      }
+      
+      // Add smooth hover effect on card and improve accessibility on buttons
+      const btns = document.querySelectorAll('.btn-login, .btn-outline-forgot');
+      btns.forEach(btn => {
+        btn.addEventListener('mouseenter', (e) => {
+          btn.style.transition = 'all 0.2s ease';
+        });
+      });
+      
+      // Animate background blobs on mousemove for premium interactive graphics
+      document.body.addEventListener('mousemove', function(e) {
+        const blob1 = document.querySelector('.blob-1');
+        const blob2 = document.querySelector('.blob-2');
+        if (blob1 && blob2) {
+          const x = e.clientX / window.innerWidth;
+          const y = e.clientY / window.innerHeight;
+          const moveX1 = (x - 0.5) * 20;
+          const moveY1 = (y - 0.5) * 15;
+          const moveX2 = (x - 0.5) * -25;
+          const moveY2 = (y - 0.5) * -20;
+          blob1.style.transform = `translate(${moveX1}px, ${moveY1}px) rotate(0deg) scale(1.02)`;
+          blob2.style.transform = `translate(${moveX2}px, ${moveY2}px) rotate(2deg) scale(1.03)`;
+        }
+      });
+      
+      // Ensure responsiveness for floating labels: if password manager auto-fills, we handle gracefully
+      // Also add micro interaction for input groups.
+      const inputs = document.querySelectorAll('.form-control-modern');
+      inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+          this.parentElement.parentElement?.classList.add('focused');
+        });
+        input.addEventListener('blur', function() {
+          this.parentElement.parentElement?.classList.remove('focused');
+        });
+      });
+    })();
+  </script>
+  
+  <!-- Additional style for consistency: ensures input-group icons align perfectly -->
+  <style>
+    .input-group-text {
+      background-color: #f8fafc;
+      border-radius: 1rem 0 0 1rem;
+    }
+    .rounded-4 {
+      border-radius: 1rem;
+    }
+    .btn-outline-secondary:focus, .form-control:focus {
+      box-shadow: none;
+    }
+    .input-group .form-control:focus {
+      border-color: #e2e8f0;
+      box-shadow: none;
+    }
+    .form-control-modern:focus {
+      border-color: #2c7da0;
+      box-shadow: 0 0 0 3px rgba(44,125,160,0.2);
+    }
+    .btn-close:focus {
+      box-shadow: none;
+    }
+    .alert-custom {
+      border-left-width: 4px;
+    }
+    .alert-danger.alert-custom {
+      border-left-color: #e11d48;
+    }
+    .login-footer {
+      color: rgba(255,255,255,0.9);
+      font-size: 0.85rem;
+      border-top: 1px solid rgba(255,255,255,0.18);
+      padding: 0.85rem 0;
+      margin-top: 1.25rem;
+      letter-spacing: 0.1px;
+      background: rgba(12,20,26,0.45);
+      border-radius: 0.75rem;
+      backdrop-filter: blur(8px);
+    }
+    .alert-success.alert-custom {
+      border-left-color: #10b981;
+    }
+    .crm-icon i {
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+    /* Improved mobile readability */
+    @media (max-width: 480px) {
+      .glass-card .p-4 {
+        padding: 1.5rem !important;
+      }
+      .btn-login, .btn-outline-forgot {
+        font-size: 0.9rem;
+      }
+    }
+    /* accessibility outlines */
+    button:focus-visible, a:focus-visible {
+      outline: 2px solid #2c7da0;
+      outline-offset: 2px;
+    }
+  </style>
+</body>
+</html>

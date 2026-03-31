@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <!-- Header -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h1 class="display-6 fw-bold mb-1">Leave Requests</h1>
+          <p class="text-muted fs-5 mb-0">Review and manage employee leave applications</p>
+        </div>
+        <a href="{{ url_for('hr.dashboard') }}" class="btn btn-outline-secondary shadow-sm">
+          <i class="bi bi-arrow-left me-2"></i> Back to HR Panel
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pending Requests - Main Section -->
+  <div class="card shadow border-0 mb-5">
+    <div class="card-header bg-light py-4 d-flex align-items-center">
+      <i class="bi bi-hourglass-split text-warning me-3 fs-4"></i>
+      <h5 class="mb-0 fw-semibold">Pending Approval ({{ pending_requests|length }})</h5>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Employee</th>
+              <th>Leave Type</th>
+              <th>Dates</th>
+              <th>Days</th>
+              <th>Reason</th>
+              <th class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for request in pending_requests %}
+            <tr>
+              <td class="ps-4">
+                <div class="fw-medium">{{ request.employee_name }}</div>
+                <div class="small text-muted">{{ request.department }} • {{ request.role }}</div>
+              </td>
+              <td>
+                <span class="badge 
+                  {% if request.leave_type == 'casual' %}bg-primary
+                  {% elif request.leave_type == 'sick' %}bg-info
+                  {% elif request.leave_type == 'annual' %}bg-success
+                  {% else %}bg-warning{% endif %}">
+                  {{ request.leave_type|title }}
+                </span>
+              </td>
+              <td>
+                <small>{{ request.start_date }} — {{ request.end_date }}</small>
+              </td>
+              <td><strong>{{ request.total_days }}</strong> days</td>
+              <td class="text-truncate" style="max-width: 280px;" title="{{ request.reason }}">
+                {{ request.reason }}
+              </td>
+              <td class="text-center">
+                <div class="d-flex justify-content-center gap-2">
+                  <form method="POST" action="{{ url_for('hr.approve_leave', leave_id=request.id) }}">
+                    <button type="submit" class="btn btn-sm btn-success px-3">
+                      <i class="bi bi-check-lg"></i> Approve
+                    </button>
+                  </form>
+                  <form method="POST" action="{{ url_for('hr.reject_leave', leave_id=request.id) }}">
+                    <button type="submit" class="btn btn-sm btn-danger px-3">
+                      <i class="bi bi-x-lg"></i> Reject
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="6" class="text-center py-5">
+                <i class="bi bi-inbox display-1 text-muted opacity-25"></i>
+                <h5 class="text-muted mt-3">No Pending Requests</h5>
+                <p class="text-muted">All leave requests have been processed.</p>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Approved & Rejected Section -->
+  <div class="row g-4">
+    
+    <!-- Approved Requests -->
+    <div class="col-lg-6">
+      <div class="card shadow border-0 h-100">
+        <div class="card-header bg-success bg-opacity-10 py-4">
+          <h5 class="mb-0 fw-semibold text-success">
+            <i class="bi bi-check-circle me-2"></i> Approved Requests
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          <ul class="list-group list-group-flush">
+            {% for request in approved_requests %}
+            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+              <div>
+                <strong>{{ request.employee_name }}</strong>
+                <span class="badge bg-success ms-2">{{ request.leave_type|title }}</span>
+                <div class="small text-muted mt-1">
+                  {{ request.start_date }} to {{ request.end_date }} • {{ request.total_days }} days
+                </div>
+              </div>
+              <div class="text-end">
+                <small class="text-success">Approved</small>
+              </div>
+            </li>
+            {% else %}
+            <li class="list-group-item text-center py-5 text-muted">
+              No approved leave requests yet.
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rejected Requests -->
+    <div class="col-lg-6">
+      <div class="card shadow border-0 h-100">
+        <div class="card-header bg-danger bg-opacity-10 py-4">
+          <h5 class="mb-0 fw-semibold text-danger">
+            <i class="bi bi-x-circle me-2"></i> Rejected Requests
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          <ul class="list-group list-group-flush">
+            {% for request in rejected_requests %}
+            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+              <div>
+                <strong>{{ request.employee_name }}</strong>
+                <span class="badge bg-danger ms-2">{{ request.leave_type|title }}</span>
+                <div class="small text-muted mt-1">
+                  {{ request.start_date }} to {{ request.end_date }} • {{ request.total_days }} days
+                </div>
+              </div>
+              <div class="text-end">
+                <small class="text-danger">Rejected</small>
+              </div>
+            </li>
+            {% else %}
+            <li class="list-group-item text-center py-5 text-muted">
+              No rejected leave requests.
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Enhanced Styles -->
+<style>
+  .card {
+    border-radius: 16px;
+  }
+
+  .table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+  }
+
+  .list-group-item {
+    transition: all 0.2s ease;
+  }
+
+  .badge {
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% if lead %}
+  <td>{{ lead.id }}</td>
+  <td><strong>{{ lead.company_name }}</strong></td>
+  <td>{{ lead.service or '-' }}</td>
+  <td>{{ lead.auth_person_name or '-' }}</td>
+  <td>
+    {{ lead.auth_person_number or '-' }}<br>
+    <small class="text-muted">{{ lead.auth_person_email or '-' }}</small>
+  </td>
+  <td>{{ lead.marketing_executive or '—' }}</td>
+  <td>
+    <span class="badge bg-info-subtle text-info border border-info">
+      {{ lead.status|default('New') }}
+    </span>
+  </td>
+  <td>{{ lead.created_at|truncate(16, True, '') }}</td>
+  <td>
+    {% if lead.status != 'Assigned to Operations' %}
+      <form hx-post="{{ url_for('assign_ops', lead_id=lead.id) }}" 
+            hx-target="#lead-row-{{ lead.id }}" 
+            hx-swap="outerHTML" 
+            hx-indicator="#assign-indicator-{{ lead.id }}"
+            class="d-inline">
+        <!-- Inside the form in partials/lead_row.html -->
+
+        <select name="operation_executive" class="form-select form-select-sm d-inline-block w-auto" required>
+        <option value="">Assign to Operations...</option>
+        {% for emp in ops_employees %}
+            <option value="{{ emp.id }}">
+            {{ emp.name }} {% if emp.role %}({{ emp.role }}){% endif %}
+            </option>
+        {% endfor %}
+        </select>    
+        <select name="operation_executive" class="form-select form-select-sm d-inline-block w-auto" required>
+          <option value="">Assign to Ops...</option>
+          <!-- Populate dynamically in real app; for skeleton use fixed or pass from view -->
+          <option value="2">Ops Executive 1 (ID 2)</option>
+          <option value="5">Ops Executive 2 (ID 5)</option>
+          <option value="7">Ops Executive 3 (ID 7)</option>
+        </select>
+
+        <button type="submit" class="btn btn-sm btn-outline-primary ms-2">Assign</button>
+        <span id="assign-indicator-{{ lead.id }}" class="htmx-indicator ms-1 text-muted small">Assigning...</span>
+      </form>
+    {% else %}
+      <span class="badge bg-success-subtle text-success border border-success">Assigned</span>
+    {% endif %}
+  </td>
+{% else %}
+  <td colspan="9" class="text-center text-danger">Lead data missing</td>
+{% endif %}

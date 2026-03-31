@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Employee | CRM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* Dark Theme (Default) */
+      --bg-primary: #0f0f12;
+      --bg-secondary: #18181b;
+      --bg-tertiary: #1f1f24;
+      --sidebar-bg: #0a0a0c;
+      --card-bg: #1a1a1f;
+      --text-primary: #ffffff;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --border: #27272a;
+      --accent-primary: #6366f1;
+      --accent-secondary: #8b5cf6;
+      --accent-success: #10b981;
+      --accent-warning: #f59e0b;
+      --accent-danger: #ef4444;
+      --accent-info: #3b82f6;
+      --gradient-1: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      --gradient-2: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f5f9;
+      --sidebar-bg: #ffffff;
+      --card-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      display: flex;
+      transition: all 0.3s ease;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      min-height: 100vh;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      left: 0;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .logo-section {
+      padding: 32px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 800;
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-badge {
+      display: inline-block;
+      background: var(--gradient-1);
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    .nav-menu {
+      flex: 1;
+      padding: 32px 16px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+      border-radius: 12px;
+      margin-bottom: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item i {
+      font-size: 20px;
+      width: 24px;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      transform: translateX(4px);
+    }
+
+    .nav-item.active {
+      background: var(--gradient-1);
+      color: white;
+      box-shadow: var(--shadow-md);
+    }
+
+    .user-section {
+      padding: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      background: var(--gradient-1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 20px;
+      color: white;
+    }
+
+    .user-details {
+      flex: 1;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    .user-role {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      background: var(--bg-tertiary);
+      border-radius: 10px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .logout-btn:hover {
+      background: var(--accent-danger);
+      color: white;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 280px;
+      flex: 1;
+      min-height: 100vh;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .theme-toggle {
+      width: 42px;
+      height: 42px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--text-secondary);
+    }
+
+    .theme-toggle:hover {
+      background: var(--gradient-1);
+      color: white;
+      transform: rotate(15deg);
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-tertiary);
+      padding: 8px 20px;
+      border-radius: 40px;
+      border: 1px solid var(--border);
+    }
+
+    .user-badge-initial {
+      width: 32px;
+      height: 32px;
+      background: var(--gradient-1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: white;
+    }
+
+    /* Content Area */
+    .content-area {
+      padding: 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .form-container {
+      width: 100%;
+      max-width: 800px;
+    }
+
+    /* Page Header */
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-header h1 {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .page-header h1 span {
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-header p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Form Card */
+    .form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Form Sections */
+    .form-section {
+      padding: 32px;
+    }
+
+    .form-section + .form-section {
+      border-top: 1px solid var(--border);
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .section-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .section-icon i {
+      font-size: 20px;
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section-title h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .section-title p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Form Grid */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .required {
+      color: var(--accent-danger);
+      margin-left: 4px;
+    }
+
+    input, select, textarea {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Role Pills */
+    .role-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .role-pill {
+      padding: 6px 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .role-pill:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+      transform: translateY(-1px);
+    }
+
+    /* Password Strength */
+    .password-strength {
+      margin-top: 8px;
+    }
+
+    .strength-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .strength-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .strength-text {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Form Footer */
+    .form-footer {
+      padding: 24px 32px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 16px;
+      background: var(--bg-secondary);
+    }
+
+    .btn-cancel {
+      padding: 12px 24px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-cancel:hover {
+      background: var(--accent-danger);
+      color: white;
+      border-color: var(--accent-danger);
+    }
+
+    .btn-submit {
+      padding: 12px 32px;
+      background: var(--gradient-1);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Flash Messages */
+    .flash-messages {
+      margin-bottom: 24px;
+    }
+
+    .flash {
+      padding: 14px 20px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.3s ease;
+    }
+
+    .flash.success {
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 3px solid var(--accent-success);
+      color: var(--accent-success);
+    }
+
+    .flash.error, .flash.danger {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 3px solid var(--accent-danger);
+      color: var(--accent-danger);
+    }
+
+    .flash.warning {
+      background: rgba(245, 158, 11, 0.1);
+      border-left: 3px solid var(--accent-warning);
+      color: var(--accent-warning);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 200;
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .form-group.full-width {
+        grid-column: span 1;
+      }
+      
+      .content-area {
+        padding: 24px;
+      }
+      
+      .top-bar {
+        padding: 16px 24px;
+      }
+    }
+  </style>
+</head>
+<body data-theme="dark">
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="logo-section">
+    <div class="logo">
+      CRM<span class="logo-badge">ADMIN</span>
+    </div>
+    <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
+      Employee Management
+    </div>
+  </div>
+
+  <div class="nav-menu">
+    <a href="{{ url_for('admin.admin_dashboard') }}" class="nav-item">
+      <i class="bi bi-grid-1x2-fill"></i>
+      <span>Dashboard</span>
+    </a>
+    <a href="{{ url_for('admin.employees_list') }}" class="nav-item">
+      <i class="bi bi-people-fill"></i>
+      <span>Employees</span>
+    </a>
+    <a href="{{ url_for('admin.create_employee') }}" class="nav-item active">
+      <i class="bi bi-person-plus-fill"></i>
+      <span>Add Employee</span>
+    </a>
+  </div>
+
+  <div class="user-section">
+    <div class="user-info">
+      <div class="user-avatar">
+        {{ (current_user.name or current_user.username)[0].upper() }}
+      </div>
+      <div class="user-details">
+        <div class="user-name">{{ current_user.name or current_user.username }}</div>
+        <div class="user-role">Administrator</div>
+      </div>
+    </div>
+    <a href="{{ url_for('auth.logout') }}" class="logout-btn">
+      <i class="bi bi-box-arrow-right"></i>
+      <span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+  <!-- Top Bar -->
+  <header class="top-bar">
+    <div class="page-title">Add Employee</div>
+    <div class="header-actions">
+      <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
+        <i class="bi bi-moon-fill" id="themeIcon"></i>
+      </button>
+      <div class="user-badge">
+        <div class="user-badge-initial">
+          {{ (current_user.name or current_user.username)[0].upper() }}
+        </div>
+        <span>{{ current_user.name or current_user.username }}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content Area -->
+  <div class="content-area">
+    <div class="form-container">
+      <!-- Page Header -->
+      <div class="page-header">
+        <h1>Create New <span>Employee</span></h1>
+        <p>Add a new team member to the organization with proper credentials</p>
+      </div>
+
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-messages">
+            {% for category, message in messages %}
+              <div class="flash {{ category }}">
+                <i class="bi bi-{% if category == 'success' %}check-circle-fill{% elif category in ['error', 'danger'] %}exclamation-triangle-fill{% else %}info-circle-fill{% endif %}"></i>
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <!-- Form Card -->
+      <div class="form-card">
+        <form method="POST" action="{{ url_for('admin.create_employee') }}">
+          <!-- Personal Information Section -->
+          <div class="form-section">
+            <div class="section-title">
+              <div class="section-icon">
+                <i class="bi bi-person-badge"></i>
+              </div>
+              <div>
+                <h3>Personal Information</h3>
+                <p>Basic details about the employee</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label>Full Name <span class="required">*</span></label>
+                <input type="text" name="name" placeholder="e.g., John Doe" required value="{{ request.form.get('name', '') }}">
+              </div>
+
+              <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" placeholder="john.doe@company.com" value="{{ request.form.get('email', '') }}">
+              </div>
+
+              <div class="form-group">
+                <label>Phone Number</label>
+                <input type="text" name="phone" placeholder="+1 234 567 8900" value="{{ request.form.get('phone', '') }}">
+              </div>
+
+              <div class="form-group">
+                <label>Department <span class="required">*</span></label>
+                <select name="department" required>
+                  <option value="" disabled {% if not request.form.get('department') %}selected{% endif %}>Select department</option>
+                  <option value="Marketing" {% if request.form.get('department') == 'Marketing' %}selected{% endif %}>Marketing</option>
+                  <option value="Operations" {% if request.form.get('department') == 'Operations' %}selected{% endif %}>Operations</option>
+                  <option value="Admin" {% if request.form.get('department') == 'Admin' %}selected{% endif %}>Admin</option>
+                  <option value="Accounts" {% if request.form.get('department') == 'Accounts' %}selected{% endif %}>Accounts</option>
+                  <option value="HR" {% if request.form.get('department') == 'HR' %}selected{% endif %}>Human Resources</option>
+                  <option value="IT" {% if request.form.get('department') == 'IT' %}selected{% endif %}>Information Technology</option>
+                  <option value="Sales" {% if request.form.get('department') == 'Sales' %}selected{% endif %}>Sales</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Role / Designation</label>
+                <input type="text" name="role" id="roleInput" placeholder="e.g., Senior Developer" value="{{ request.form.get('role', '') }}">
+                <div class="role-pills">
+                  <span class="role-pill" onclick="setRole('admin')">Admin</span>
+                  <span class="role-pill" onclick="setRole('manager')">Manager</span>
+                  <span class="role-pill" onclick="setRole('employee')">Employee</span>
+                  <span class="role-pill" onclick="setRole('hr')">HR</span>
+                  <span class="role-pill" onclick="setRole('marketing')">Marketing</span>
+                  <span class="role-pill" onclick="setRole('operations')">Operations</span>
+                  <span class="role-pill" onclick="setRole('accounts')">Accounts</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Login Credentials Section -->
+          <div class="form-section">
+            <div class="section-title">
+              <div class="section-icon">
+                <i class="bi bi-key"></i>
+              </div>
+              <div>
+                <h3>Login Credentials</h3>
+                <p>Set up access for the employee</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Username <span class="required">*</span></label>
+                <input type="text" name="username" placeholder="e.g., john.doe" required value="{{ request.form.get('username', '') }}">
+              </div>
+
+              <div class="form-group">
+                <label>Password <span class="required">*</span></label>
+                <input type="password" name="password" id="passwordInput" placeholder="Minimum 8 characters" required>
+                <div class="password-strength">
+                  <div class="strength-bar">
+                    <div class="strength-fill" id="strengthFill"></div>
+                  </div>
+                  <div class="strength-text" id="strengthText">Enter a strong password</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-footer">
+            <a href="{{ url_for('admin.employees_list') }}" class="btn-cancel">
+              <i class="bi bi-x-lg"></i> Cancel
+            </a>
+            <button type="submit" class="btn-submit">
+              <i class="bi bi-check-lg"></i> Create Employee
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Theme Toggle
+  const html = document.documentElement;
+  const themeToggle = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+
+  function setTheme(theme) {
+    html.setAttribute('data-theme', theme);
+    localStorage.setItem('admin_theme', theme);
+    themeIcon.className = theme === 'light' ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+  }
+
+  const savedTheme = localStorage.getItem('admin_theme') || 'dark';
+  setTheme(savedTheme);
+
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = html.getAttribute('data-theme');
+    setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+  });
+
+  // Role pill click handler
+  function setRole(role) {
+    document.getElementById('roleInput').value = role;
+    // Visual feedback
+    const pills = document.querySelectorAll('.role-pill');
+    pills.forEach(pill => {
+      pill.style.borderColor = pill.innerText.toLowerCase() === role ? 'var(--accent-primary)' : '';
+      pill.style.color = pill.innerText.toLowerCase() === role ? 'var(--accent-primary)' : '';
+    });
+  }
+
+  // Password strength meter
+  const passwordInput = document.getElementById('passwordInput');
+  const strengthFill = document.getElementById('strengthFill');
+  const strengthText = document.getElementById('strengthText');
+
+  function checkPasswordStrength(password) {
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (password.length >= 12) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+    const strengthMap = {
+      0: { width: '0%', color: '#ef4444', text: 'Very Weak - Add more characters' },
+      1: { width: '20%', color: '#ef4444', text: 'Weak - Use uppercase and numbers' },
+      2: { width: '40%', color: '#f59e0b', text: 'Fair - Add special characters' },
+      3: { width: '60%', color: '#f59e0b', text: 'Good - Almost there' },
+      4: { width: '80%', color: '#10b981', text: 'Strong - Great password!' },
+      5: { width: '100%', color: '#10b981', text: 'Very Strong - Excellent!' }
+    };
+
+    const result = strengthMap[strength] || strengthMap[0];
+    strengthFill.style.width = result.width;
+    strengthFill.style.backgroundColor = result.color;
+    strengthText.textContent = result.text;
+    strengthText.style.color = result.color;
+  }
+
+  passwordInput.addEventListener('input', (e) => {
+    checkPasswordStrength(e.target.value);
+  });
+
+  // Auto-dismiss flash messages
+  setTimeout(() => {
+    const flashes = document.querySelectorAll('.flash');
+    flashes.forEach(flash => {
+      flash.style.opacity = '0';
+      flash.style.transform = 'translateY(-10px)';
+      setTimeout(() => flash.remove(), 300);
+    });
+  }, 5000);
+</script>
+
+</body>
+</html>

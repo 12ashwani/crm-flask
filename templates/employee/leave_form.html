@@ -1,0 +1,766 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <!-- Enhanced Header with Gradient -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <div class="card shadow-xl border-0 overflow-hidden position-relative" style="border-radius: 24px;">
+        <div class="card-body py-5 px-4 position-relative" 
+             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          
+          <!-- Animated Background Elements -->
+          <div class="position-absolute top-0 start-0 w-100 h-100 overflow-hidden">
+            <div class="position-absolute" style="top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: float 8s ease-in-out infinite;"></div>
+            <div class="position-absolute" style="bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; animation: float 10s ease-in-out infinite reverse;"></div>
+            <div class="position-absolute" style="top: 50%; left: 20%; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%; animation: float 12s ease-in-out infinite;"></div>
+          </div>
+          
+          <div class="d-flex justify-content-between align-items-center position-relative flex-wrap gap-3">
+            <div>
+              <div class="d-flex align-items-center gap-3 mb-2">
+                <div class="glass-icon">
+                  <i class="bi bi-calendar-plus fs-1 text-white"></i>
+                </div>
+                <div>
+                  <h1 class="display-6 fw-bold mb-1 text-white">Apply for Leave</h1>
+                  <p class="mb-0 fs-5 text-white-90">Submit your leave request for HR approval</p>
+                </div>
+              </div>
+              <div class="mt-3 d-flex gap-2">
+                <span class="badge bg-white text-primary px-3 py-2 rounded-pill shadow-sm">
+                  <i class="bi bi-clock-history me-1"></i> {{ current_date|default('Ready to submit') }}
+                </span>
+              </div>
+            </div>
+            <a href="{{ url_for('employee.leave_status') }}" class="btn btn-light shadow-lg rounded-pill px-4 py-3 fw-semibold hover-lift">
+              <i class="bi bi-list-check me-2"></i> View My Requests
+              <i class="bi bi-arrow-right-short ms-2"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    
+    <!-- Enhanced Main Leave Request Form -->
+    <div class="col-lg-8">
+      <div class="card shadow-lg border-0 hover-card" style="border-radius: 20px;">
+        <div class="card-header bg-transparent py-4 border-0">
+          <h5 class="mb-0 fw-semibold d-flex align-items-center">
+            <div class="gradient-icon me-3">
+              <i class="bi bi-calendar-plus text-white"></i>
+            </div>
+            Leave Request Form
+          </h5>
+        </div>
+        <div class="card-body p-5">
+          <form method="POST" action="{{ url_for('employee.leave_request') }}" id="leaveForm">
+            
+            <!-- Enhanced Leave Type Selection -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold mb-2">
+                <i class="bi bi-tag me-2 text-primary"></i>Leave Type
+              </label>
+              <div class="leave-type-grid">
+                <div class="leave-type-option" data-type="casual">
+                  <input type="radio" name="leave_type" value="casual" id="casual" class="d-none" required>
+                  <label for="casual" class="leave-type-card">
+                    <div class="leave-icon bg-primary-glow">
+                      <i class="bi bi-emoji-smile fs-3"></i>
+                    </div>
+                    <div class="leave-info">
+                      <strong>Casual Leave</strong>
+                      <small>Personal reasons</small>
+                    </div>
+                    <div class="leave-balance-badge">
+                      {{ balance.casual or 0 }} days left
+                    </div>
+                  </label>
+                </div>
+
+                <div class="leave-type-option" data-type="sick">
+                  <input type="radio" name="leave_type" value="sick" id="sick" class="d-none">
+                  <label for="sick" class="leave-type-card">
+                    <div class="leave-icon bg-info-glow">
+                      <i class="bi bi-thermometer-half fs-3"></i>
+                    </div>
+                    <div class="leave-info">
+                      <strong>Sick Leave</strong>
+                      <small>Medical reasons</small>
+                    </div>
+                    <div class="leave-balance-badge">
+                      {{ balance.sick or 0 }} days left
+                    </div>
+                  </label>
+                </div>
+
+                <div class="leave-type-option" data-type="annual">
+                  <input type="radio" name="leave_type" value="annual" id="annual" class="d-none">
+                  <label for="annual" class="leave-type-card">
+                    <div class="leave-icon bg-success-glow">
+                      <i class="bi bi-suitcase-lg fs-3"></i>
+                    </div>
+                    <div class="leave-info">
+                      <strong>Annual Leave</strong>
+                      <small>Vacation</small>
+                    </div>
+                    <div class="leave-balance-badge">
+                      {{ balance.annual or 0 }} days left
+                    </div>
+                  </label>
+                </div>
+
+                <div class="leave-type-option" data-type="maternity">
+                  <input type="radio" name="leave_type" value="maternity" id="maternity" class="d-none">
+                  <label for="maternity" class="leave-type-card">
+                    <div class="leave-icon bg-warning-glow">
+                      <i class="bi bi-heart-pulse fs-3"></i>
+                    </div>
+                    <div class="leave-info">
+                      <strong>Maternity Leave</strong>
+                      <small>Maternity benefits</small>
+                    </div>
+                    <div class="leave-balance-badge">
+                      {{ balance.maternity or 0 }} days
+                    </div>
+                  </label>
+                </div>
+
+                <div class="leave-type-option" data-type="paternity">
+                  <input type="radio" name="leave_type" value="paternity" id="paternity" class="d-none">
+                  <label for="paternity" class="leave-type-card">
+                    <div class="leave-icon bg-danger-glow">
+                      <i class="bi bi-person-heart fs-3"></i>
+                    </div>
+                    <div class="leave-info">
+                      <strong>Paternity Leave</strong>
+                      <small>Paternity benefits</small>
+                    </div>
+                    <div class="leave-balance-badge">
+                      {{ balance.paternity or 0 }} days
+                    </div>
+                  </label>
+                </div>
+
+                <div class="leave-type-option" data-type="emergency">
+                  <input type="radio" name="leave_type" value="emergency" id="emergency" class="d-none">
+                  <label for="emergency" class="leave-type-card">
+                    <div class="leave-icon bg-secondary-glow">
+                      <i class="bi bi-exclamation-triangle fs-3"></i>
+                    </div>
+                    <div class="leave-info">
+                      <strong>Emergency Leave</strong>
+                      <small>Urgent matters</small>
+                    </div>
+                    <div class="leave-balance-badge">
+                      {{ balance.emergency or 0 }} days
+                    </div>
+                  </label>
+                </div>
+              </div>
+              <div class="invalid-feedback" id="leaveTypeError">Please select a leave type</div>
+            </div>
+
+            <!-- Enhanced Date Range with Calendar Icons -->
+            <div class="row g-4 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold mb-2">
+                  <i class="bi bi-calendar-start me-2 text-success"></i>Start Date
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 rounded-start-pill">
+                    <i class="bi bi-calendar3 text-success"></i>
+                  </span>
+                  <input type="date" class="form-control form-control-lg rounded-end-pill" name="start_date" id="startDate" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold mb-2">
+                  <i class="bi bi-calendar-end me-2 text-warning"></i>End Date
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 rounded-start-pill">
+                    <i class="bi bi-calendar3 text-warning"></i>
+                  </span>
+                  <input type="date" class="form-control form-control-lg rounded-end-pill" name="end_date" id="endDate" required>
+                </div>
+              </div>
+            </div>
+
+            <!-- Date Duration Display -->
+            <div class="mb-4" id="durationDisplay" style="display: none;">
+              <div class="alert alert-info rounded-3 border-0 shadow-sm">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div>
+                    <i class="bi bi-calculator-fill me-2"></i>
+                    <strong>Leave Duration:</strong>
+                    <span id="leaveDays" class="fw-bold ms-2">0</span> day(s)
+                  </div>
+                  <div class="text-muted small">
+                    <i class="bi bi-calendar-week me-1"></i>
+                    Excluding weekends
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Enhanced Reason Field -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold mb-2">
+                <i class="bi bi-pencil-square me-2 text-primary"></i>Reason for Leave
+              </label>
+              <textarea class="form-control form-control-lg" 
+                        name="reason" 
+                        rows="5" 
+                        placeholder="Please provide a clear reason for your leave request..."
+                        required></textarea>
+              <div class="form-text mt-2">
+                <i class="bi bi-info-circle me-1"></i>
+                Be specific about the reason for faster approval
+              </div>
+            </div>
+
+            <!-- Enhanced Submit Button with Animation -->
+            <div class="d-grid gap-3">
+              <button type="submit" class="btn-submit btn-lg py-3 shadow-lg" id="submitBtn">
+                <i class="bi bi-send me-2"></i>
+                Submit Leave Request
+                <i class="bi bi-arrow-right-short ms-2"></i>
+              </button>
+              <div class="text-center">
+                <small class="text-muted">
+                  <i class="bi bi-shield-check me-1"></i>
+                  Your request will be reviewed by HR within 24-48 hours
+                </small>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced Sidebar: Current Leave Balance -->
+    <div class="col-lg-4">
+      <div class="card shadow-lg border-0 sticky-top" style="top: 20px; border-radius: 20px;">
+        <div class="card-header bg-transparent py-4 border-0">
+          <h5 class="mb-0 fw-semibold d-flex align-items-center">
+            <div class="gradient-icon me-3 bg-info-gradient">
+              <i class="bi bi-wallet2 text-white"></i>
+            </div>
+            Current Leave Balance
+          </h5>
+        </div>
+        <div class="card-body p-4">
+          <!-- Enhanced Balance Cards -->
+          <div class="row g-3 text-center mb-4">
+            <div class="col-4">
+              <div class="balance-card bg-primary-glow">
+                <div class="balance-icon">
+                  <i class="bi bi-emoji-smile fs-2"></i>
+                </div>
+                <h3 class="fw-bold text-primary mb-0 balance-number" data-balance="{{ balance.casual or 0 }}">{{ balance.casual or 0 }}</h3>
+                <small class="text-muted d-block">Casual Leave</small>
+                <div class="progress-mini mt-2">
+                  <div class="progress-fill" style="width: {{ (balance.casual or 0) / 12 * 100 }}%; background: #667eea;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-4">
+              <div class="balance-card bg-info-glow">
+                <div class="balance-icon">
+                  <i class="bi bi-thermometer-half fs-2"></i>
+                </div>
+                <h3 class="fw-bold text-info mb-0 balance-number" data-balance="{{ balance.sick or 0 }}">{{ balance.sick or 0 }}</h3>
+                <small class="text-muted d-block">Sick Leave</small>
+                <div class="progress-mini mt-2">
+                  <div class="progress-fill" style="width: {{ (balance.sick or 0) / 6 * 100 }}%; background: #4facfe;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-4">
+              <div class="balance-card bg-success-glow">
+                <div class="balance-icon">
+                  <i class="bi bi-suitcase-lg fs-2"></i>
+                </div>
+                <h3 class="fw-bold text-success mb-0 balance-number" data-balance="{{ balance.annual or 0 }}">{{ balance.annual or 0 }}</h3>
+                <small class="text-muted d-block">Annual Leave</small>
+                <div class="progress-mini mt-2">
+                  <div class="progress-fill" style="width: {{ (balance.annual or 0) / 20 * 100 }}%; background: #43e97b;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Additional Special Leaves -->
+          <div class="special-leaves mt-4 pt-3 border-top">
+            <h6 class="fw-semibold mb-3">
+              <i class="bi bi-star-fill text-warning me-2"></i>Special Leaves
+            </h6>
+            <div class="row g-2">
+              <div class="col-6">
+                <div class="special-card bg-warning-glow">
+                  <i class="bi bi-heart-pulse me-1"></i>
+                  Maternity: <strong>{{ balance.maternity or 0 }}</strong> days
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="special-card bg-danger-glow">
+                  <i class="bi bi-person-heart me-1"></i>
+                  Paternity: <strong>{{ balance.paternity or 0 }}</strong> days
+                </div>
+              </div>
+              <div class="col-12 mt-2">
+                <div class="special-card bg-secondary-glow">
+                  <i class="bi bi-exclamation-triangle me-1"></i>
+                  Emergency: <strong>{{ balance.emergency or 0 }}</strong> days
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Tips -->
+          <div class="mt-4 pt-3 border-top">
+            <div class="tips-card">
+              <i class="bi bi-lightbulb-fill text-warning me-2"></i>
+              <strong>Quick Tips:</strong>
+              <ul class="mt-2 mb-0 small text-muted">
+                <li><i class="bi bi-check-circle-fill text-success me-1 fs-10"></i> Submit requests at least 3 days in advance</li>
+                <li><i class="bi bi-check-circle-fill text-success me-1 fs-10"></i> Medical certificates required for sick leave > 3 days</li>
+                <li><i class="bi bi-check-circle-fill text-success me-1 fs-10"></i> Emergency leaves subject to approval</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Enhanced Custom Styles -->
+<style>
+  :root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    --danger-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+
+  /* Floating Animation */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+  /* Glass Icon */
+  .glass-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .text-white-90 {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  /* Hover Card Effect */
+  .hover-card {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 40px rgba(0, 0, 0, 0.12) !important;
+  }
+
+  /* Gradient Icon */
+  .gradient-icon {
+    width: 45px;
+    height: 45px;
+    background: var(--primary-gradient);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bg-info-gradient {
+    background: var(--info-gradient);
+  }
+
+  /* Leave Type Grid */
+  .leave-type-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .leave-type-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+  }
+
+  .leave-type-option input:checked + .leave-type-card {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  }
+
+  .leave-type-card:hover {
+    transform: translateX(5px);
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .leave-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .bg-primary-glow {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+  }
+
+  .bg-info-glow {
+    background: rgba(79, 172, 254, 0.1);
+    color: #4facfe;
+  }
+
+  .bg-success-glow {
+    background: rgba(67, 233, 123, 0.1);
+    color: #43e97b;
+  }
+
+  .bg-warning-glow {
+    background: rgba(250, 112, 154, 0.1);
+    color: #fa709a;
+  }
+
+  .bg-danger-glow {
+    background: rgba(240, 147, 251, 0.1);
+    color: #f093fb;
+  }
+
+  .bg-secondary-glow {
+    background: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+  }
+
+  .leave-info {
+    flex: 1;
+  }
+
+  .leave-info strong {
+    display: block;
+    font-size: 1rem;
+  }
+
+  .leave-info small {
+    font-size: 0.75rem;
+    color: #6c757d;
+  }
+
+  .leave-balance-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    background: #f3f4f6;
+    border-radius: 50px;
+    color: #374151;
+  }
+
+  /* Form Controls */
+  .form-control, .input-group-text {
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+  }
+
+  .form-control:focus, .input-group-text:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .form-control-lg {
+    padding: 12px 20px;
+    font-size: 1rem;
+  }
+
+  /* Submit Button */
+  .btn-submit {
+    background: var(--primary-gradient);
+    border: none;
+    color: white;
+    font-weight: 600;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-submit:active {
+    transform: translateY(0);
+  }
+
+  /* Balance Cards */
+  .balance-card {
+    padding: 1rem;
+    border-radius: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: white;
+  }
+
+  .balance-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .balance-icon {
+    width: 45px;
+    height: 45px;
+    margin: 0 auto 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+  }
+
+  .bg-primary-glow .balance-icon {
+    background: rgba(102, 126, 234, 0.1);
+  }
+
+  .progress-mini {
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  /* Special Cards */
+  .special-card {
+    padding: 0.75rem;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+  }
+
+  .special-card:hover {
+    transform: translateX(3px);
+  }
+
+  /* Tips Card */
+  .tips-card {
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+    border-radius: 12px;
+  }
+
+  .tips-card ul {
+    padding-left: 1.2rem;
+  }
+
+  .tips-card li {
+    margin-bottom: 0.5rem;
+  }
+
+  /* Alert Animation */
+  .alert-info {
+    background: linear-gradient(135deg, rgba(79, 172, 254, 0.1), rgba(0, 242, 254, 0.05));
+    border: none;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .leave-type-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .glass-icon {
+      width: 45px;
+      height: 45px;
+    }
+    
+    .display-6 {
+      font-size: 1.5rem;
+    }
+    
+    .card-body {
+      padding: 1.5rem !important;
+    }
+  }
+
+  /* Hover Lift */
+  .hover-lift {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1) !important;
+  }
+</style>
+
+<!-- Enhanced JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Date calculation for leave duration
+  const startDateInput = document.getElementById('startDate');
+  const endDateInput = document.getElementById('endDate');
+  const durationDisplay = document.getElementById('durationDisplay');
+  const leaveDaysSpan = document.getElementById('leaveDays');
+  
+  function calculateWorkingDays(start, end) {
+    let count = 0;
+    const current = new Date(start);
+    const endDate = new Date(end);
+    
+    while (current <= endDate) {
+      const dayOfWeek = current.getDay();
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) { // Exclude weekends
+        count++;
+      }
+      current.setDate(current.getDate() + 1);
+    }
+    return count;
+  }
+  
+  function updateDuration() {
+    const startDate = startDateInput.value;
+    const endDate = endDateInput.value;
+    
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      
+      if (end >= start) {
+        const days = calculateWorkingDays(start, end);
+        leaveDaysSpan.textContent = days;
+        durationDisplay.style.display = 'block';
+        
+        // Animate the alert
+        durationDisplay.classList.add('animate__animated', 'animate__fadeIn');
+        setTimeout(() => {
+          durationDisplay.classList.remove('animate__animated', 'animate__fadeIn');
+        }, 1000);
+      } else {
+        durationDisplay.style.display = 'none';
+        alert('End date must be after start date');
+      }
+    }
+  }
+  
+  if (startDateInput && endDateInput) {
+    startDateInput.addEventListener('change', updateDuration);
+    endDateInput.addEventListener('change', updateDuration);
+  }
+  
+  // Set minimum date to today
+  const today = new Date().toISOString().split('T')[0];
+  if (startDateInput) startDateInput.min = today;
+  if (endDateInput) endDateInput.min = today;
+  
+  // Leave type selection validation
+  const leaveTypeRadios = document.querySelectorAll('input[name="leave_type"]');
+  const submitBtn = document.getElementById('submitBtn');
+  const leaveTypeError = document.getElementById('leaveTypeError');
+  
+  function validateLeaveType() {
+    const selected = document.querySelector('input[name="leave_type"]:checked');
+    if (!selected) {
+      leaveTypeError.style.display = 'block';
+      return false;
+    } else {
+      leaveTypeError.style.display = 'none';
+      return true;
+    }
+  }
+  
+  leaveTypeRadios.forEach(radio => {
+    radio.addEventListener('change', validateLeaveType);
+  });
+  
+  // Form submission validation
+  const form = document.getElementById('leaveForm');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      if (!validateLeaveType()) {
+        e.preventDefault();
+        leaveTypeError.style.display = 'block';
+        leaveTypeError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        // Show loading state on button
+        const btn = document.getElementById('submitBtn');
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i> Submitting...';
+        btn.disabled = true;
+        
+        // Re-enable after submission (if submission fails, it will be handled by form)
+        setTimeout(() => {
+          btn.innerHTML = originalContent;
+          btn.disabled = false;
+        }, 5000);
+      }
+    });
+  }
+  
+  // Animate balance numbers
+  const balanceNumbers = document.querySelectorAll('.balance-number');
+  balanceNumbers.forEach(number => {
+    const finalValue = parseInt(number.getAttribute('data-balance'));
+    let currentValue = 0;
+    const duration = 1000;
+    const increment = finalValue / (duration / 16);
+    
+    const updateNumber = () => {
+      currentValue += increment;
+      if (currentValue < finalValue) {
+        number.textContent = Math.ceil(currentValue);
+        requestAnimationFrame(updateNumber);
+      } else {
+        number.textContent = finalValue;
+      }
+    };
+    
+    updateNumber();
+  });
+});
+</script>
+{% endblock %}

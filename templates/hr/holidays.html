@@ -1,0 +1,466 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4 px-4">
+  <!-- Header Section with Gradient -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h1 class="display-6 fw-bold mb-2" style="background: linear-gradient(135deg, #2c3e50 0%, #e67e22 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+            <i class="bi bi-calendar-heart-fill me-2"></i>Holiday Calendar
+          </h1>
+          <p class="text-muted fs-6 mb-0">
+            <i class="bi bi-star-fill text-warning me-1"></i> Manage company holidays, festivals, and important observances
+          </p>
+        </div>
+        <a href="{{ url_for('hr.dashboard') }}" class="btn btn-outline-secondary rounded-3 px-4 py-2">
+          <i class="bi bi-arrow-left me-2"></i>Back to HR Panel
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Holiday Card - Enhanced Design -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+    <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+      <div class="d-flex align-items-center gap-2">
+        <div class="rounded-3 p-2 bg-warning bg-opacity-10">
+          <i class="bi bi-plus-circle fs-5 text-warning"></i>
+        </div>
+        <h5 class="fw-semibold mb-0">Add New Holiday / Festival</h5>
+      </div>
+      <p class="text-muted small mt-2 mb-0">Add a new holiday that will be visible to all employees</p>
+    </div>
+    <div class="card-body p-4">
+      <form method="POST" action="{{ url_for('hr.add_holiday_route') }}" class="row g-4">
+        <div class="col-md-3">
+          <label class="form-label fw-semibold mb-2">
+            <i class="bi bi-calendar3 me-1"></i> Date
+          </label>
+          <input type="date" class="form-control rounded-3" name="holiday_date" min="{{ today.strftime('%Y-%m-%d') }}" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-semibold mb-2">
+            <i class="bi bi-tag me-1"></i> Holiday / Festival Name
+          </label>
+          <input type="text" class="form-control rounded-3" name="title" placeholder="e.g., Diwali, Christmas, Republic Day" required>
+        </div>
+        <div class="col-md-5">
+          <label class="form-label fw-semibold mb-2">
+            <i class="bi bi-info-circle me-1"></i> Description (Optional)
+          </label>
+          <input type="text" class="form-control rounded-3" name="description" placeholder="Additional notes for employees">
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-warning rounded-3 px-4 py-2 fw-semibold" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); border: none;">
+            <i class="bi bi-plus-circle me-2"></i>Save Holiday
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Holiday Stats Summary -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-3 text-center">
+          <div class="d-flex align-items-center justify-content-center gap-2">
+            <i class="bi bi-calendar-event fs-4 text-warning"></i>
+            <span class="fs-2 fw-bold text-warning">{{ upcoming|length }}</span>
+          </div>
+          <p class="text-muted mb-0 small">Upcoming Holidays</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-3 text-center">
+          <div class="d-flex align-items-center justify-content-center gap-2">
+            <i class="bi bi-calendar-check fs-4 text-success"></i>
+            <span class="fs-2 fw-bold text-success">{{ all_holidays|length }}</span>
+          </div>
+          <p class="text-muted mb-0 small">Total Holidays</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-3 text-center">
+          <div class="d-flex align-items-center justify-content-center gap-2">
+            <i class="bi bi-calendar-month fs-4 text-primary"></i>
+            <span class="fs-2 fw-bold text-primary">{{ today.strftime('%B') }}</span>
+          </div>
+          <p class="text-muted mb-0 small">Current Month</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-3 text-center">
+          <div class="d-flex align-items-center justify-content-center gap-2">
+            <i class="bi bi-calendar2-week fs-4 text-info"></i>
+            <span class="fs-2 fw-bold text-info">{{ all_holidays|selectattr('holiday_date', 'ge', today)|list|length }}</span>
+          </div>
+          <p class="text-muted mb-0 small">Remaining {{ today.year }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Upcoming Holidays Card - Enhanced -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+        <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+          <div class="d-flex align-items-center gap-2">
+            <div class="rounded-3 p-2 bg-success bg-opacity-10">
+              <i class="bi bi-calendar-week fs-5 text-success"></i>
+            </div>
+            <h5 class="fw-semibold mb-0">Upcoming Holidays</h5>
+            <span class="badge bg-success rounded-pill ms-2">{{ upcoming|length }} upcoming</span>
+          </div>
+          <p class="text-muted small mt-2 mb-0">Next holidays and observances</p>
+        </div>
+        <div class="card-body p-0">
+          {% if upcoming %}
+          <div class="list-group list-group-flush">
+            {% for holiday in upcoming %}
+            <div class="list-group-item border-0 px-4 py-3 hover-lift">
+              <div class="d-flex align-items-start gap-3">
+                <div class="text-center min-w-60" style="min-width: 65px;">
+                  <div class="bg-warning bg-opacity-10 rounded-3 p-2 text-center">
+                    <div class="fw-bold text-warning fs-5">{{ holiday.holiday_date.strftime('%d') if holiday.holiday_date else '' }}</div>
+                    <div class="small text-muted">{{ holiday.holiday_date.strftime('%b') if holiday.holiday_date else '' }}</div>
+                  </div>
+                </div>
+                <div class="flex-grow-1">
+                  <div class="fw-semibold fs-6">{{ holiday.title }}</div>
+                  <div class="d-flex flex-wrap gap-2 mt-1">
+                    <small class="text-muted">
+                      <i class="bi bi-calendar3 me-1"></i>{{ holiday.holiday_date.strftime('%A, %d %B %Y') if holiday.holiday_date else holiday.holiday_date }}
+                    </small>
+                    {% if holiday.description %}
+                    <span class="badge bg-light text-muted rounded-pill">
+                      <i class="bi bi-info-circle me-1"></i>{{ holiday.description }}
+                    </span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="text-center py-5">
+            <i class="bi bi-calendar-x fs-1 text-muted"></i>
+            <p class="text-muted mt-2 mb-0">No upcoming holidays scheduled</p>
+            <small class="text-muted">Use the form above to add holidays</small>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- All Holidays Card - Enhanced with Yearly Overview -->
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+        <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <div class="rounded-3 p-2 bg-primary bg-opacity-10">
+              <i class="bi bi-calendar3 fs-5 text-primary"></i>
+            </div>
+            <h5 class="fw-semibold mb-0">All Holidays</h5>
+            <span class="badge bg-primary rounded-pill ms-2">{{ all_holidays|length }} total</span>
+          </div>
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-outline-secondary active" id="listViewBtn" onclick="toggleView('list')">
+              <i class="bi bi-list-ul"></i> List
+            </button>
+            <button type="button" class="btn btn-outline-secondary" id="calendarViewBtn" onclick="toggleView('calendar')">
+              <i class="bi bi-calendar-grid"></i> Calendar
+            </button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <!-- List View -->
+          <div id="listView" class="view-content">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th class="ps-4 py-3 fw-semibold" style="width: 110px;">Date</th>
+                    <th class="py-3 fw-semibold">Holiday / Festival</th>
+                    <th class="py-3 fw-semibold">Day</th>
+                    <th class="text-end pe-4 py-3 fw-semibold" style="width: 80px;">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for holiday in all_holidays %}
+                  <tr class="border-bottom">
+                    <td class="ps-4">
+                      <div class="d-flex flex-column">
+                        <span class="fw-semibold">{{ holiday.holiday_date.strftime('%d %b %Y') if holiday.holiday_date else holiday.holiday_date }}</span>
+                        {% if holiday.holiday_date %}
+                        <small class="text-muted">{{ holiday.holiday_date.strftime('%A') }}</small>
+                        {% endif %}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="fw-semibold">{{ holiday.title }}</div>
+                      {% if holiday.description %}
+                      <small class="text-muted">{{ holiday.description }}</small>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if holiday.holiday_date %}
+                      {% set week_num = holiday.holiday_date.strftime('%U')|int %}
+                      <span class="badge bg-light text-dark rounded-pill">Week {{ week_num }}</span>
+                      {% endif %}
+                    </td>
+                    <td class="text-end pe-4">
+                      <form method="POST" action="{{ url_for('hr.delete_holiday_route', holiday_id=holiday.id) }}" onsubmit="return confirm('⚠️ Delete this holiday?\n\nAre you sure you want to remove "{{ holiday.title }}"? This action cannot be undone.');" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-3" title="Delete holiday">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                  {% else %}
+                  <tr>
+                    <td colspan="4" class="text-center py-5">
+                      <div class="d-flex flex-column align-items-center gap-2">
+                        <i class="bi bi-calendar2-x fs-1 text-muted"></i>
+                        <p class="text-muted mb-0">No holidays created yet</p>
+                        <small class="text-muted">Add your first holiday using the form above</small>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <!-- Calendar View (Enhanced) -->
+          <div id="calendarView" class="view-content" style="display: none;">
+            <div class="p-4">
+              {% if all_holidays %}
+              <div class="row g-3">
+                {% set months_data = {} %}
+                {% for holiday in all_holidays %}
+                  {% if holiday.holiday_date %}
+                    {% set month_key = holiday.holiday_date.strftime('%Y-%m') %}
+                    {% set month_name = holiday.holiday_date.strftime('%B %Y') %}
+                    {% if month_key not in months_data %}
+                      {% set _ = months_data.update({month_key: {'name': month_name, 'holidays': []}}) %}
+                    {% endif %}
+                    {% set _ = months_data[month_key].holidays.append(holiday) %}
+                  {% endif %}
+                {% endfor %}
+                
+                {% for month_key, month_info in months_data|dictsort %}
+                <div class="col-md-6 col-lg-4">
+                  <div class="card border-0 shadow-sm rounded-3 h-100">
+                    <div class="card-header bg-transparent border-0 pt-3 px-3 pb-0">
+                      <h6 class="fw-semibold mb-0 text-primary">{{ month_info.name }}</h6>
+                    </div>
+                    <div class="card-body p-3">
+                      <div class="d-flex flex-column gap-2">
+                        {% for holiday in month_info.holidays|sort(attribute='holiday_date') %}
+                        <div class="d-flex align-items-center gap-2 p-2 rounded-3 hover-bg-light">
+                          <div class="text-center" style="min-width: 45px;">
+                            <span class="fw-bold fs-5">{{ holiday.holiday_date.strftime('%d') }}</span>
+                          </div>
+                          <div class="flex-grow-1">
+                            <div class="fw-medium small">{{ holiday.title }}</div>
+                            <small class="text-muted">{{ holiday.holiday_date.strftime('%A') }}</small>
+                          </div>
+                          {% if holiday.description %}
+                          <i class="bi bi-info-circle text-muted" title="{{ holiday.description }}"></i>
+                          {% endif %}
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              {% else %}
+              <div class="text-center py-5">
+                <i class="bi bi-calendar2-week fs-1 text-muted"></i>
+                <p class="text-muted mt-2">No holidays to display in calendar view</p>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="card-footer bg-transparent border-0 py-3 px-4">
+          <small class="text-muted">
+            <i class="bi bi-info-circle me-1"></i> Holidays are automatically considered as non-working days for attendance calculation
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enhanced Styles -->
+<style>
+  .rounded-4 {
+    border-radius: 20px !important;
+  }
+  
+  .rounded-3 {
+    border-radius: 12px !important;
+  }
+  
+  .min-w-60 {
+    min-width: 65px;
+  }
+  
+  .hover-lift {
+    transition: all 0.25s ease;
+  }
+  
+  .hover-lift:hover {
+    transform: translateX(4px);
+    background-color: rgba(230, 126, 34, 0.02);
+  }
+  
+  .hover-bg-light:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+  
+  [data-theme="dark"] .hover-bg-light:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .btn-outline-secondary.active {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    border-color: #e67e22;
+    color: white;
+  }
+  
+  .btn-outline-secondary.active:hover {
+    background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+    border-color: #d35400;
+    color: white;
+  }
+  
+  .btn-group .btn {
+    transition: all 0.2s ease;
+  }
+  
+  .bg-warning.bg-opacity-10 {
+    background-color: rgba(243, 156, 18, 0.1) !important;
+  }
+  
+  .table > :not(caption) > * > * {
+    padding: 1rem 0.75rem;
+  }
+  
+  .table tbody tr:hover {
+    background-color: rgba(230, 126, 34, 0.02);
+  }
+  
+  .form-control, .form-select {
+    border-color: #e9ecef;
+    transition: all 0.2s ease;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    border-color: #e67e22;
+    box-shadow: 0 0 0 0.2rem rgba(230, 126, 34, 0.15);
+  }
+  
+  .btn-warning {
+    color: white;
+  }
+  
+  .btn-warning:hover {
+    transform: translateY(-1px);
+    color: white;
+  }
+  
+  @media (max-width: 768px) {
+    .container-fluid {
+      padding: 1rem !important;
+    }
+    
+    .table-responsive {
+      font-size: 0.85rem;
+    }
+    
+    .list-group-item {
+      padding: 1rem !important;
+    }
+    
+    .min-w-60 {
+      min-width: 50px;
+    }
+  }
+  
+  @media print {
+    .btn, .btn-group, .btn-outline-secondary, .card-footer {
+      display: none !important;
+    }
+    
+    .card {
+      box-shadow: none !important;
+      border: 1px solid #ddd !important;
+      break-inside: avoid;
+    }
+    
+    body {
+      background: white;
+    }
+  }
+</style>
+
+<script>
+  // Toggle between list and calendar view
+  function toggleView(view) {
+    const listView = document.getElementById('listView');
+    const calendarView = document.getElementById('calendarView');
+    const listBtn = document.getElementById('listViewBtn');
+    const calendarBtn = document.getElementById('calendarViewBtn');
+    
+    if (view === 'list') {
+      listView.style.display = 'block';
+      calendarView.style.display = 'none';
+      listBtn.classList.add('active');
+      calendarBtn.classList.remove('active');
+      localStorage.setItem('holidayViewPreference', 'list');
+    } else {
+      listView.style.display = 'none';
+      calendarView.style.display = 'block';
+      listBtn.classList.remove('active');
+      calendarBtn.classList.add('active');
+      localStorage.setItem('holidayViewPreference', 'calendar');
+    }
+  }
+  
+  // Load saved view preference
+  document.addEventListener('DOMContentLoaded', function() {
+    const savedView = localStorage.getItem('holidayViewPreference');
+    if (savedView === 'calendar') {
+      toggleView('calendar');
+    } else {
+      toggleView('list');
+    }
+    
+    // Add smooth transitions for flash messages
+    setTimeout(() => {
+      const flashes = document.querySelectorAll('.alert');
+      flashes.forEach(flash => {
+        flash.style.transition = 'opacity 0.3s';
+        flash.style.opacity = '0';
+        setTimeout(() => flash.remove(), 300);
+      });
+    }, 5000);
+  });
+</script>
+{% endblock %}

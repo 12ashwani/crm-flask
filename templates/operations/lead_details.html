@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Lead Detail · OpsPanel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Light Theme (default) */
+    :root {
+      --bg: #fafcff;
+      --surface: #ffffff;
+      --surface2: #f8fafd;
+      --surface3: #f1f4f9;
+      --border: #e9edf2;
+      --border-light: #dfe3ea;
+      --accent: #4361ee;
+      --accent2: #06b6d4;
+      --accent-glow: rgba(67, 97, 238, 0.08);
+      --text: #0a0c12;
+      --text-secondary: #2d3a4b;
+      --muted: #6c7a8e;
+      --muted-light: #8e9aae;
+      --danger: #f43f5e;
+      --danger-glow: rgba(244, 63, 94, 0.1);
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.1);
+      --warning: #f59e0b;
+      --warning-glow: rgba(245, 158, 11, 0.1);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.02);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.02);
+      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.08);
+      --transition: all 0.3s cubic-bezier(0.2, 0.95, 0.4, 1);
+      --transition-bounce: all 0.5s cubic-bezier(0.34, 1.2, 0.64, 1);
+    }
+
+    /* Dark Theme */
+    [data-theme="dark"] {
+      --bg: #01010a;
+      --surface: #0c0c14;
+      --surface2: #12121c;
+      --surface3: #181824;
+      --border: #22222e;
+      --border-light: #2a2a38;
+      --accent: #c0ff4e;
+      --accent2: #4dd4ff;
+      --accent-glow: rgba(77, 212, 255, 0.12);
+      --text: #f0f3ff;
+      --text-secondary: #cbd5ff;
+      --muted: #8b8ca8;
+      --muted-light: #6b6d89;
+      --danger: #ff6b6b;
+      --danger-glow: rgba(255, 107, 107, 0.15);
+      --success: #6effa8;
+      --success-glow: rgba(110, 255, 168, 0.12);
+      --warning: #ffbe5e;
+      --warning-glow: rgba(255, 190, 94, 0.12);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(77, 212, 255, 0.05);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(77, 212, 255, 0.08);
+      --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 30% 20%, var(--accent-glow) 0%, transparent 60%);
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 0;
+      animation: bgPulse 10s ease-in-out infinite;
+    }
+
+    @keyframes bgPulse {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.02); }
+    }
+
+    /* ========= SIDEBAR ========= */
+    .sidebar {
+      width: 280px;
+      min-height: 100vh;
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      transition: var(--transition);
+      animation: slideInLeft 0.5s ease-out;
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .sidebar-logo {
+      padding: 32px 28px 28px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo span {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      color: var(--bg);
+      font-weight: 800;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      padding: 8px 18px;
+      border-radius: 60px;
+      transition: var(--transition-bounce);
+    }
+    .sidebar-logo span i {
+      font-size: 14px;
+    }
+    .sidebar-logo span:hover {
+      transform: scale(1.02);
+    }
+    .sidebar-logo p {
+      margin-top: 14px;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+    }
+
+    nav {
+      padding: 28px 20px;
+      flex: 1;
+    }
+    nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 14px;
+      margin-bottom: 6px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    nav a::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 0;
+      height: 100%;
+      background: var(--accent-glow);
+      transition: width 0.3s ease;
+      z-index: -1;
+    }
+    nav a:hover::before {
+      width: 100%;
+    }
+    nav a i {
+      width: 24px;
+      font-size: 1.2rem;
+    }
+    nav a:hover {
+      color: var(--accent2);
+      transform: translateX(6px);
+    }
+    nav a.active {
+      color: var(--accent2);
+      background: var(--accent-glow);
+      border-left: 3px solid var(--accent2);
+      border-radius: 14px 12px 12px 14px;
+    }
+
+    .sidebar-footer {
+      padding: 24px 28px 32px;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+      animation: fadeInUp 0.5s ease-out 0.2s both;
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .sf-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sf-name i {
+      color: var(--accent2);
+    }
+    .sf-role {
+      font-size: 10px;
+      color: var(--accent2);
+      font-family: 'Space Mono', monospace;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .logout-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 18px;
+      padding: 10px 16px;
+      border-radius: 60px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    .logout-link i {
+      font-size: 13px;
+    }
+    .logout-link:hover {
+      color: var(--danger);
+      border-color: var(--danger);
+      background: var(--danger-glow);
+      transform: translateX(4px);
+    }
+
+    /* ========= MAIN ========= */
+    .main {
+      margin-left: 280px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 2;
+    }
+
+    .topbar {
+      padding: 18px 44px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      transition: var(--transition);
+      animation: slideInDown 0.5s ease-out;
+    }
+
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 8px 18px;
+      border-radius: 60px;
+      transition: var(--transition);
+    }
+    .back-btn i {
+      font-size: 12px;
+      transition: transform 0.2s;
+    }
+    .back-btn:hover {
+      color: var(--accent2);
+      border-color: var(--accent2);
+      transform: translateX(-3px);
+    }
+    .back-btn:hover i {
+      transform: translateX(-4px);
+    }
+    .topbar-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      background: var(--accent-glow);
+      padding: 5px 14px;
+      border-radius: 40px;
+      font-family: 'Space Mono', monospace;
+    }
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border-light);
+      padding: 6px 18px 6px 10px;
+      border-radius: 60px;
+      font-size: 13px;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+    .user-badge:hover {
+      border-color: var(--accent2);
+      transform: translateY(-2px);
+    }
+    .user-badge .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      color: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      animation: gentleFloat 3s ease-in-out infinite;
+    }
+    @keyframes gentleFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-2px); }
+    }
+    .btn-logout {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 8px 20px;
+      border-radius: 60px;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+    .btn-logout:hover {
+      color: var(--danger);
+      border-color: var(--danger);
+      background: var(--danger-glow);
+      transform: translateY(-2px);
+    }
+
+    /* Theme Toggle Button */
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 8px 22px;
+      border-radius: 60px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      transition: var(--transition-bounce);
+      position: relative;
+      overflow: hidden;
+    }
+    .theme-toggle::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: var(--accent-glow);
+      transform: translate(-50%, -50%);
+      transition: width 0.5s, height 0.5s;
+    }
+    .theme-toggle:hover::before {
+      width: 150px;
+      height: 150px;
+    }
+    .theme-toggle i {
+      font-size: 14px;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.4s ease;
+    }
+    .theme-toggle span {
+      position: relative;
+      z-index: 1;
+    }
+    .theme-toggle:hover {
+      border-color: var(--accent2);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px var(--accent-glow);
+    }
+    .theme-toggle:hover i {
+      transform: rotate(180deg);
+    }
+
+    /* ========= CONTENT ========= */
+    .content {
+      padding: 40px 48px 60px;
+      max-width: 1100px;
+    }
+
+    .flash-messages {
+      margin-bottom: 28px;
+    }
+    .flash {
+      padding: 14px 22px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideInRight 0.4s ease-out;
+    }
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    .flash i {
+      font-size: 18px;
+    }
+    .flash.success {
+      background: var(--success-glow);
+      border-left: 3px solid var(--success);
+      color: var(--success);
+    }
+    .flash.danger {
+      background: var(--danger-glow);
+      border-left: 3px solid var(--danger);
+      color: var(--danger);
+    }
+    .flash.warning {
+      background: var(--warning-glow);
+      border-left: 3px solid var(--warning);
+      color: var(--warning);
+    }
+
+    /* Lead Header */
+    .lead-header {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      animation: fadeUp 0.5s ease both;
+      transition: var(--transition);
+    }
+    .lead-header:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--accent2);
+    }
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .lh-left h2 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--text) 0%, var(--accent2) 70%);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+    .lh-left p {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      margin-top: 6px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      padding: 8px 20px;
+      border-radius: 60px;
+      animation: badgePop 0.4s ease-out;
+    }
+    @keyframes badgePop {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    .badge i {
+      font-size: 11px;
+    }
+    .badge-done {
+      background: var(--success-glow);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+    .badge-pending {
+      background: var(--warning-glow);
+      color: var(--warning);
+      border: 1px solid var(--warning);
+    }
+    .badge-failed {
+      background: var(--danger-glow);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+    .badge-new {
+      background: var(--accent-glow);
+      color: var(--accent2);
+      border: 1px solid var(--accent2);
+    }
+
+    /* Info Cards Grid */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      overflow: hidden;
+      transition: var(--transition);
+      animation: fadeUp 0.5s ease both;
+    }
+    .info-card:nth-child(1) { animation-delay: 0.05s; }
+    .info-card:nth-child(2) { animation-delay: 0.1s; }
+    .info-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent2);
+      box-shadow: var(--shadow-md);
+    }
+    .info-card-hdr {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      font-family: 'Space Mono', monospace;
+      background: var(--surface2);
+    }
+    .info-card-body {
+      padding: 20px 24px;
+    }
+    .info-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 18px;
+    }
+    .info-row:last-child {
+      margin-bottom: 0;
+    }
+    .info-label {
+      font-size: 10px;
+      font-family: 'Space Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted-light);
+    }
+    .info-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      word-break: break-word;
+    }
+    .info-value.mono {
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+    }
+
+    /* Operation Details Card */
+    .operation-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      transition: var(--transition);
+      animation: fadeUp 0.5s ease both 0.15s;
+    }
+    .operation-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent2);
+      box-shadow: var(--shadow-md);
+    }
+    .operation-card .info-card-hdr {
+      padding: 16px 24px;
+    }
+    .op-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      padding: 20px 24px;
+    }
+    .op-grid .info-row {
+      margin-bottom: 0;
+    }
+    .op-grid .info-row:last-child {
+      grid-column: 1 / -1;
+    }
+    @media (max-width: 700px) {
+      .op-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      .op-grid .info-row:last-child {
+        grid-column: 1;
+      }
+    }
+
+    /* Action Card */
+    .action-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      overflow: hidden;
+      transition: var(--transition);
+      animation: fadeUp 0.5s ease both 0.2s;
+    }
+    .action-card:hover {
+      border-color: var(--accent2);
+      box-shadow: var(--shadow-md);
+    }
+    .action-card-hdr {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      font-family: 'Space Mono', monospace;
+      background: var(--surface2);
+    }
+    .action-card-body {
+      padding: 24px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .act-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 60px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .act-btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      transform: translate(-50%, -50%);
+      transition: width 0.4s, height 0.4s;
+    }
+    .act-btn:hover::after {
+      width: 100px;
+      height: 100px;
+    }
+    .act-btn:hover {
+      transform: translateY(-2px);
+    }
+    .act-btn.done:hover {
+      border-color: var(--success);
+      color: var(--success);
+      background: var(--success-glow);
+    }
+    .act-btn.pending:hover {
+      border-color: var(--warning);
+      color: var(--warning);
+      background: var(--warning-glow);
+    }
+    .act-btn.failed:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: var(--danger-glow);
+    }
+    .act-btn.remark:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(192, 255, 78, 0.1);
+    }
+    .act-btn i {
+      font-size: 13px;
+    }
+
+    .preset-remarks {
+      margin-top: 0.85rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .preset-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
+    }
+    .preset-buttons .chip {
+      border: 1px solid var(--border);
+      background: var(--surface3);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 0.35rem 0.65rem;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      line-height: 1.2;
+    }
+    .preset-buttons .chip:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--bg);
+      transform: translateY(-1px);
+    }
+
+    /* Modal Styles */
+    .modal-backdrop-custom {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      width: 90%;
+      max-width: 460px;
+      overflow: hidden;
+      animation: modalSlideUp 0.3s cubic-bezier(0.34, 1.2, 0.64, 1);
+    }
+    @keyframes modalSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    .modal-hdr {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface2);
+    }
+    .modal-hdr h3 {
+      font-size: 16px;
+      font-weight: 800;
+    }
+    .modal-close {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      width: 32px;
+      height: 32px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+    .modal-close:hover {
+      color: var(--danger);
+      border-color: var(--danger);
+      transform: rotate(90deg);
+    }
+    .modal-body {
+      padding: 24px;
+    }
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+    .fl {
+      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted-light);
+      display: block;
+      margin-bottom: 6px;
+    }
+    .fi {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 12px 16px;
+      outline: none;
+      width: 100%;
+      transition: var(--transition);
+      margin-bottom: 16px;
+    }
+    .fi:focus {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    textarea.fi {
+      resize: vertical;
+      min-height: 100px;
+    }
+    .btn-modal {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 10px 22px;
+      border-radius: 60px;
+      border: none;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      transition: var(--transition);
+    }
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .btn-cancel:hover {
+      color: var(--text);
+      border-color: var(--muted-light);
+    }
+    .btn-success-m {
+      background: var(--success);
+      color: #0a0c12;
+    }
+    .btn-success-m:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--success-glow);
+    }
+    .btn-danger-m {
+      background: var(--danger);
+      color: white;
+    }
+    .btn-danger-m:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--danger-glow);
+    }
+    .btn-accent-m {
+      background: var(--accent);
+      color: #0a0c12;
+    }
+    .btn-accent-m:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(192, 255, 78, 0.3);
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { width: 260px; }
+      .main { margin-left: 260px; }
+      .content { padding: 28px 24px; }
+      .topbar { padding: 14px 24px; }
+      .info-grid { grid-template-columns: 1fr; }
+      .lead-header h2 { font-size: 22px; }
+    }
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span><i class="fas fa-cubes"></i> OpsPanel</span>
+    <p><i class="fas fa-chart-line"></i> v3.0 · operations core</p>
+  </div>
+  <nav>
+    <a href="{{ url_for('operations.dashboard') }}"><i class="fas fa-chart-line"></i> Dashboard</a>
+    <a href="{{ url_for('operations.my_leads') }}" class="active"><i class="fas fa-folder-open"></i> My Leads</a>
+    <a href="{{ url_for('attendance') }}"><i class="fas fa-calendar-check"></i> Attendance</a>
+    <a href="{{ url_for('operations.leave_management') }}"><i class="fas fa-umbrella-beach"></i> Leave Management</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sf-name"><i class="fas fa-user-astronaut"></i> {{ current_user.name or current_user.username }}</div>
+    <div class="sf-role"><i class="fas fa-bolt"></i> ● Operations Lead</div>
+    <a href="{{ url_for('auth.logout') }}" class="logout-link">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="{{ url_for('operations.my_leads') }}" class="back-btn">
+        <i class="fas fa-arrow-left"></i> My Leads
+      </a>
+      <span class="topbar-title"><i class="fas fa-info-circle"></i> LEAD DETAIL</span>
+    </div>
+    <div class="topbar-right">
+      <div class="user-badge">
+        <div class="avatar">{{ (current_user.name or current_user.username)[0].upper() }}</div>
+        {{ current_user.name or current_user.username }}
+      </div>
+      <button class="theme-toggle" id="themeToggleBtn">
+        <i class="fas fa-moon" id="themeIcon"></i>
+        <span id="themeText">Dark</span>
+      </button>
+      <a href="{{ url_for('auth.logout') }}" class="btn-logout"><i class="fas fa-door-open"></i> Logout</a>
+    </div>
+  </header>
+
+  <div class="content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">
+              {% if category == 'success' %}<i class="fas fa-check-circle"></i>
+              {% elif category == 'danger' %}<i class="fas fa-exclamation-triangle"></i>
+              {% else %}<i class="fas fa-info-circle"></i>{% endif %}
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Lead Header -->
+    <div class="lead-header">
+      <div class="lh-left">
+        <h2><i class="fas fa-building"></i> {{ lead.company_name or 'Unknown Company' }}</h2>
+        <p><i class="fas fa-hashtag"></i> Lead #{{ lead.id }} · {{ lead.service or 'No service' }}</p>
+      </div>
+      <div>
+        {% set st = lead.file_status | lower if lead.file_status else '' %}
+        {% if st == 'done' %}
+          <span class="badge badge-done"><i class="fas fa-check-circle"></i> Done</span>
+        {% elif st == 'failed' %}
+          <span class="badge badge-failed"><i class="fas fa-times-circle"></i> Failed</span>
+        {% elif st == 'pending' %}
+          <span class="badge badge-pending"><i class="fas fa-clock"></i> Pending</span>
+        {% else %}
+          <span class="badge badge-new"><i class="fas fa-sparkles"></i> New</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Info Grid -->
+    <div class="info-grid">
+      <!-- Company Details -->
+      <div class="info-card">
+        <div class="info-card-hdr"><i class="fas fa-building"></i> Company Details</div>
+        <div class="info-card-body">
+          <div class="info-row">
+            <span class="info-label">Company Name</span>
+            <span class="info-value">{{ lead.company_name or '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Service</span>
+            <span class="info-value">{{ lead.service or '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Company Email</span>
+            <span class="info-value mono">{{ lead.email or '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Lead Status</span>
+            <span class="info-value">{{ lead.status or 'Assigned' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Authorised Person -->
+      <div class="info-card">
+        <div class="info-card-hdr"><i class="fas fa-user-tie"></i> Authorised Person</div>
+        <div class="info-card-body">
+          <div class="info-row">
+            <span class="info-label">Full Name</span>
+            <span class="info-value">{{ lead.auth_person_name or '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Phone Number</span>
+            <span class="info-value mono">{{ lead.auth_person_number or '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Email Address</span>
+            <span class="info-value mono">{{ lead.auth_person_email or '—' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Operation Details -->
+    <div class="operation-card">
+      <div class="info-card-hdr"><i class="fas fa-cogs"></i> Operation Details</div>
+      <div class="op-grid">
+        <div class="info-row">
+          <span class="info-label">File Status</span>
+          <span class="info-value">{{ lead.file_status or 'Not updated' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Client Login</span>
+          <span class="info-value mono">{{ lead.client_login or '—' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Client Password</span>
+          <span class="info-value mono">{{ lead.client_password or '—' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Remarks / Notes</span>
+          <span class="info-value" style="font-size: 13px; color: var(--muted);">{{ lead.remarks or 'No remarks yet.' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="action-card">
+      <div class="action-card-hdr"><i class="fas fa-bolt"></i> Update Status</div>
+      <div class="action-card-body">
+        <button class="act-btn done" onclick="openModal('done-modal')"><i class="fas fa-check-circle"></i> Mark Done</button>
+        <form method="POST" action="{{ url_for('operations.mark_pending', lead_id=lead.id) }}" style="margin:0;">
+          <button type="submit" class="act-btn pending"><i class="fas fa-hourglass-half"></i> Mark Pending</button>
+        </form>
+        <button class="act-btn failed" onclick="openModal('fail-modal')"><i class="fas fa-times-circle"></i> Mark Failed</button>
+        <button class="act-btn remark" onclick="openModal('remark-modal')"><i class="fas fa-comment-dots"></i> Add Remark</button>
+        <a href="{{ url_for('operations.my_leads') }}" class="act-btn" style="margin-left: auto;"><i class="fas fa-arrow-left"></i> Back to Leads</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DONE MODAL -->
+<div id="done-modal" class="modal-backdrop-custom">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3><i class="fas fa-check-circle" style="color: var(--success);"></i> Mark as Done</h3>
+      <button class="modal-close" onclick="closeModal('done-modal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form method="POST" action="{{ url_for('operations.mark_done', lead_id=lead.id) }}">
+      <div class="modal-body">
+        <label class="fl"><i class="fas fa-user"></i> Client Login</label>
+        <input type="text" name="client_login" class="fi" placeholder="Username / Email" value="{{ lead.client_login or '' }}"/>
+        <label class="fl"><i class="fas fa-lock"></i> Client Password</label>
+        <input type="text" name="client_password" class="fi" placeholder="Password" value="{{ lead.client_password or '' }}"/>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal btn-cancel" onclick="closeModal('done-modal')">Cancel</button>
+        <button type="submit" class="btn-modal btn-success-m"><i class="fas fa-check"></i> Mark Done</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- FAILED MODAL -->
+<div id="fail-modal" class="modal-backdrop-custom">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3 style="color: var(--danger);"><i class="fas fa-exclamation-triangle"></i> Mark as Failed</h3>
+      <button class="modal-close" onclick="closeModal('fail-modal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form method="POST" action="{{ url_for('operations.mark_failed', lead_id=lead.id) }}">
+      <div class="modal-body">
+        <label class="fl"><i class="fas fa-comment"></i> Failure Reason <span style="color: var(--danger);">*</span></label>
+        <textarea name="reason" class="fi" placeholder="Why did this lead fail? Please provide details..." required></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal btn-cancel" onclick="closeModal('fail-modal')">Cancel</button>
+        <button type="submit" class="btn-modal btn-danger-m"><i class="fas fa-times"></i> Mark Failed</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- REMARK MODAL -->
+<div id="remark-modal" class="modal-backdrop-custom">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3><i class="fas fa-pen"></i> Add Remark</h3>
+      <button class="modal-close" onclick="closeModal('remark-modal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form method="POST" action="{{ url_for('operations.add_remark', lead_id=lead.id) }}">
+      <div class="modal-body">
+        <label class="fl"><i class="fas fa-sticky-note"></i> Remark <span style="color: var(--accent);">*</span></label>
+        <textarea id="remark-field" name="remark" class="fi" placeholder="Enter your remark or note about this lead..." required></textarea>
+
+        <div class="preset-remarks">
+          <span>Select one quick remark:</span>
+          <div class="preset-buttons">
+            <button type="button" class="chip" onclick="applyQuickRemark('AUTO APPROVED')">AUTO APPROVED</button>
+            <button type="button" class="chip" onclick="applyQuickRemark('FEE PENDING')">FEE PENDING</button>
+            <button type="button" class="chip" onclick="applyQuickRemark('DOCUMENTS PENDII')">DOCUMENTS PENDII</button>
+            <button type="button" class="chip" onclick="applyQuickRemark('PENDING AT GOV DE')">PENDING AT GOV DE</button>
+            <button type="button" class="chip" onclick="applyQuickRemark('QUERY')">QUERY</button>
+            <button type="button" class="chip" onclick="applyQuickRemark('FILE UNNDER REVIE')">FILE UNNDER REVIE</button>
+            <button type="button" class="chip" onclick="applyQuickRemark('FILE REJECTED')">FILE REJECTED</button>
+            <button type="button" class="chip" onclick="applyQuickRemark('PORTAL NOT WORKI')">PORTAL NOT WORKI</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal btn-cancel" onclick="closeModal('remark-modal')">Cancel</button>
+        <button type="submit" class="btn-modal btn-accent-m"><i class="fas fa-save"></i> Save Remark</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openModal(id) {
+    document.getElementById(id).style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  document.querySelectorAll('.modal-backdrop-custom').forEach(m => {
+    m.addEventListener('click', e => {
+      if (e.target === m) closeModal(m.id);
+    });
+  });
+
+  // Quick presets for operation remarks
+  function applyQuickRemark(value) {
+    const field = document.getElementById('remark-field');
+    if (!field) return;
+    if (field.value.trim()) {
+      field.value = `${field.value.trim()}\n${value}`;
+    } else {
+      field.value = value;
+    }
+    field.focus();
+  }
+
+  // Theme Toggle
+  (function() {
+    const savedTheme = localStorage.getItem('opsPanelTheme') || 'light';
+    const root = document.documentElement;
+    const themeIcon = document.getElementById('themeIcon');
+    const themeText = document.getElementById('themeText');
+    
+    function setTheme(theme) {
+      if (theme === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+        if (themeIcon) {
+          themeIcon.className = 'fas fa-sun';
+        }
+        if (themeText) {
+          themeText.textContent = 'Light';
+        }
+        localStorage.setItem('opsPanelTheme', 'dark');
+      } else {
+        root.removeAttribute('data-theme');
+        if (themeIcon) {
+          themeIcon.className = 'fas fa-moon';
+        }
+        if (themeText) {
+          themeText.textContent = 'Dark';
+        }
+        localStorage.setItem('opsPanelTheme', 'light');
+      }
+    }
+    
+    setTheme(savedTheme);
+    
+    const toggleBtn = document.getElementById('themeToggleBtn');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', function() {
+        const currentTheme = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
+      });
+    }
+  })();
+</script>
+</body>
+</html>

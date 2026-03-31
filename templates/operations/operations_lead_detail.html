@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lead Detail · Operations</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#0d0d0f;--surface:#141416;--surface2:#1c1c1f;--border:#2a2a2e;--accent:#e8ff47;--accent2:#47d4ff;--text:#f0f0f0;--muted:#888;--danger:#ff5353;--success:#4dff91;--warning:#ffb347;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;}
+    .sidebar{width:240px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:32px 0;position:fixed;top:0;left:0;z-index:100;}
+    .sidebar-logo{padding:0 24px 32px;border-bottom:1px solid var(--border);}
+    .sidebar-logo span{display:inline-block;background:var(--accent2);color:#0d0d0f;font-weight:800;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;padding:6px 12px;}
+    .sidebar-logo p{margin-top:8px;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.05em;}
+    nav{padding:24px 12px;flex:1;}
+    nav a{display:flex;align-items:center;gap:10px;padding:10px 14px;color:var(--muted);text-decoration:none;font-size:13px;font-weight:600;letter-spacing:0.04em;border-radius:6px;margin-bottom:4px;transition:all 0.2s;}
+    nav a:hover{color:var(--text);background:var(--surface2);}
+    nav a.active{color:var(--accent2);background:rgba(71,212,255,0.08);}
+    nav a .dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+    .sidebar-footer{padding:20px 24px;border-top:1px solid var(--border);}
+    .sf-name{font-size:13px;font-weight:700;color:var(--text);}
+    .sf-role{font-size:11px;color:var(--accent2);font-family:'DM Mono',monospace;margin-top:2px;text-transform:uppercase;letter-spacing:0.06em;}
+    .logout-link{display:flex;align-items:center;gap:7px;margin-top:12px;padding:8px 12px;border-radius:6px;border:1px solid var(--border);color:var(--muted);text-decoration:none;font-size:12px;font-weight:700;transition:all 0.2s;}
+    .logout-link:hover{color:var(--danger);border-color:var(--danger);background:rgba(255,83,83,0.06);}
+    .logout-link svg{width:13px;height:13px;}
+    .main{margin-left:240px;flex:1;display:flex;flex-direction:column;}
+    .topbar{padding:20px 40px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+    .topbar-left{display:flex;align-items:center;gap:14px;}
+    .back-btn{display:inline-flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);text-decoration:none;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:7px 14px;border-radius:6px;transition:all 0.2s;}
+    .back-btn:hover{color:var(--accent2);border-color:var(--accent2);}
+    .back-btn svg{width:13px;height:13px;transition:transform 0.2s;}
+    .back-btn:hover svg{transform:translateX(-3px);}
+    .topbar-title{font-size:14px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);}
+    .topbar-right{display:flex;align-items:center;gap:12px;}
+    .user-badge{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);padding:6px 14px 6px 8px;border-radius:100px;font-size:12px;font-weight:600;}
+    .user-badge .avatar{width:26px;height:26px;border-radius:50%;background:var(--accent2);color:#0d0d0f;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;}
+    .btn-logout{display:inline-flex;align-items:center;gap:6px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--muted);background:none;border:1px solid var(--border);padding:7px 16px;border-radius:6px;cursor:pointer;letter-spacing:0.06em;text-transform:uppercase;transition:all 0.2s;text-decoration:none;}
+    .btn-logout:hover{color:var(--danger);border-color:var(--danger);}
+    .content{padding:40px;max-width:860px;}
+    .flash-messages{margin-bottom:24px;}
+    .flash{padding:12px 18px;border-radius:6px;font-size:13px;font-weight:600;margin-bottom:8px;border-left:3px solid;}
+    .flash.success{background:rgba(77,255,145,0.07);border-color:var(--success);color:var(--success);}
+    .flash.danger{background:rgba(255,83,83,0.07);border-color:var(--danger);color:var(--danger);}
+    .flash.warning{background:rgba(255,179,71,0.07);border-color:var(--warning);color:var(--warning);}
+
+    /* Lead header card */
+    .lead-header{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;animation:fadeUp 0.3s ease both;}
+    .lh-left h2{font-size:24px;font-weight:800;letter-spacing:-0.02em;}
+    .lh-left p{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:4px;}
+    .badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-family:'DM Mono',monospace;font-weight:700;padding:5px 12px;border-radius:100px;}
+    .badge::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;}
+    .badge-done{background:rgba(77,255,145,0.1);color:var(--success);}
+    .badge-pending{background:rgba(255,179,71,0.1);color:var(--warning);}
+    .badge-failed{background:rgba(255,83,83,0.1);color:var(--danger);}
+    .badge-new{background:rgba(71,212,255,0.1);color:var(--accent2);}
+
+    /* Info cards */
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+    .info-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;animation:fadeUp 0.35s ease both;}
+    .info-card:nth-child(1){animation-delay:0.05s;}
+    .info-card:nth-child(2){animation-delay:0.1s;}
+    .info-card-hdr{padding:14px 20px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-family:'DM Mono',monospace;}
+    .info-card-body{padding:18px 20px;}
+    .info-row{display:flex;flex-direction:column;gap:4px;margin-bottom:14px;}
+    .info-row:last-child{margin-bottom:0;}
+    .info-label{font-size:10px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);}
+    .info-value{font-size:14px;font-weight:700;color:var(--text);}
+    .info-value.mono{font-family:'DM Mono',monospace;font-size:13px;}
+
+    /* Action card */
+    .action-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px;animation:fadeUp 0.4s ease both 0.15s;}
+    .action-card-hdr{padding:14px 20px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-family:'DM Mono',monospace;}
+    .action-card-body{padding:18px 20px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+    .act-btn{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;padding:8px 16px;border-radius:6px;cursor:pointer;text-decoration:none;transition:all 0.15s;white-space:nowrap;}
+    .act-btn:hover{color:var(--text);border-color:#555;}
+    .act-btn.done:hover{border-color:var(--success);color:var(--success);background:rgba(77,255,145,0.06);}
+    .act-btn.pending:hover{border-color:var(--warning);color:var(--warning);background:rgba(255,179,71,0.06);}
+    .act-btn.failed:hover{border-color:var(--danger);color:var(--danger);background:rgba(255,83,83,0.06);}
+    .act-btn.remark:hover{border-color:var(--accent);color:var(--accent);background:rgba(232,255,71,0.06);}
+
+    /* Modals */
+    .modal-backdrop-custom{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);backdrop-filter:blur(4px);z-index:999;align-items:center;justify-content:center;}
+    .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:90%;max-width:420px;overflow:hidden;animation:fadeUp 0.22s ease both;}
+    .modal-hdr{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .modal-hdr h3{font-size:15px;font-weight:800;}
+    .modal-close{background:var(--surface2);border:1px solid var(--border);color:var(--muted);width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+    .modal-close:hover{color:var(--danger);border-color:var(--danger);}
+    .modal-body{padding:20px 22px;}
+    .modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+    .fl{font-size:10px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);display:block;margin-bottom:5px;}
+    .fi{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;padding:9px 12px;outline:none;width:100%;transition:border-color 0.2s;margin-bottom:12px;}
+    .fi:focus{border-color:var(--accent2);}
+    .fi::placeholder{color:#444;font-weight:400;}
+    textarea.fi{resize:vertical;min-height:80px;}
+    .btn-modal{display:inline-flex;align-items:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;letter-spacing:0.04em;padding:9px 18px;border-radius:6px;border:none;cursor:pointer;text-transform:uppercase;transition:all 0.18s;}
+    .btn-cancel{background:none;border:1px solid var(--border);color:var(--muted);}
+    .btn-cancel:hover{color:var(--text);}
+    .btn-success-m{background:var(--success);color:#0d0d0f;}
+    .btn-danger-m{background:var(--danger);color:#fff;}
+    .btn-accent-m{background:var(--accent);color:#0d0d0f;}
+
+    @media(max-width:900px){.sidebar{display:none;}.main{margin-left:0;}.content{padding:20px;}.topbar{padding:16px 20px;}.info-grid{grid-template-columns:1fr;}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span>OpsPanel</span>
+    <p>v1.0 · Operations</p>
+  </div>
+  <nav>
+    <a href="{{ url_for('operations.dashboard') }}"><span class="dot"></span> Dashboard</a>
+    <a href="{{ url_for('operations.my_leads') }}" class="active"><span class="dot"></span> My Leads</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sf-name">{{ current_user.username }}</div>
+    <div class="sf-role">● Operations</div>
+    <a href="{{ url_for('auth.logout') }}" class="logout-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="{{ url_for('operations.my_leads') }}" class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        My Leads
+      </a>
+      <span class="topbar-title">Lead Detail</span>
+    </div>
+    <div class="topbar-right">
+      <div class="user-badge">
+        <div class="avatar">{{ current_user.username[0].upper() }}</div>
+        {{ current_user.username }}
+      </div>
+      <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
+    </div>
+  </header>
+
+  <div class="content">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Lead Header -->
+    <div class="lead-header">
+      <div class="lh-left">
+        <h2>{{ lead.company_name or 'Unknown Company' }}</h2>
+        <p>Lead #{{ lead.id }} · {{ lead.service or 'No service' }}</p>
+      </div>
+      <div>
+        {% set st = lead.file_status | lower if lead.file_status else '' %}
+        {% if st == 'done' %}    <span class="badge badge-done">Done</span>
+        {% elif st == 'failed' %}<span class="badge badge-failed">Failed</span>
+        {% elif st == 'pending' %}<span class="badge badge-pending">Pending</span>
+        {% else %}              <span class="badge badge-new">New</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Info Grid -->
+    <div class="info-grid">
+
+      <!-- Company Details -->
+      <div class="info-card">
+        <div class="info-card-hdr">🏢 Company Details</div>
+        <div class="info-card-body">
+          <div class="info-row">
+            <span class="info-label">Company Name</span>
+            <span class="info-value">{{ lead.company_name or '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Service</span>
+            <span class="info-value">{{ lead.service or '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Company Email</span>
+            <span class="info-value mono">{{ lead.email or '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Lead Status</span>
+            <span class="info-value">{{ lead.status or 'Assigned' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Authorised Person -->
+      <div class="info-card">
+        <div class="info-card-hdr">👤 Authorised Person</div>
+        <div class="info-card-body">
+          <div class="info-row">
+            <span class="info-label">Name</span>
+            <span class="info-value">{{ lead.auth_person_name or '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Phone</span>
+            <span class="info-value mono">{{ lead.auth_person_number or '—' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Email</span>
+            <span class="info-value mono">{{ lead.auth_person_email or '—' }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Operation Details (full width) -->
+    <div class="info-card" style="margin-bottom:16px;animation:fadeUp 0.35s ease both 0.15s;">
+      <div class="info-card-hdr">⚙️ Operation Details</div>
+      <div class="info-card-body" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+        <div class="info-row">
+          <span class="info-label">File Status</span>
+          <span class="info-value">{{ lead.file_status or 'Not updated' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Client Login</span>
+          <span class="info-value mono">{{ lead.client_login or '—' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Client Password</span>
+          <span class="info-value mono">{{ lead.client_password or '—' }}</span>
+        </div>
+        <div class="info-row" style="grid-column:1/-1;">
+          <span class="info-label">Remarks</span>
+          <span class="info-value" style="font-size:13px;font-weight:600;color:var(--muted);">{{ lead.remarks or 'No remarks yet.' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="action-card">
+      <div class="action-card-hdr">🔧 Update Status</div>
+      <div class="action-card-body">
+        <button class="act-btn done"    onclick="openModal('done-modal')">✅ Mark Done</button>
+        <form method="POST" action="{{ url_for('operations.mark_pending', lead_id=lead.id) }}" style="margin:0;">
+          <button type="submit" class="act-btn pending">⏳ Mark Pending</button>
+        </form>
+        <button class="act-btn failed"  onclick="openModal('fail-modal')">❌ Mark Failed</button>
+        <button class="act-btn remark"  onclick="openModal('remark-modal')">📝 Add Remark</button>
+        <a href="{{ url_for('operations.my_leads') }}" class="act-btn" style="margin-left:auto;">← Back</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DONE MODAL -->
+<div id="done-modal" class="modal-backdrop-custom">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3>✅ Mark as Done</h3>
+      <button class="modal-close" onclick="closeModal('done-modal')">✕</button>
+    </div>
+    <form method="POST" action="{{ url_for('operations.mark_done', lead_id=lead.id) }}">
+      <div class="modal-body">
+        <label class="fl">Client Login</label>
+        <input type="text" name="client_login" class="fi" placeholder="Username / Email" value="{{ lead.client_login or '' }}"/>
+        <label class="fl">Client Password</label>
+        <input type="text" name="client_password" class="fi" placeholder="Password" value="{{ lead.client_password or '' }}"/>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal btn-cancel" onclick="closeModal('done-modal')">Cancel</button>
+        <button type="submit" class="btn-modal btn-success-m">✅ Mark Done</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- FAILED MODAL -->
+<div id="fail-modal" class="modal-backdrop-custom">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3 style="color:var(--danger);">❌ Mark as Failed</h3>
+      <button class="modal-close" onclick="closeModal('fail-modal')">✕</button>
+    </div>
+    <form method="POST" action="{{ url_for('operations.mark_failed', lead_id=lead.id) }}">
+      <div class="modal-body">
+        <label class="fl">Reason <span style="color:var(--danger);">*</span></label>
+        <textarea name="reason" class="fi" placeholder="Why did this lead fail?" required></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal btn-cancel" onclick="closeModal('fail-modal')">Cancel</button>
+        <button type="submit" class="btn-modal btn-danger-m">❌ Mark Failed</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- REMARK MODAL -->
+<div id="remark-modal" class="modal-backdrop-custom">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3>📝 Add Remark</h3>
+      <button class="modal-close" onclick="closeModal('remark-modal')">✕</button>
+    </div>
+    <form method="POST" action="{{ url_for('operations.add_remark', lead_id=lead.id) }}">
+      <div class="modal-body">
+        <label class="fl">Remark <span style="color:var(--accent);">*</span></label>
+        <textarea name="remark" class="fi" placeholder="Enter your remark…" required></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal btn-cancel" onclick="closeModal('remark-modal')">Cancel</button>
+        <button type="submit" class="btn-modal btn-accent-m">Save Remark</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openModal(id)  { document.getElementById(id).style.display = 'flex'; }
+  function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+  document.querySelectorAll('.modal-backdrop-custom').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
+  });
+</script>
+</body>
+</html>

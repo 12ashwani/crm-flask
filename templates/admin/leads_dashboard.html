@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Analytics | CRM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    :root {
+      --bg: #0f1117;
+      --panel: #171a23;
+      --panel-2: #1f2430;
+      --text: #eff2f8;
+      --muted: #a5afc3;
+      --line: #2f3544;
+      --brand: #6366f1;
+      --brand-2: #8b5cf6;
+      --ok: #22c55e;
+      --warn: #f59e0b;
+      --bad: #ef4444;
+      --info: #3b82f6;
+      --shadow: 0 14px 34px rgba(0, 0, 0, 0.25);
+      --grad: linear-gradient(135deg, #6366f1, #8b5cf6);
+    }
+    [data-theme="light"] {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --panel-2: #f8faff;
+      --text: #111827;
+      --muted: #64748b;
+      --line: #e5e7eb;
+      --shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    body {
+      margin: 0;
+      font-family: Inter, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 270px;
+      background: var(--panel);
+      border-right: 1px solid var(--line);
+      padding: 20px 14px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: 800;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 6px 8px 24px;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 12px;
+      border-radius: 11px;
+      color: var(--muted);
+      text-decoration: none;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .nav-item:hover { background: var(--panel-2); color: var(--text); }
+    .nav-item.active { background: var(--grad); color: white; }
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 22px;
+    }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .title {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+    .pill {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1.5fr repeat(5, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .toolbar input, .toolbar select {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--text);
+      padding: 10px 11px;
+      font: inherit;
+    }
+    .toolbar .btn {
+      border: 1px solid transparent;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--grad);
+      color: white;
+    }
+    .toolbar .btn.secondary {
+      background: var(--panel);
+      color: var(--text);
+      border-color: var(--line);
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 15px;
+      box-shadow: var(--shadow);
+    }
+    .card .k { font-size: 12px; color: var(--muted); margin-bottom: 8px; font-weight: 700; }
+    .card .v { font-size: 30px; font-weight: 800; line-height: 1; }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 2fr 1.3fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .section-title h3 { margin: 0; font-size: 17px; }
+    .charts-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .table-wrap { overflow: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 11px;
+      text-align: left;
+      font-size: 13px;
+    }
+    th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+    .progress {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--panel-2);
+      overflow: hidden;
+    }
+    .progress > span {
+      display: block;
+      height: 100%;
+      background: var(--grad);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .pending { background: rgba(245, 158, 11, .18); color: #fbbf24; }
+    .in-progress { background: rgba(59, 130, 246, .18); color: #93c5fd; }
+    .completed { background: rgba(34, 197, 94, .18); color: #86efac; }
+    .paid { background: rgba(34, 197, 94, .18); color: #86efac; }
+    .partial { background: rgba(245, 158, 11, .18); color: #fcd34d; }
+    .alert-box {
+      margin: 12px 0;
+      border: 1px solid rgba(245, 158, 11, .35);
+      background: rgba(245, 158, 11, .08);
+      color: #fcd34d;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      display: none;
+    }
+    @media (max-width: 1280px) {
+      .toolbar { grid-template-columns: 1fr 1fr 1fr; }
+      .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid-2, .charts-3 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main { padding: 14px; }
+      .cards { grid-template-columns: 1fr; }
+      .toolbar { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">CRM Admin</div>
+    <a class="nav-item" href="{{ url_for('admin.admin_dashboard') }}"><i class="bi bi-grid-1x2-fill"></i>Dashboard</a>
+    <a class="nav-item active" href="{{ url_for('admin.leads_dashboard') }}"><i class="bi bi-bar-chart-steps"></i>Analytics</a>
+    <a class="nav-item" href="{{ url_for('admin.employees_list') }}"><i class="bi bi-people-fill"></i>Employees</a>
+    <a class="nav-item" href="{{ url_for('admin.create_employee') }}"><i class="bi bi-person-plus-fill"></i>Add Employee</a>
+    <a class="nav-item" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right"></i>Logout</a>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div>
+        <div class="title">Leads Analytics Dashboard</div>
+        <div style="color:var(--muted);font-size:14px;">Admin-only analytics for leads, performance, file workflow, and accounts.</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <span class="pill"><i class="bi bi-shield-lock"></i>Admin Only</span>
+        <a id="csvDownloadLink" class="pill" href="{{ url_for('admin.download_leads') }}"><i class="bi bi-filetype-csv"></i>Export CSV</a>
+        <button id="pdfExportBtn" class="pill" type="button"><i class="bi bi-file-earmark-pdf"></i>Export PDF</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <input id="globalSearch" type="text" placeholder="Search lead / employee / file..." value="{{ filters.search }}" />
+      <select id="filterTeam">
+        <option value="">All Departments</option>
+        <option value="Marketing" {% if filters.team == 'Marketing' %}selected{% endif %}>Marketing</option>
+        <option value="Operations" {% if filters.team == 'Operations' %}selected{% endif %}>Operations</option>
+        <option value="Accounts" {% if filters.team == 'Accounts' %}selected{% endif %}>Accounts</option>
+      </select>
+      <select id="filterEmployee">
+        <option value="">All Employees</option>
+        {% for emp in employee_options %}
+        <option value="{{ emp.id }}" data-team="{{ emp.team }}" {% if filters.employee == emp.id|string %}selected{% endif %}>{{ emp.name }} ({{ emp.team }})</option>
+        {% endfor %}
+      </select>
+      <select id="filterStatus">
+        <option value="">All Status</option>
+        {% for s in lead_statuses %}
+        <option value="{{ s }}" {% if filters.status == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+      <input id="filterDateFrom" type="date" value="{{ filters.date_from }}" />
+      <input id="filterDateTo" type="date" value="{{ filters.date_to }}" />
+      <button id="resetFiltersBtn" class="btn secondary" type="button">Reset</button>
+    </div>
+
+    <div id="pendingAlert" class="alert-box"></div>
+
+    <section class="cards">
+      <div class="card"><div class="k">Total Leads</div><div class="v" id="kpiTotal">0</div></div>
+      <div class="card"><div class="k">Marketing Leads</div><div class="v" id="kpiMarketing">0</div></div>
+      <div class="card"><div class="k">Operations Leads</div><div class="v" id="kpiOperations">0</div></div>
+      <div class="card"><div class="k">Accounts Leads</div><div class="v" id="kpiAccounts">0</div></div>
+    </section>
+
+    <section class="grid-2">
+      <div class="card">
+        <div class="section-title"><h3><i class="bi bi-bar-chart"></i> Leads by Employee</h3></div>
+        <canvas id="employeeBarChart" height="120"></canvas>
+      </div>
+      <div class="card">
+        <div class="section-title"><h3><i class="bi bi-pie-chart"></i> Leads by Department</h3></div>
+        <canvas id="departmentPieChart" height="120"></canvas>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <div class="card">
+        <div class="section-title"><h3><i class="bi bi-person-workspace"></i> Employee Performance</h3></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Employee</th><th>Assigned</th><th>Completed</th><th>Pending</th><th>Performance</th>
+              </tr>
+            </thead>
+            <tbody id="employeePerfBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title"><h3><i class="bi bi-folder-check"></i> File Status Tracking</h3></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
+          <div class="card" style="padding:10px;"><div class="k">Pending</div><div class="v" style="font-size:24px;color:#fbbf24;" id="filePending">0</div></div>
+          <div class="card" style="padding:10px;"><div class="k">In Progress</div><div class="v" style="font-size:24px;color:#93c5fd;" id="fileInProgress">0</div></div>
+          <div class="card" style="padding:10px;"><div class="k">Completed</div><div class="v" style="font-size:24px;color:#86efac;" id="fileCompleted">0</div></div>
+        </div>
+        <canvas id="fileStatusDonut" height="130"></canvas>
+      </div>
+    </section>
+
+    <section class="cards" style="grid-template-columns:repeat(5,minmax(0,1fr));">
+      <div class="card"><div class="k">Total Fee</div><div class="v" style="font-size:24px;" id="feeTotal">?0</div></div>
+      <div class="card"><div class="k">Government Fee</div><div class="v" style="font-size:24px;" id="feeGovt">?0</div></div>
+      <div class="card"><div class="k">Professional Fee</div><div class="v" style="font-size:24px;" id="feeProfessional">?0</div></div>
+      <div class="card"><div class="k">Paid</div><div class="v" style="font-size:24px;color:#86efac;" id="feePaid">?0</div></div>
+      <div class="card"><div class="k">Pending</div><div class="v" style="font-size:24px;color:#fbbf24;" id="feePending">?0</div></div>
+    </section>
+
+    <section class="charts-3">
+      <div class="card">
+        <div class="section-title"><h3><i class="bi bi-pie-chart-fill"></i> Fee Distribution</h3></div>
+        <canvas id="feePieChart" height="130"></canvas>
+      </div>
+      <div class="card">
+        <div class="section-title"><h3><i class="bi bi-graph-up"></i> Monthly Revenue Trend</h3></div>
+        <canvas id="revenueLineChart" height="130"></canvas>
+      </div>
+      <div class="card">
+        <div class="section-title"><h3><i class="bi bi-cash-coin"></i> Payment Status</h3></div>
+        <canvas id="paymentStatusPie" height="130"></canvas>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title"><h3><i class="bi bi-list-check"></i> Leads List (Live Filtered)</h3><span class="pill" id="leadCountPill">0 records</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Lead</th><th>Employee</th><th>Department</th><th>Status</th><th>File</th><th>Payment</th><th>Date</th><th>Fee</th>
+            </tr>
+          </thead>
+          <tbody id="leadRowsBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const initialPayload = {{ initial_payload|tojson }};
+    const charts = {};
+    let fetchTimer = null;
+
+    const elements = {
+      search: document.getElementById('globalSearch'),
+      team: document.getElementById('filterTeam'),
+      employee: document.getElementById('filterEmployee'),
+      status: document.getElementById('filterStatus'),
+      dateFrom: document.getElementById('filterDateFrom'),
+      dateTo: document.getElementById('filterDateTo'),
+      resetBtn: document.getElementById('resetFiltersBtn'),
+      csvLink: document.getElementById('csvDownloadLink'),
+      pdfBtn: document.getElementById('pdfExportBtn'),
+      alert: document.getElementById('pendingAlert')
+    };
+
+    function money(v) {
+      return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(v || 0);
+    }
+
+    function getFilterParams() {
+      const params = new URLSearchParams();
+      if (elements.search.value.trim()) params.set('search', elements.search.value.trim());
+      if (elements.team.value) params.set('team', elements.team.value);
+      if (elements.employee.value) params.set('employee', elements.employee.value);
+      if (elements.status.value) params.set('status', elements.status.value);
+      if (elements.dateFrom.value) params.set('date_from', elements.dateFrom.value);
+      if (elements.dateTo.value) params.set('date_to', elements.dateTo.value);
+      return params;
+    }
+
+    function applyEmployeeFilterByTeam() {
+      const team = elements.team.value;
+      const selected = elements.employee.value;
+      let selectedStillAvailable = selected === '';
+
+      Array.from(elements.employee.options).forEach((option, idx) => {
+        if (idx === 0) {
+          option.hidden = false;
+          return;
+        }
+        const optionTeam = option.getAttribute('data-team');
+        const visible = !team || optionTeam === team;
+        option.hidden = !visible;
+        if (visible && option.value === selected) selectedStillAvailable = true;
+      });
+
+      if (!selectedStillAvailable) elements.employee.value = '';
+    }
+
+    function badgeClassFile(status) {
+      const s = (status || '').toLowerCase();
+      if (s.includes('completed')) return 'completed';
+      if (s.includes('progress')) return 'in-progress';
+      return 'pending';
+    }
+
+    function badgeClassPayment(status) {
+      const s = (status || '').toLowerCase();
+      if (s === 'paid') return 'paid';
+      if (s === 'partial') return 'partial';
+      return 'pending';
+    }
+
+    function createOrUpdateChart(key, canvasId, config) {
+      const ctx = document.getElementById(canvasId);
+      if (!ctx) return;
+      if (charts[key]) {
+        charts[key].data = config.data;
+        charts[key].options = config.options;
+        charts[key].update();
+        return;
+      }
+      charts[key] = new Chart(ctx, config);
+    }
+
+    function renderKpis(payload) {
+      const m = payload.metrics;
+      document.getElementById('kpiTotal').textContent = m.total_leads;
+      document.getElementById('kpiMarketing').textContent = m.marketing_leads;
+      document.getElementById('kpiOperations').textContent = m.operations_leads;
+      document.getElementById('kpiAccounts').textContent = m.accounts_leads;
+
+      const f = payload.finance;
+      document.getElementById('feeTotal').textContent = money(f.total_fee);
+      document.getElementById('feeGovt').textContent = money(f.govt_fee);
+      document.getElementById('feeProfessional').textContent = money(f.professional_fee);
+      document.getElementById('feePaid').textContent = money(f.paid_amount);
+      document.getElementById('feePending').textContent = money(f.pending_amount);
+
+      const fs = payload.charts.file_status;
+      document.getElementById('filePending').textContent = fs.values[0] || 0;
+      document.getElementById('fileInProgress').textContent = fs.values[1] || 0;
+      document.getElementById('fileCompleted').textContent = fs.values[2] || 0;
+    }
+
+    function renderEmployeeTable(payload) {
+      const tbody = document.getElementById('employeePerfBody');
+      const rows = payload.employee_performance || [];
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);">No employee performance data.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map(row => `
+        <tr>
+          <td><strong>${row.employee_name}</strong><div style="color:var(--muted);font-size:11px;">${row.team}</div></td>
+          <td>${row.total_assigned}</td>
+          <td>${row.completed}</td>
+          <td>${row.pending}</td>
+          <td>
+            <div class="progress"><span style="width:${row.completion_rate}%;"></span></div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;">${row.completion_rate}%</div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderLeadRows(payload) {
+      const tbody = document.getElementById('leadRowsBody');
+      const rows = payload.lead_rows || [];
+      document.getElementById('leadCountPill').textContent = `${rows.length} records`;
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);">No leads found for filters.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map(row => `
+        <tr>
+          <td><strong>${row.company_name}</strong><div style="color:var(--muted);font-size:11px;">${row.service}</div></td>
+          <td>${row.employee_name}</td>
+          <td>${row.team}</td>
+          <td>${row.status}</td>
+          <td><span class="badge ${badgeClassFile(row.file_status_bucket)}">${row.file_status_bucket}</span></td>
+          <td><span class="badge ${badgeClassPayment(row.payment_bucket)}">${row.payment_bucket}</span></td>
+          <td>${row.date || '-'}</td>
+          <td>${money(row.total_fee)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderCharts(payload) {
+      const c = payload.charts;
+      createOrUpdateChart('employeeBar', 'employeeBarChart', {
+        type: 'bar',
+        data: { labels: c.leads_by_employee.labels, datasets: [{ label: 'Leads', data: c.leads_by_employee.values, backgroundColor: '#6366f1' }] },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      });
+
+      createOrUpdateChart('deptPie', 'departmentPieChart', {
+        type: 'pie',
+        data: { labels: c.leads_by_department.labels, datasets: [{ data: c.leads_by_department.values, backgroundColor: ['#3b82f6', '#f59e0b', '#22c55e'] }] },
+        options: { responsive: true }
+      });
+
+      createOrUpdateChart('fileDonut', 'fileStatusDonut', {
+        type: 'doughnut',
+        data: { labels: c.file_status.labels, datasets: [{ data: c.file_status.values, backgroundColor: ['#f59e0b', '#3b82f6', '#22c55e'] }] },
+        options: { responsive: true }
+      });
+
+      createOrUpdateChart('feePie', 'feePieChart', {
+        type: 'pie',
+        data: { labels: c.fee_distribution.labels, datasets: [{ data: c.fee_distribution.values, backgroundColor: ['#60a5fa', '#34d399'] }] },
+        options: { responsive: true }
+      });
+
+      createOrUpdateChart('revenueLine', 'revenueLineChart', {
+        type: 'line',
+        data: { labels: c.monthly_revenue.labels, datasets: [{ label: 'Revenue', data: c.monthly_revenue.values, borderColor: '#8b5cf6', tension: .35, fill: false }] },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      });
+
+      createOrUpdateChart('paymentPie', 'paymentStatusPie', {
+        type: 'doughnut',
+        data: { labels: c.payment_status.labels, datasets: [{ data: c.payment_status.values, backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'] }] },
+        options: { responsive: true }
+      });
+    }
+
+    function renderAlerts(payload) {
+      const pendingTasks = payload.alerts?.pending_tasks || 0;
+      if (pendingTasks > 0) {
+        elements.alert.style.display = 'block';
+        elements.alert.innerHTML = `<i class="bi bi-bell-fill"></i> ${pendingTasks} pending tasks detected (file + payment workflow).`;
+      } else {
+        elements.alert.style.display = 'none';
+      }
+    }
+
+    function syncExportLink() {
+      const params = getFilterParams().toString();
+      elements.csvLink.href = `{{ url_for('admin.download_leads') }}${params ? `?${params}` : ''}`;
+    }
+
+    function renderAll(payload) {
+      renderKpis(payload);
+      renderEmployeeTable(payload);
+      renderLeadRows(payload);
+      renderCharts(payload);
+      renderAlerts(payload);
+      syncExportLink();
+    }
+
+    async function fetchAnalytics() {
+      const params = getFilterParams().toString();
+      const res = await fetch(`{{ url_for('admin.leads_analytics') }}?${params}`);
+      if (!res.ok) return;
+      const payload = await res.json();
+      renderAll(payload);
+    }
+
+    function scheduleFetch() {
+      clearTimeout(fetchTimer);
+      fetchTimer = setTimeout(fetchAnalytics, 260);
+    }
+
+    ['input', 'change'].forEach(evt => {
+      elements.search.addEventListener(evt, scheduleFetch);
+      elements.team.addEventListener(evt, () => { applyEmployeeFilterByTeam(); scheduleFetch(); });
+      elements.employee.addEventListener(evt, scheduleFetch);
+      elements.status.addEventListener(evt, scheduleFetch);
+      elements.dateFrom.addEventListener(evt, scheduleFetch);
+      elements.dateTo.addEventListener(evt, scheduleFetch);
+    });
+
+    elements.resetBtn.addEventListener('click', () => {
+      elements.search.value = '';
+      elements.team.value = '';
+      elements.employee.value = '';
+      elements.status.value = '';
+      elements.dateFrom.value = '';
+      elements.dateTo.value = '';
+      applyEmployeeFilterByTeam();
+      fetchAnalytics();
+    });
+
+    elements.pdfBtn.addEventListener('click', () => window.print());
+
+    setInterval(fetchAnalytics, 60000);
+    applyEmployeeFilterByTeam();
+    renderAll(initialPayload);
+  </script>
+</body>
+</html>

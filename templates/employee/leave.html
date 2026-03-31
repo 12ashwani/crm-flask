@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <!-- Header -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h1 class="display-6 fw-bold mb-1">Leave Requests</h1>
+          <p class="text-muted fs-5 mb-0">Submit new requests and track your leave history</p>
+        </div>
+        <a href="{{ url_for('employee.leave_balance') }}" class="btn btn-outline-info">
+          <i class="bi bi-wallet2 me-2"></i> View Full Balance
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- Submit Leave Request Form -->
+    <div class="col-lg-7">
+      <div class="card shadow border-0">
+        <div class="card-header bg-light py-4">
+          <h5 class="mb-0 fw-semibold">
+            <i class="bi bi-plus-circle me-2 text-primary"></i>
+            Submit New Leave Request
+          </h5>
+        </div>
+        <div class="card-body p-5">
+          <form method="POST" action="{{ url_for('employee.leave_request') }}">
+
+            <!-- Leave Type -->
+            <div class="mb-4">
+              <label class="form-label fw-medium">Leave Type <span class="text-danger">*</span></label>
+              <select class="form-select form-select-lg" id="leave_type" name="leave_type" required>
+                <option value="">-- Select Leave Type --</option>
+                <option value="casual" {% if request.form.get('leave_type') == 'casual' %}selected{% endif %}>Casual Leave</option>
+                <option value="sick" {% if request.form.get('leave_type') == 'sick' %}selected{% endif %}>Sick Leave</option>
+                <option value="annual" {% if request.form.get('leave_type') == 'annual' %}selected{% endif %}>Annual Leave</option>
+                <option value="maternity" {% if request.form.get('leave_type') == 'maternity' %}selected{% endif %}>Maternity Leave</option>
+                <option value="paternity" {% if request.form.get('leave_type') == 'paternity' %}selected{% endif %}>Paternity Leave</option>
+                <option value="emergency" {% if request.form.get('leave_type') == 'emergency' %}selected{% endif %}>Emergency Leave</option>
+              </select>
+            </div>
+
+            <!-- Date Range -->
+            <div class="row g-4 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-medium">Start Date <span class="text-danger">*</span></label>
+                <input type="date" class="form-control form-control-lg" 
+                       id="start_date" name="start_date" required
+                       value="{{ request.form.get('start_date', '') }}">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-medium">End Date <span class="text-danger">*</span></label>
+                <input type="date" class="form-control form-control-lg" 
+                       id="end_date" name="end_date" required
+                       value="{{ request.form.get('end_date', '') }}">
+              </div>
+            </div>
+
+            <!-- Reason -->
+            <div class="mb-4">
+              <label class="form-label fw-medium">Reason for Leave <span class="text-danger">*</span></label>
+              <textarea class="form-control form-control-lg" id="reason" name="reason" 
+                        rows="5" required
+                        placeholder="Please explain why you need this leave...">{{ request.form.get('reason', '') }}</textarea>
+            </div>
+
+            <!-- Submit -->
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary btn-lg py-3">
+                <i class="bi bi-send me-2"></i> Submit Leave Request
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leave Balance Sidebar -->
+    <div class="col-lg-5">
+      <div class="card shadow border-0 h-100">
+        <div class="card-header bg-light py-4">
+          <h5 class="mb-0 fw-semibold">
+            <i class="bi bi-wallet2 me-2 text-info"></i>
+            Your Current Leave Balance
+          </h5>
+        </div>
+        <div class="card-body p-5">
+          {% if balance %}
+            <div class="row g-4">
+              <div class="col-6">
+                <div class="text-center p-4 border rounded-3 hover-lift">
+                  <h6 class="text-muted mb-2">Casual Leave</h6>
+                  <h2 class="text-primary fw-bold mb-0">{{ balance.get('casual', 0) }}</h2>
+                  <small class="text-muted">days</small>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="text-center p-4 border rounded-3 hover-lift">
+                  <h6 class="text-muted mb-2">Sick Leave</h6>
+                  <h2 class="text-info fw-bold mb-0">{{ balance.get('sick', 0) }}</h2>
+                  <small class="text-muted">days</small>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="text-center p-4 border rounded-3 hover-lift">
+                  <h6 class="text-muted mb-2">Annual Leave</h6>
+                  <h2 class="text-success fw-bold mb-0">{{ balance.get('annual', 0) }}</h2>
+                  <small class="text-muted">days</small>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="text-center p-4 border rounded-3 hover-lift">
+                  <h6 class="text-muted mb-2">Others</h6>
+                  <h2 class="text-warning fw-bold mb-0">
+                    {{ balance.get('maternity', 0) + balance.get('paternity', 0) + balance.get('emergency', 0) }}
+                  </h2>
+                  <small class="text-muted">days</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-center mt-4">
+              <a href="{{ url_for('employee.leave_balance') }}" class="btn btn-outline-primary">
+                View Detailed Balance →
+              </a>
+            </div>
+          {% else %}
+            <div class="alert alert-warning">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              Unable to load leave balance. Please contact HR.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Leave History Section -->
+  <div class="row mt-5">
+    <div class="col-12">
+      <div class="card shadow border-0">
+        <div class="card-header bg-light py-4">
+          <h5 class="mb-0 fw-semibold">Your Leave History</h5>
+        </div>
+        <div class="card-body">
+
+          {% if requests %}
+            <!-- Status Tabs -->
+            <ul class="nav nav-tabs mb-4" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button">
+                  Pending 
+                  <span class="badge bg-warning ms-2">
+                    {{ requests|selectattr('status', 'equalto', 'pending')|list|length }}
+                  </span>
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="approved-tab" data-bs-toggle="tab" data-bs-target="#approved" type="button">
+                  Approved 
+                  <span class="badge bg-success ms-2">
+                    {{ requests|selectattr('status', 'equalto', 'approved')|list|length }}
+                  </span>
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="rejected-tab" data-bs-toggle="tab" data-bs-target="#rejected" type="button">
+                  Rejected 
+                  <span class="badge bg-danger ms-2">
+                    {{ requests|selectattr('status', 'equalto', 'rejected')|list|length }}
+                  </span>
+                </button>
+              </li>
+            </ul>
+
+            <div class="tab-content">
+              <!-- Pending Tab -->
+              <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                {% set pending_reqs = requests|selectattr('status', 'equalto', 'pending')|list %}
+                {% include "partials/leave_table.html" with context %}  <!-- You can create a partial later if needed -->
+                {% if not pending_reqs %}
+                  <div class="alert alert-info text-center py-4">No pending requests at the moment.</div>
+                {% endif %}
+              </div>
+
+              <!-- Approved & Rejected Tabs (similar structure) -->
+              <div class="tab-pane fade" id="approved" role="tabpanel">
+                {% set approved_reqs = requests|selectattr('status', 'equalto', 'approved')|list %}
+                {% if approved_reqs %}
+                  <div class="table-responsive">
+                    <table class="table table-hover">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Type</th>
+                          <th>From</th>
+                          <th>To</th>
+                          <th>Days</th>
+                          <th>Reason</th>
+                          <th>Applied On</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for req in approved_reqs %}
+                        <tr>
+                          <td><span class="badge bg-success">{{ req.leave_type|title }}</span></td>
+                          <td>{{ req.start_date.strftime('%d %b, %Y') }}</td>
+                          <td>{{ req.end_date.strftime('%d %b, %Y') }}</td>
+                          <td><strong>{{ req.total_days }}</strong></td>
+                          <td class="text-truncate" style="max-width: 300px;">{{ req.reason }}</td>
+                          <td><small class="text-muted">{{ req.applied_on.strftime('%d %b, %Y') }}</small></td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  <div class="alert alert-info text-center py-4">No approved requests yet.</div>
+                {% endif %}
+              </div>
+
+              <div class="tab-pane fade" id="rejected" role="tabpanel">
+                {% set rejected_reqs = requests|selectattr('status', 'equalto', 'rejected')|list %}
+                {% if rejected_reqs %}
+                  <div class="table-responsive">
+                    <table class="table table-hover">
+                      <thead class="table-light">
+                        <tr>
+                          <th>Type</th>
+                          <th>From</th>
+                          <th>To</th>
+                          <th>Days</th>
+                          <th>Reason</th>
+                          <th>Applied On</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for req in rejected_reqs %}
+                        <tr>
+                          <td><span class="badge bg-danger">{{ req.leave_type|title }}</span></td>
+                          <td>{{ req.start_date.strftime('%d %b, %Y') }}</td>
+                          <td>{{ req.end_date.strftime('%d %b, %Y') }}</td>
+                          <td><strong>{{ req.total_days }}</strong></td>
+                          <td class="text-truncate" style="max-width: 300px;">{{ req.reason }}</td>
+                          <td><small class="text-muted">{{ req.applied_on.strftime('%d %b, %Y') }}</small></td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  <div class="alert alert-info text-center py-4">No rejected requests.</div>
+                {% endif %}
+              </div>
+            </div>
+          {% else %}
+            <div class="alert alert-info text-center py-5">
+              <i class="bi bi-journal-plus display-1 text-muted opacity-25 mb-3"></i>
+              <h5>No leave requests found</h5>
+              <p class="mb-0">Submit your first leave request using the form on the left.</p>
+            </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Styles -->
+<style>
+  .card {
+    border-radius: 16px;
+  }
+
+  .form-control-lg, .form-select-lg {
+    border-radius: 12px;
+    padding: 12px 16px;
+  }
+
+  .hover-lift {
+    transition: all 0.3s ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+  }
+
+  .nav-tabs .nav-link {
+    border-radius: 8px 8px 0 0;
+    padding: 12px 20px;
+  }
+
+  .badge {
+    font-size: 0.8rem;
+  }
+</style>
+{% endblock %}

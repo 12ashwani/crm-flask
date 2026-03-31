@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4 px-4">
+
+  <!-- Header with Enhanced Styling -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h1 class="display-6 fw-bold mb-2" style="background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+            <i class="bi bi-person-badge me-2"></i>HR Panel
+          </h1>
+          <p class="text-muted fs-5 mb-0">
+            <i class="bi bi-calendar3 me-1"></i> {{ today.strftime('%B %d, %Y') }} • Managing attendance, leave & payroll operations
+          </p>
+        </div>
+        <div class="text-end">
+          <div class="d-flex gap-2">
+            <span class="badge bg-primary bg-opacity-10 text-primary px-4 py-2 fs-6 rounded-pill">
+              <i class="bi bi-clock-history me-1"></i> Real-time
+            </span>
+            <span class="badge bg-light text-dark px-4 py-2 fs-6 rounded-pill shadow-sm">
+              <i class="bi bi-calendar-week"></i> {{ today.strftime('%A') }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced Stats Overview with Progress Indicators -->
+  <div class="row g-4 mb-5">
+    <!-- Today's Records -->
+    <div class="col-md-6 col-lg-3">
+      <div class="card h-100 shadow-sm border-0 hover-lift rounded-4 overflow-hidden">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="rounded-3 p-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+              <i class="bi bi-clipboard-data fs-3 text-white"></i>
+            </div>
+            <span class="badge bg-success bg-opacity-10 text-success px-3 py-1 rounded-pill">Today</span>
+          </div>
+          <div class="fs-1 fw-bold mb-1">{{ stats.total_records_today }}</div>
+          <p class="text-muted mb-0 fw-medium">Total Records Today</p>
+          <div class="mt-3 small text-success">
+            <i class="bi bi-arrow-up-short"></i> Active tracking
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Present Today -->
+    <div class="col-md-6 col-lg-3">
+      <div class="card h-100 shadow-sm border-0 hover-lift rounded-4 overflow-hidden">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="rounded-3 p-3" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+              <i class="bi bi-check-circle-fill fs-3 text-white"></i>
+            </div>
+            <span class="badge bg-success bg-opacity-10 text-success px-3 py-1 rounded-pill">Attendance</span>
+          </div>
+          <div class="fs-1 fw-bold text-success mb-1">{{ stats.present_today }}</div>
+          <p class="text-muted mb-0 fw-medium">Present Today</p>
+          {% if stats.total_records_today > 0 %}
+          <div class="progress mt-3" style="height: 6px;">
+            <div class="progress-bar bg-success" style="width: {{ (stats.present_today / stats.total_records_today * 100) if stats.total_records_today > 0 else 0 }}%"></div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Needs Attention -->
+    <div class="col-md-6 col-lg-3">
+      <div class="card h-100 shadow-sm border-0 hover-lift rounded-4 overflow-hidden">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="rounded-3 p-3" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+              <i class="bi bi-exclamation-triangle fs-3 text-white"></i>
+            </div>
+            <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-1 rounded-pill">Urgent</span>
+          </div>
+          <div class="fs-1 fw-bold text-warning mb-1">{{ stats.attention_needed }}</div>
+          <p class="text-muted mb-0 fw-medium">Needs Attention</p>
+          {% if stats.attention_needed > 0 %}
+          <div class="mt-2 small text-warning">
+            <i class="bi bi-bell-fill me-1"></i> Requires review
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Pending Leaves -->
+    <div class="col-md-6 col-lg-3">
+      <div class="card h-100 shadow-sm border-0 hover-lift rounded-4 overflow-hidden">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="rounded-3 p-3" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+              <i class="bi bi-hourglass-split fs-3 text-white"></i>
+            </div>
+            <span class="badge bg-info bg-opacity-10 text-info px-3 py-1 rounded-pill">Requests</span>
+          </div>
+          <div class="fs-1 fw-bold text-info mb-1">{{ stats.pending_leaves }}</div>
+          <p class="text-muted mb-0 fw-medium">Pending Leave Requests</p>
+          <a href="{{ url_for('hr.leave_requests') }}" class="stretched-link text-decoration-none small mt-2 d-inline-block">
+            Review now <i class="bi bi-arrow-right-short"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Secondary Stats Row -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-6 col-lg-3">
+      <div class="card h-100 shadow-sm border-0 hover-lift rounded-4">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-3">
+            <div class="rounded-3 p-3 bg-primary bg-opacity-10">
+              <i class="bi bi-calendar-event fs-3 text-primary"></i>
+            </div>
+            <div>
+              <div class="fs-2 fw-bold">{{ stats.upcoming_holidays }}</div>
+              <p class="text-muted mb-0">Upcoming Holidays</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+      <div class="card h-100 shadow-sm border-0 hover-lift rounded-4">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-3">
+            <div class="rounded-3 p-3 bg-success bg-opacity-10">
+              <i class="bi bi-people fs-3 text-success"></i>
+            </div>
+            <div>
+              <div class="fs-2 fw-bold">{{ stats.attendance_rate|default(0) }}%</div>
+              <p class="text-muted mb-0">Attendance Rate</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+      <div class="card h-100 shadow-sm border-0 hover-lift rounded-4">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-3">
+            <div class="rounded-3 p-3 bg-warning bg-opacity-10">
+              <i class="bi bi-envelope-paper fs-3 text-warning"></i>
+            </div>
+            <div>
+              <div class="fs-2 fw-bold">{{ stats.leave_utilization|default(0) }}%</div>
+              <p class="text-muted mb-0">Leave Utilization</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-6 col-lg-3">
+      <div class="card h-100 shadow-sm border-0 hover-lift rounded-4">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center gap-3">
+            <div class="rounded-3 p-3 bg-info bg-opacity-10">
+              <i class="bi bi-building fs-3 text-info"></i>
+            </div>
+            <div>
+              <div class="fs-2 fw-bold">{{ stats.active_employees|default(0) }}</div>
+              <p class="text-muted mb-0">Active Employees</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Access Cards - Enhanced Design -->
+  <div class="row g-4">
+    
+    <!-- Attendance Management -->
+    <div class="col-lg-6">
+      <div class="card h-100 shadow-sm border-0 hover-lift overflow-hidden rounded-4">
+        <div class="position-relative">
+          <div class="card-body p-5">
+            <div class="d-flex align-items-center mb-4">
+              <div class="flex-shrink-0">
+                <div class="bg-primary bg-opacity-10 p-4 rounded-4" style="background: linear-gradient(135deg, rgba(52,152,219,0.1) 0%, rgba(52,152,219,0.2) 100%);">
+                  <i class="bi bi-calendar-check fs-1 text-primary"></i>
+                </div>
+              </div>
+              <div class="flex-grow-1 ms-4">
+                <h4 class="fw-semibold mb-2">Attendance Management</h4>
+                <p class="text-muted mb-0">
+                  Mark daily attendance, track hours, and generate attendance reports.
+                </p>
+              </div>
+            </div>
+            
+            <div class="d-flex gap-3 mt-4">
+              <a href="{{ url_for('hr.attendance_management') }}" 
+                 class="btn btn-primary btn-lg flex-grow-1 py-3 rounded-3">
+                <i class="bi bi-door-open me-2"></i> Open Module
+              </a>
+              <button class="btn btn-outline-secondary btn-lg px-4 py-3 rounded-3" onclick="alert('Quick report coming soon')">
+                <i class="bi bi-download"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Leave Management -->
+    <div class="col-lg-6">
+      <div class="card h-100 shadow-sm border-0 hover-lift overflow-hidden rounded-4">
+        <div class="card-body p-5">
+          <div class="d-flex align-items-center mb-4">
+            <div class="flex-shrink-0">
+              <div class="bg-info bg-opacity-10 p-4 rounded-4" style="background: linear-gradient(135deg, rgba(52,152,219,0.1) 0%, rgba(52,152,219,0.2) 100%);">
+                <i class="bi bi-envelope-paper fs-1 text-info"></i>
+              </div>
+            </div>
+            <div class="flex-grow-1 ms-4">
+              <h4 class="fw-semibold mb-2">Leave Management</h4>
+              <p class="text-muted mb-0">
+                Review, approve, or reject leave requests with automated balance updates.
+              </p>
+            </div>
+          </div>
+          
+          <div class="d-flex gap-3 mt-4">
+            <a href="{{ url_for('hr.leave_requests') }}" 
+               class="btn btn-outline-primary btn-lg flex-grow-1 py-3 rounded-3">
+              <i class="bi bi-list-check me-2"></i> Manage Requests
+            </a>
+            {% if stats.pending_leaves > 0 %}
+            <span class="badge bg-danger position-relative" style="top: -10px; left: -10px;">{{ stats.pending_leaves }} pending</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payroll Management -->
+    <div class="col-lg-6">
+      <div class="card h-100 shadow-sm border-0 hover-lift overflow-hidden rounded-4">
+        <div class="card-body p-5">
+          <div class="d-flex align-items-center mb-4">
+            <div class="flex-shrink-0">
+              <div class="bg-success bg-opacity-10 p-4 rounded-4" style="background: linear-gradient(135deg, rgba(46,204,113,0.1) 0%, rgba(46,204,113,0.2) 100%);">
+                <i class="bi bi-cash-coin fs-1 text-success"></i>
+              </div>
+            </div>
+            <div class="flex-grow-1 ms-4">
+              <h4 class="fw-semibold mb-2">Payroll Management</h4>
+              <p class="text-muted mb-0">
+                Auto-calculate salaries from attendance, generate payslips, and manage payroll.
+              </p>
+            </div>
+          </div>
+
+          <a href="{{ url_for('hr.payroll') }}"
+             class="btn btn-success btn-lg w-100 py-3 rounded-3 mt-3">
+            <i class="bi bi-calculator me-2"></i> Process Payroll
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Holiday Calendar -->
+    <div class="col-lg-6">
+      <div class="card h-100 shadow-sm border-0 hover-lift overflow-hidden rounded-4">
+        <div class="card-body p-5">
+          <div class="d-flex align-items-center mb-4">
+            <div class="flex-shrink-0">
+              <div class="bg-warning bg-opacity-10 p-4 rounded-4" style="background: linear-gradient(135deg, rgba(241,196,15,0.1) 0%, rgba(241,196,15,0.2) 100%);">
+                <i class="bi bi-calendar2-week fs-1 text-warning"></i>
+              </div>
+            </div>
+            <div class="flex-grow-1 ms-4">
+              <h4 class="fw-semibold mb-2">Holiday Calendar</h4>
+              <p class="text-muted mb-0">
+                Add company holidays, festivals, and manage global leave calendar.
+              </p>
+            </div>
+          </div>
+
+          <div class="d-flex gap-3 mt-4">
+            <a href="{{ url_for('hr.holidays') }}"
+               class="btn btn-outline-warning btn-lg flex-grow-1 py-3 rounded-3">
+              <i class="bi bi-calendar-plus me-2"></i> Manage Holidays
+            </a>
+            {% if stats.upcoming_holidays > 0 %}
+            <span class="badge bg-warning text-dark align-self-center px-3 py-2 rounded-pill">{{ stats.upcoming_holidays }} upcoming</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Recent Activity Section (New Enhancement) -->
+  <div class="row mt-5">
+    <div class="col-12">
+      <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-header bg-transparent border-0 pt-4 px-4">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-activity fs-4 text-primary"></i>
+            <h5 class="fw-semibold mb-0">Recent Activity</h5>
+            <span class="badge bg-light text-dark ms-2 rounded-pill">Live</span>
+          </div>
+        </div>
+        <div class="card-body px-4 pb-4">
+          <div class="timeline">
+            <div class="d-flex gap-3 mb-3">
+              <div class="rounded-circle bg-success bg-opacity-10 p-2" style="width: 32px; height: 32px;">
+                <i class="bi bi-check-lg text-success"></i>
+              </div>
+              <div>
+                <p class="mb-0 fw-medium">Attendance marked for {{ stats.present_today }} employees</p>
+                <small class="text-muted">Today, {{ today.strftime('%I:%M %p') }}</small>
+              </div>
+            </div>
+            {% if stats.pending_leaves > 0 %}
+            <div class="d-flex gap-3 mb-3">
+              <div class="rounded-circle bg-warning bg-opacity-10 p-2" style="width: 32px; height: 32px;">
+                <i class="bi bi-hourglass-split text-warning"></i>
+              </div>
+              <div>
+                <p class="mb-0 fw-medium">{{ stats.pending_leaves }} leave request(s) pending approval</p>
+                <small class="text-muted">Requires attention</small>
+              </div>
+            </div>
+            {% endif %}
+            {% if stats.attention_needed > 0 %}
+            <div class="d-flex gap-3 mb-3">
+              <div class="rounded-circle bg-danger bg-opacity-10 p-2" style="width: 32px; height: 32px;">
+                <i class="bi bi-exclamation-triangle text-danger"></i>
+              </div>
+              <div>
+                <p class="mb-0 fw-medium">{{ stats.attention_needed }} attendance records need review</p>
+                <small class="text-muted">Mark incomplete or missing data</small>
+              </div>
+            </div>
+            {% endif %}
+            <div class="d-flex gap-3">
+              <div class="rounded-circle bg-primary bg-opacity-10 p-2" style="width: 32px; height: 32px;">
+                <i class="bi bi-calendar-check text-primary"></i>
+              </div>
+              <div>
+                <p class="mb-0 fw-medium">Payroll processing ready for {{ today.strftime('%B') }}</p>
+                <small class="text-muted">Last updated: {{ today.strftime('%d %B %Y') }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Enhanced Styles -->
+<style>
+  .card {
+    border-radius: 20px;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 25px 40px rgba(0, 0, 0, 0.12) !important;
+  }
+
+  .fs-1 {
+    font-size: 2.5rem !important;
+    line-height: 1.2;
+  }
+
+  .rounded-4 {
+    border-radius: 20px !important;
+  }
+
+  .bg-opacity-10 {
+    transition: all 0.3s ease;
+  }
+
+  .btn-lg {
+    font-weight: 600;
+    border-radius: 14px;
+    transition: all 0.25s ease;
+  }
+  
+  .btn-lg:hover {
+    transform: translateY(-2px);
+  }
+  
+  .timeline {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .timeline::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .timeline::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  
+  .timeline::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+  }
+  
+  .stretched-link {
+    text-decoration: none;
+  }
+  
+  .stretched-link:hover {
+    text-decoration: underline;
+  }
+  
+  @media (max-width: 768px) {
+    .container-fluid {
+      padding: 1rem !important;
+    }
+    .card-body {
+      padding: 1.5rem !important;
+    }
+  }
+</style>
+
+<script>
+  // Auto-refresh indicator for real-time feel (optional)
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add smooth scroll animation
+    const cards = document.querySelectorAll('.hover-lift');
+    cards.forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        card.style.transition = 'all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1)';
+      });
+    });
+  });
+</script>
+{% endblock %}

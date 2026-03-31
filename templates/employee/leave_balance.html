@@ -1,0 +1,689 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  <!-- Enhanced Header with Gradient Background -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <div class="card shadow-xl border-0 overflow-hidden position-relative" style="border-radius: 24px;">
+        <div class="card-body py-5 px-4 position-relative" 
+             style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          
+          <!-- Animated Background Elements -->
+          <div class="position-absolute top-0 start-0 w-100 h-100 overflow-hidden">
+            <div class="position-absolute" style="top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
+            <div class="position-absolute" style="bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
+            <div class="position-absolute" style="top: 50%; left: 20%; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%; animation: float 8s ease-in-out infinite;"></div>
+          </div>
+          
+          <div class="d-flex align-items-center justify-content-between position-relative flex-wrap gap-3">
+            <div>
+              <div class="d-flex align-items-center gap-3 mb-2">
+                <div class="glass-icon">
+                  <i class="bi bi-calendar-check fs-1 text-white"></i>
+                </div>
+                <div>
+                  <h1 class="display-6 fw-bold mb-1 text-white" style="letter-spacing: -0.5px;">
+                    Leave Balance
+                  </h1>
+                  <p class="mb-0 fs-5 text-white-90">
+                    Track your available leaves across all categories
+                  </p>
+                </div>
+              </div>
+              <div class="mt-3 d-flex gap-2">
+                <span class="badge bg-white text-primary px-3 py-2 rounded-pill shadow-sm">
+                  <i class="bi bi-star-fill me-1"></i> {{ current_year|default('2026') }} Year
+                </span>
+              </div>
+            </div>
+            <div>
+              <a href="{{ url_for('employee.leave_request') }}" class="btn btn-light shadow-lg rounded-pill px-4 py-3 fw-semibold">
+                <i class="bi bi-plus-circle me-2"></i> Request New Leave
+                <i class="bi bi-arrow-right-short ms-2"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if balance %}
+    <!-- Enhanced Leave Balance Overview Cards with Animated Progress -->
+    <div class="row g-4 mb-5">
+      <!-- Casual Leave - Enhanced Card -->
+      <div class="col-lg-4 col-md-6">
+        <div class="card h-100 border-0 shadow-lg hover-card" style="border-radius: 20px;">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start mb-4">
+              <div>
+                <span class="badge-glow badge-primary-glow px-3 py-2 rounded-pill">
+                  <i class="bi bi-emoji-smile me-1"></i> Casual Leave
+                </span>
+              </div>
+              <div class="icon-gradient-bg bg-primary-gradient">
+                <i class="bi bi-emoji-smile fs-1 text-white"></i>
+              </div>
+            </div>
+            <div class="text-center mb-4">
+              <div class="position-relative d-inline-block">
+                <div class="counter-wrapper">
+                  <span class="counter display-1 fw-bold text-primary" data-target="{{ balance.get('casual', 0) }}">0</span>
+                  <span class="fs-2 text-muted">/12</span>
+                </div>
+                <p class="text-muted mb-0 mt-2">Days Remaining</p>
+              </div>
+            </div>
+            <div class="mt-3">
+              <div class="d-flex justify-content-between mb-2">
+                <small class="text-muted">Usage</small>
+                <small class="text-muted fw-semibold">{{ ((12 - balance.get('casual', 0)) / 12 * 100)|round(0) }}% Used</small>
+              </div>
+              <div class="progress-custom">
+                <div class="progress-fill" style="width: {{ ((12 - balance.get('casual', 0)) / 12 * 100)|round(0) }}%; background: linear-gradient(90deg, #667eea, #764ba2);"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sick Leave - Enhanced Card -->
+      <div class="col-lg-4 col-md-6">
+        <div class="card h-100 border-0 shadow-lg hover-card" style="border-radius: 20px;">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start mb-4">
+              <div>
+                <span class="badge-glow badge-info-glow px-3 py-2 rounded-pill">
+                  <i class="bi bi-thermometer-half me-1"></i> Sick Leave
+                </span>
+              </div>
+              <div class="icon-gradient-bg bg-info-gradient">
+                <i class="bi bi-thermometer-half fs-1 text-white"></i>
+              </div>
+            </div>
+            <div class="text-center mb-4">
+              <div class="position-relative d-inline-block">
+                <div class="counter-wrapper">
+                  <span class="counter display-1 fw-bold text-info" data-target="{{ balance.get('sick', 0) }}">0</span>
+                  <span class="fs-2 text-muted">/6</span>
+                </div>
+                <p class="text-muted mb-0 mt-2">Days Remaining</p>
+              </div>
+            </div>
+            <div class="mt-3">
+              <div class="d-flex justify-content-between mb-2">
+                <small class="text-muted">Usage</small>
+                <small class="text-muted fw-semibold">{{ ((6 - balance.get('sick', 0)) / 6 * 100)|round(0) }}% Used</small>
+              </div>
+              <div class="progress-custom">
+                <div class="progress-fill" style="width: {{ ((6 - balance.get('sick', 0)) / 6 * 100)|round(0) }}%; background: linear-gradient(90deg, #4facfe, #00f2fe);"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Annual Leave - Enhanced Card -->
+      <div class="col-lg-4 col-md-6">
+        <div class="card h-100 border-0 shadow-lg hover-card" style="border-radius: 20px;">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-start mb-4">
+              <div>
+                <span class="badge-glow badge-success-glow px-3 py-2 rounded-pill">
+                  <i class="bi bi-suitcase-lg me-1"></i> Annual Leave
+                </span>
+              </div>
+              <div class="icon-gradient-bg bg-success-gradient">
+                <i class="bi bi-suitcase-lg fs-1 text-white"></i>
+              </div>
+            </div>
+            <div class="text-center mb-4">
+              <div class="position-relative d-inline-block">
+                <div class="counter-wrapper">
+                  <span class="counter display-1 fw-bold text-success" data-target="{{ balance.get('annual', 0) }}">0</span>
+                  <span class="fs-2 text-muted">/20</span>
+                </div>
+                <p class="text-muted mb-0 mt-2">Days Remaining</p>
+              </div>
+            </div>
+            <div class="mt-3">
+              <div class="d-flex justify-content-between mb-2">
+                <small class="text-muted">Usage</small>
+                <small class="text-muted fw-semibold">{{ ((20 - balance.get('annual', 0)) / 20 * 100)|round(0) }}% Used</small>
+              </div>
+              <div class="progress-custom">
+                <div class="progress-fill" style="width: {{ ((20 - balance.get('annual', 0)) / 20 * 100)|round(0) }}%; background: linear-gradient(90deg, #43e97b, #38f9d7);"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Maternity Leave - Enhanced Card -->
+      <div class="col-lg-4 col-md-6">
+        <div class="card h-100 border-0 shadow-lg hover-card" style="border-radius: 20px;">
+          <div class="card-body p-4 text-center">
+            <div class="icon-circle-lg bg-warning-gradient mb-4 mx-auto">
+              <i class="bi bi-heart-pulse fs-1 text-white"></i>
+            </div>
+            <h5 class="fw-semibold mb-2">Maternity Leave</h5>
+            <div class="counter-wrapper mb-2">
+              <span class="counter display-3 fw-bold text-warning" data-target="{{ balance.get('maternity', 0) }}">0</span>
+              <span class="fs-4 text-muted">days</span>
+            </div>
+            <small class="text-muted">Available for eligible employees</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Paternity Leave - Enhanced Card -->
+      <div class="col-lg-4 col-md-6">
+        <div class="card h-100 border-0 shadow-lg hover-card" style="border-radius: 20px;">
+          <div class="card-body p-4 text-center">
+            <div class="icon-circle-lg bg-danger-gradient mb-4 mx-auto">
+              <i class="bi bi-person-heart fs-1 text-white"></i>
+            </div>
+            <h5 class="fw-semibold mb-2">Paternity Leave</h5>
+            <div class="counter-wrapper mb-2">
+              <span class="counter display-3 fw-bold text-danger" data-target="{{ balance.get('paternity', 0) }}">0</span>
+              <span class="fs-4 text-muted">days</span>
+            </div>
+            <small class="text-muted">Available for eligible employees</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency Leave - Enhanced Card -->
+      <div class="col-lg-4 col-md-6">
+        <div class="card h-100 border-0 shadow-lg hover-card" style="border-radius: 20px;">
+          <div class="card-body p-4 text-center">
+            <div class="icon-circle-lg bg-secondary-gradient mb-4 mx-auto">
+              <i class="bi bi-exclamation-triangle fs-1 text-white"></i>
+            </div>
+            <h5 class="fw-semibold mb-2">Emergency Leave</h5>
+            <div class="counter-wrapper mb-2">
+              <span class="counter display-3 fw-bold text-secondary" data-target="{{ balance.get('emergency', 0) }}">0</span>
+              <span class="fs-4 text-muted">days</span>
+            </div>
+            <small class="text-muted">Immediate approval available</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced Summary Table with Status Indicators -->
+    <div class="row mb-5">
+      <div class="col-12">
+        <div class="card shadow-lg border-0" style="border-radius: 20px;">
+          <div class="card-header bg-transparent py-4 border-0">
+            <h5 class="mb-0 fw-semibold d-flex align-items-center">
+              <div class="gradient-icon me-3">
+                <i class="bi bi-table text-primary"></i>
+              </div>
+              Leave Balance Summary
+            </h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="bg-light">
+                  <tr>
+                    <th class="ps-4 py-3">Leave Type</th>
+                    <th class="py-3">Total Allocation</th>
+                    <th class="py-3">Used</th>
+                    <th class="py-3">Remaining</th>
+                    <th class="py-3 pe-4">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="ps-4 fw-medium">
+                      <i class="bi bi-emoji-smile text-primary me-2"></i>Casual Leave
+                    </td>
+                    <td>12</td>
+                    <td>{{ 12 - balance.get('casual', 0) }}</td>
+                    <td><strong class="text-primary">{{ balance.get('casual', 0) }}</strong></td>
+                    <td class="pe-4">
+                      {% if balance.get('casual', 0) > 5 %}
+                        <span class="status-badge status-good"><i class="bi bi-check-circle me-1"></i> Good</span>
+                      {% elif balance.get('casual', 0) > 2 %}
+                        <span class="status-badge status-warning"><i class="bi bi-exclamation-triangle me-1"></i> Low</span>
+                      {% else %}
+                        <span class="status-badge status-critical"><i class="bi bi-emoji-frown me-1"></i> Critical</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="ps-4 fw-medium">
+                      <i class="bi bi-thermometer-half text-info me-2"></i>Sick Leave
+                    </td>
+                    <td>6</td>
+                    <td>{{ 6 - balance.get('sick', 0) }}</td>
+                    <td><strong class="text-info">{{ balance.get('sick', 0) }}</strong></td>
+                    <td class="pe-4">
+                      {% if balance.get('sick', 0) > 3 %}
+                        <span class="status-badge status-good"><i class="bi bi-check-circle me-1"></i> Good</span>
+                      {% elif balance.get('sick', 0) > 1 %}
+                        <span class="status-badge status-warning"><i class="bi bi-exclamation-triangle me-1"></i> Low</span>
+                      {% else %}
+                        <span class="status-badge status-critical"><i class="bi bi-emoji-frown me-1"></i> Critical</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="ps-4 fw-medium">
+                      <i class="bi bi-suitcase-lg text-success me-2"></i>Annual Leave
+                    </td>
+                    <td>20</td>
+                    <td>{{ 20 - balance.get('annual', 0) }}</td>
+                    <td><strong class="text-success">{{ balance.get('annual', 0) }}</strong></td>
+                    <td class="pe-4">
+                      {% if balance.get('annual', 0) > 10 %}
+                        <span class="status-badge status-good"><i class="bi bi-check-circle me-1"></i> Good</span>
+                      {% elif balance.get('annual', 0) > 5 %}
+                        <span class="status-badge status-warning"><i class="bi bi-exclamation-triangle me-1"></i> Moderate</span>
+                      {% else %}
+                        <span class="status-badge status-critical"><i class="bi bi-emoji-frown me-1"></i> Low</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enhanced Policy Information + Quick Actions -->
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card shadow-lg border-0 h-100" style="border-radius: 20px;">
+          <div class="card-header bg-transparent py-4 border-0">
+            <h5 class="mb-0 fw-semibold d-flex align-items-center">
+              <div class="gradient-icon me-3">
+                <i class="bi bi-info-circle text-info"></i>
+              </div>
+              Leave Policy Information
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="policy-card p-3 mb-3 rounded-3">
+                  <h6 class="fw-semibold mb-3"><i class="bi bi-bookmark-check text-primary me-2"></i>Leave Types & Rules</h6>
+                  <ul class="list-unstyled policy-list">
+                    <li class="mb-3">
+                      <i class="bi bi-calendar-check text-success me-2"></i>
+                      <strong>Casual Leave:</strong> 12 days/year – Personal reasons
+                    </li>
+                    <li class="mb-3">
+                      <i class="bi bi-thermometer-half text-info me-2"></i>
+                      <strong>Sick Leave:</strong> 6 days/year – Medical reasons
+                    </li>
+                    <li class="mb-3">
+                      <i class="bi bi-suitcase-lg text-warning me-2"></i>
+                      <strong>Annual Leave:</strong> 20 days/year – Vacation
+                    </li>
+                    <li>
+                      <i class="bi bi-heart-pulse text-danger me-2"></i>
+                      <strong>Maternity / Paternity:</strong> As per company policy
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="policy-card p-3 mb-3 rounded-3">
+                  <h6 class="fw-semibold mb-3"><i class="bi bi-lightbulb text-warning me-2"></i>Important Notes</h6>
+                  <ul class="list-unstyled policy-list">
+                    <li class="mb-2">✓ Balance resets every January 1st</li>
+                    <li class="mb-2">✓ Unused leaves do not carry forward</li>
+                    <li class="mb-2">✓ 2 weeks notice for Annual Leave</li>
+                    <li class="mb-2">✓ Medical documents may be required</li>
+                    <li>✓ Early request recommended</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card shadow-lg border-0 h-100" style="border-radius: 20px;">
+          <div class="card-header bg-transparent py-4 border-0">
+            <h5 class="mb-0 fw-semibold d-flex align-items-center">
+              <div class="gradient-icon me-3">
+                <i class="bi bi-lightning-charge text-warning"></i>
+              </div>
+              Quick Actions
+            </h5>
+          </div>
+          <div class="card-body d-grid gap-3 pt-4">
+            <a href="{{ url_for('employee.leave_request') }}" class="quick-action-btn btn-primary-glow rounded-pill py-3 text-center">
+              <i class="bi bi-plus-circle me-2"></i> Request Leave
+              <i class="bi bi-arrow-right-short ms-2"></i>
+            </a>
+            <a href="{{ url_for('employee.dashboard') }}" class="quick-action-btn btn-outline-glow rounded-pill py-3 text-center">
+              <i class="bi bi-arrow-left me-2"></i> Back to Dashboard
+            </a>
+          </div>
+          <div class="card-footer bg-transparent border-0 pb-4">
+            <div class="alert alert-info rounded-3 mb-0">
+              <i class="bi bi-question-circle me-2"></i>
+              <small>Need help? Contact HR at hr@company.com</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  {% else %}
+    <div class="alert alert-warning shadow-lg p-5 text-center rounded-4">
+      <i class="bi bi-exclamation-triangle fs-1 d-block mb-3"></i>
+      <h5 class="fw-semibold">Unable to Load Leave Balance</h5>
+      <p class="mb-4">Please contact the HR department for assistance.</p>
+      <a href="{{ url_for('employee.dashboard') }}" class="btn btn-primary rounded-pill px-4">
+        <i class="bi bi-house me-2"></i> Back to Dashboard
+      </a>
+    </div>
+  {% endif %}
+
+</div>
+
+<!-- Enhanced Custom Styles -->
+<style>
+  :root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    --danger-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --secondary-gradient: linear-gradient(135deg, #868f96 0%, #596164 100%);
+  }
+
+  /* Header Styles */
+  .shadow-xl {
+    box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.2);
+  }
+
+  .glass-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+  }
+
+  .text-white-90 {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  /* Hover Card Effects */
+  .hover-card {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .hover-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 25px 40px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  /* Gradient Backgrounds */
+  .bg-primary-gradient {
+    background: var(--primary-gradient);
+  }
+
+  .bg-info-gradient {
+    background: var(--info-gradient);
+  }
+
+  .bg-success-gradient {
+    background: var(--success-gradient);
+  }
+
+  .bg-warning-gradient {
+    background: var(--warning-gradient);
+  }
+
+  .bg-danger-gradient {
+    background: var(--danger-gradient);
+  }
+
+  .bg-secondary-gradient {
+    background: var(--secondary-gradient);
+  }
+
+  /* Icon Containers */
+  .icon-gradient-bg {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .icon-circle-lg {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+  }
+
+  .hover-card:hover .icon-gradient-bg,
+  .hover-card:hover .icon-circle-lg {
+    transform: scale(1.1) rotate(5deg);
+  }
+
+  /* Badge Styles */
+  .badge-glow {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .badge-primary-glow {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    border: 1px solid rgba(102, 126, 234, 0.3);
+  }
+
+  .badge-info-glow {
+    background: rgba(79, 172, 254, 0.1);
+    color: #4facfe;
+    border: 1px solid rgba(79, 172, 254, 0.3);
+  }
+
+  .badge-success-glow {
+    background: rgba(67, 233, 123, 0.1);
+    color: #43e97b;
+    border: 1px solid rgba(67, 233, 123, 0.3);
+  }
+
+  /* Custom Progress Bar */
+  .progress-custom {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 50px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 50px;
+    transition: width 1s ease;
+  }
+
+  /* Status Badges */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  .status-good {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .status-warning {
+    background: #fed7aa;
+    color: #92400e;
+  }
+
+  .status-critical {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  /* Quick Action Buttons */
+  .quick-action-btn {
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: block;
+  }
+
+  .btn-primary-glow {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .btn-primary-glow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    color: white;
+  }
+
+  .btn-outline-glow {
+    border: 2px solid #e5e7eb;
+    color: #374151;
+  }
+
+  .btn-outline-glow:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    color: #667eea;
+  }
+
+  /* Policy Cards */
+  .policy-card {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    transition: all 0.3s ease;
+  }
+
+  .policy-card:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+    transform: translateX(5px);
+  }
+
+  .policy-list li {
+    transition: all 0.2s ease;
+  }
+
+  .policy-list li:hover {
+    transform: translateX(5px);
+  }
+
+  /* Gradient Icon */
+  .gradient-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--primary-gradient);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .gradient-icon i {
+    color: white;
+    font-size: 1.2rem;
+  }
+
+  /* Counter Animation */
+  .counter {
+    font-size: 3.5rem;
+    font-weight: bold;
+    transition: all 0.5s ease;
+  }
+
+  /* Floating Animation */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .display-1 {
+      font-size: 2.5rem;
+    }
+    
+    .counter {
+      font-size: 2.5rem;
+    }
+    
+    .icon-gradient-bg,
+    .icon-circle-lg {
+      width: 50px;
+      height: 50px;
+    }
+    
+    .glass-icon {
+      width: 45px;
+      height: 45px;
+    }
+  }
+
+  /* Table Enhancements */
+  .table > :not(caption) > * > * {
+    padding: 1rem 0.5rem;
+  }
+
+  .table-hover tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.05);
+    transition: all 0.3s ease;
+  }
+</style>
+
+<!-- Counter Animation Script -->
+<script>
+  // Animate counter numbers on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    const counters = document.querySelectorAll('.counter');
+    
+    counters.forEach(counter => {
+      const target = parseInt(counter.getAttribute('data-target'));
+      let current = 0;
+      const increment = target / 50; // Smooth animation over 50 frames
+      const updateCounter = () => {
+        if (current < target) {
+          current += increment;
+          counter.innerText = Math.ceil(current);
+          setTimeout(updateCounter, 20);
+        } else {
+          counter.innerText = target;
+        }
+      };
+      updateCounter();
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit Employee | CRM Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* Dark Theme (Default) */
+      --bg-primary: #0f0f12;
+      --bg-secondary: #18181b;
+      --bg-tertiary: #1f1f24;
+      --sidebar-bg: #0a0a0c;
+      --card-bg: #1a1a1f;
+      --text-primary: #ffffff;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --border: #27272a;
+      --accent-primary: #6366f1;
+      --accent-secondary: #8b5cf6;
+      --accent-success: #10b981;
+      --accent-warning: #f59e0b;
+      --accent-danger: #ef4444;
+      --accent-info: #3b82f6;
+      --gradient-1: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      --gradient-2: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f5f9;
+      --sidebar-bg: #ffffff;
+      --card-bg: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      display: flex;
+      transition: all 0.3s ease;
+    }
+
+    /* Modern Sidebar */
+    .sidebar {
+      width: 280px;
+      min-height: 100vh;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      left: 0;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+      z-index: 100;
+    }
+
+    .logo-section {
+      padding: 32px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 800;
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-badge {
+      display: inline-block;
+      background: var(--gradient-1);
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    .nav-menu {
+      flex: 1;
+      padding: 32px 16px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+      border-radius: 12px;
+      margin-bottom: 6px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .nav-item i {
+      font-size: 20px;
+      width: 24px;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      transform: translateX(4px);
+    }
+
+    .nav-item.active {
+      background: var(--gradient-1);
+      color: white;
+      box-shadow: var(--shadow-md);
+    }
+
+    .nav-item.active i {
+      color: white;
+    }
+
+    .user-section {
+      padding: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      background: var(--gradient-1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 20px;
+      color: white;
+    }
+
+    .user-details {
+      flex: 1;
+    }
+
+    .user-name {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    .user-role {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      background: var(--bg-tertiary);
+      border-radius: 10px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .logout-btn:hover {
+      background: var(--accent-danger);
+      color: white;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 280px;
+      flex: 1;
+      min-height: 100vh;
+    }
+
+    /* Modern Top Bar */
+    .top-bar {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(10px);
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .theme-toggle {
+      width: 42px;
+      height: 42px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--text-secondary);
+    }
+
+    .theme-toggle:hover {
+      background: var(--gradient-1);
+      color: white;
+      transform: rotate(15deg);
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-tertiary);
+      padding: 8px 20px;
+      border-radius: 40px;
+      border: 1px solid var(--border);
+    }
+
+    .user-badge-initial {
+      width: 32px;
+      height: 32px;
+      background: var(--gradient-1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: white;
+    }
+
+    /* Content Area */
+    .content-area {
+      padding: 40px;
+    }
+
+    /* Form Styles */
+    .form-container {
+      max-width: 900px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      margin-top: 24px;
+    }
+
+    .form-header {
+      margin-bottom: 32px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .form-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .form-title i {
+      font-size: 28px;
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .form-subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    .form-label {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-label i {
+      font-size: 16px;
+      color: var(--accent-primary);
+    }
+
+    .form-control {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 14px;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-control::placeholder {
+      color: var(--text-muted);
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    select.form-control {
+      cursor: pointer;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 16px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 28px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: none;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .btn-primary {
+      background: var(--gradient-1);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+      color: var(--text-primary);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--accent-primary);
+      border: 1px solid var(--accent-primary);
+    }
+
+    .btn-outline:hover {
+      background: var(--accent-primary);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background: var(--accent-danger);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+      transform: translateY(-2px);
+    }
+
+    /* Flash Messages */
+    .flash-messages {
+      margin-bottom: 24px;
+    }
+
+    .flash {
+      padding: 16px 20px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: slideIn 0.3s ease;
+    }
+
+    .flash.success {
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 3px solid var(--accent-success);
+      color: var(--accent-success);
+    }
+
+    .flash.error {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 3px solid var(--accent-danger);
+      color: var(--accent-danger);
+    }
+
+    .flash.info {
+      background: rgba(59, 130, 246, 0.1);
+      border-left: 3px solid var(--accent-info);
+      color: var(--accent-info);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 200;
+      }
+      
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .content-area {
+        padding: 24px;
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .form-group.full-width {
+        grid-column: span 1;
+      }
+      
+      .form-actions {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body data-theme="dark">
+
+<!-- Modern Sidebar -->
+<aside class="sidebar">
+  <div class="logo-section">
+    <div class="logo">
+      CRM<span class="logo-badge">ADMIN</span>
+    </div>
+    <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
+      Enterprise Control Center
+    </div>
+  </div>
+
+  <div class="nav-menu">
+    <a href="{{ url_for('admin.admin_dashboard') }}" class="nav-item">
+      <i class="bi bi-grid-1x2-fill"></i>
+      <span>Dashboard</span>
+    </a>
+    <a href="{{ url_for('admin.employees_list') }}" class="nav-item active">
+      <i class="bi bi-people-fill"></i>
+      <span>Employees</span>
+    </a>
+    <a href="{{ url_for('admin.create_employee') }}" class="nav-item">
+      <i class="bi bi-person-plus-fill"></i>
+      <span>Add Employee</span>
+    </a>
+    <a href="{{ url_for('attendance') }}" class="nav-item">
+      <i class="bi bi-calendar-check-fill"></i>
+      <span>Attendance</span>
+    </a>
+    <a href="{{ url_for('admin.leave_management') }}" class="nav-item">
+      <i class="bi bi-envelope-paper-fill"></i>
+      <span>Leave Management</span>
+    </a>
+  </div>
+
+  <div class="user-section">
+    <div class="user-info">
+      <div class="user-avatar">
+        {{ (current_user.name or current_user.username)[0].upper() }}
+      </div>
+      <div class="user-details">
+        <div class="user-name">{{ current_user.name or current_user.username }}</div>
+        <div class="user-role">Administrator</div>
+      </div>
+    </div>
+    <a href="{{ url_for('auth.logout') }}" class="logout-btn">
+      <i class="bi bi-box-arrow-right"></i>
+      <span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+  <!-- Top Bar -->
+  <header class="top-bar">
+    <div class="page-title">Edit Employee</div>
+    <div class="header-actions">
+      <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
+        <i class="bi bi-moon-fill" id="themeIcon"></i>
+      </button>
+      <div class="user-badge">
+        <div class="user-badge-initial">
+          {{ (current_user.name or current_user.username)[0].upper() }}
+        </div>
+        <span style="font-weight: 500;">{{ current_user.name or current_user.username }}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Content Area -->
+  <div class="content-area">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">
+              <i class="bi bi-{% if category == 'success' %}check-circle-fill{% elif category == 'error' %}exclamation-triangle-fill{% else %}info-circle-fill{% endif %}"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Edit Employee Form -->
+    <div class="form-container">
+      <div class="form-header">
+        <div class="form-title">
+          <i class="bi bi-pencil-square"></i>
+          <span>Edit Employee Information</span>
+        </div>
+        <div class="form-subtitle">
+          Update employee details and manage their information
+        </div>
+      </div>
+
+      <form method="POST">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-person-fill"></i>
+              Full Name
+            </label>
+            <input type="text" name="name" value="{{ employee[1] }}" class="form-control" required placeholder="Enter employee name">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-envelope-fill"></i>
+              Email Address
+            </label>
+            <input type="email" name="email" value="{{ employee[2] }}" class="form-control" placeholder="employee@company.com">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-telephone-fill"></i>
+              Phone Number
+            </label>
+            <input type="text" name="phone" value="{{ employee[3] }}" class="form-control" placeholder="+1 234 567 8900">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-building-fill"></i>
+              Department
+            </label>
+            <input type="text" name="department" value="{{ employee[4] }}" class="form-control" placeholder="Admin, Marketing, Operations, Accounts, HR">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-briefcase-fill"></i>
+              Role / Position
+            </label>
+            <input type="text" name="role" value="{{ employee[5] }}" class="form-control" placeholder="e.g., Senior Developer, Team Lead">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-person-badge-fill"></i>
+              Username
+            </label>
+            <input type="text" name="username" value="{{ employee[6] }}" class="form-control" required placeholder="Unique username">
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg"></i>
+            Update Employee
+          </button>
+          <a href="{{ url_for('admin.employees_list') }}" class="btn btn-secondary">
+            <i class="bi bi-x-lg"></i>
+            Cancel
+          </a>
+          <a href="{{ url_for('admin.manage_employee_credentials', employee_id=employee[0]) }}" class="btn btn-outline">
+            <i class="bi bi-key-fill"></i>
+            Manage Login Credentials
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Theme Toggle with localStorage persistence
+  const html = document.documentElement;
+  const themeToggle = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+
+  function setTheme(theme) {
+    html.setAttribute('data-theme', theme);
+    localStorage.setItem('admin_theme', theme);
+    
+    if (theme === 'light') {
+      themeIcon.className = 'bi bi-sun-fill';
+    } else {
+      themeIcon.className = 'bi bi-moon-fill';
+    }
+  }
+
+  // Load saved theme
+  const savedTheme = localStorage.getItem('admin_theme') || 'dark';
+  setTheme(savedTheme);
+
+  // Toggle theme
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+  });
+
+  // Optional: Auto-dismiss flash messages
+  setTimeout(() => {
+    const flashes = document.querySelectorAll('.flash');
+    flashes.forEach(flash => {
+      flash.style.opacity = '0';
+      flash.style.transform = 'translateY(-20px)';
+      setTimeout(() => flash.remove(), 300);
+    });
+  }, 5000);
+</script>
+
+</body>
+</html>

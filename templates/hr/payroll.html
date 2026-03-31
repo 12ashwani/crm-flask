@@ -1,0 +1,427 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4 px-4">
+  <!-- Header Section with Gradient -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h1 class="display-6 fw-bold mb-2" style="background: linear-gradient(135deg, #2c3e50 0%, #27ae60 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+            <i class="bi bi-calculator-fill me-2"></i>Payroll Management
+          </h1>
+          <p class="text-muted fs-6 mb-0">
+            <i class="bi bi-currency-rupee me-1"></i> Set monthly salaries and auto-calculate payroll from attendance records
+          </p>
+        </div>
+        <a href="{{ url_for('hr.dashboard') }}" class="btn btn-outline-secondary rounded-3 px-4 py-2">
+          <i class="bi bi-arrow-left me-2"></i>Back to HR Panel
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Period Selection Card - Enhanced -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+    <div class="card-body p-4">
+      <form method="GET" action="{{ url_for('hr.payroll') }}" class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label fw-semibold mb-2">
+            <i class="bi bi-calendar3 me-1"></i> Month
+          </label>
+          <select name="month" class="form-select rounded-3" required>
+            {% for value, label in months %}
+            <option value="{{ value }}" {% if value == month %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-semibold mb-2">
+            <i class="bi bi-calendar-year me-1"></i> Year
+          </label>
+          <input type="number" name="year" class="form-control rounded-3" value="{{ year }}" min="2000" max="2100" required>
+        </div>
+        <div class="col-md-4">
+          <button type="submit" class="btn btn-primary w-100 rounded-3 py-2 fw-semibold">
+            <i class="bi bi-funnel me-2"></i>Load Payroll Data
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Salary Settings Card - Enhanced with Modern Design -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+    <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+      <div class="d-flex align-items-center gap-2">
+        <div class="rounded-3 p-2 bg-primary bg-opacity-10">
+          <i class="bi bi-cash-stack fs-5 text-primary"></i>
+        </div>
+        <h5 class="fw-semibold mb-0">Employee Salary Configuration</h5>
+        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill ms-2">{{ employees|length }} Employees</span>
+      </div>
+      <p class="text-muted small mt-2 mb-0">Set or update monthly salary and effective date for each employee</p>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th class="ps-4 py-3 fw-semibold">Employee</th>
+              <th class="py-3 fw-semibold">Department</th>
+              <th class="py-3 fw-semibold">Monthly Salary</th>
+              <th class="py-3 fw-semibold">Effective From</th>
+              <th class="text-end pe-4 py-3 fw-semibold">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for employee in employees %}
+            {% set setting = salary_map.get(employee.id) %}
+            {% set salary_form_id = 'salary-form-' ~ employee.id %}
+            <tr class="border-bottom">
+              <td class="ps-4">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="rounded-circle bg-primary bg-opacity-10 p-2" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-person fs-6 text-primary"></i>
+                  </div>
+                  <div>
+                    <div class="fw-semibold">{{ employee.name }}</div>
+                    <small class="text-muted">ID: {{ employee.id }}</small>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="badge bg-light text-dark rounded-pill px-3 py-2">
+                  {{ employee.department|title }}
+                </span>
+              </td>
+              <td style="min-width: 160px;">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-transparent border-end-0">₹</span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    class="form-control form-control-sm rounded-end-3"
+                    name="monthly_salary"
+                    form="{{ salary_form_id }}"
+                    value="{{ setting.monthly_salary if setting else '' }}"
+                    placeholder="Enter amount"
+                    style="border-left: none;"
+                  >
+                </div>
+              </td>
+              <td style="min-width: 160px;">
+                <input
+                  type="date"
+                  class="form-control form-control-sm rounded-3"
+                  name="effective_from"
+                  form="{{ salary_form_id }}"
+                  value="{{ setting.effective_from.strftime('%Y-%m-%d') if setting and setting.effective_from else default_effective_date }}"
+                >
+              </td>
+              <td class="text-end pe-4">
+                <form id="{{ salary_form_id }}" method="POST" action="{{ url_for('hr.save_salary') }}" class="d-inline">
+                  <input type="hidden" name="employee_id" value="{{ employee.id }}">
+                  <input type="hidden" name="month" value="{{ month }}">
+                  <input type="hidden" name="year" value="{{ year }}">
+                </form>
+                <button type="submit" class="btn btn-sm btn-primary rounded-3 px-3" form="{{ salary_form_id }}">
+                  <i class="bi bi-save me-1"></i>Save
+                </button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payroll Result Card - Enhanced with Stats Summary -->
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-header bg-transparent border-0 pt-4 px-4 pb-0">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-2">
+          <div class="rounded-3 p-2 bg-success bg-opacity-10">
+            <i class="bi bi-receipt fs-5 text-success"></i>
+          </div>
+          <h5 class="fw-semibold mb-0">Payroll Summary</h5>
+          <span class="badge bg-success rounded-pill">{{ month }}/{{ year }}</span>
+        </div>
+        {% if payroll_rows %}
+        <div class="d-flex gap-3">
+          <div class="text-end">
+            <small class="text-muted d-block">Total Payroll</small>
+            <span class="fw-bold fs-5 text-success">₹{{ "%.2f"|format(payroll_rows|sum(attribute='net_salary')) }}</span>
+          </div>
+          <div class="text-end">
+            <small class="text-muted d-block">Total Deductions</small>
+            <span class="fw-bold fs-5 text-danger">₹{{ "%.2f"|format(payroll_rows|sum(attribute='deduction')) }}</span>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      <p class="text-muted small mt-2 mb-0">Auto-calculated based on attendance records for the selected period</p>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="bg-light">
+            <tr>
+              <th class="ps-4 py-3 fw-semibold">Employee Details</th>
+              <th class="py-3 fw-semibold text-center">Working Days</th>
+              <th class="py-3 fw-semibold text-center">Paid Days</th>
+              <th class="py-3 fw-semibold text-center">Absent Days</th>
+              <th class="py-3 fw-semibold text-end">Base Salary</th>
+              <th class="py-3 fw-semibold text-end">Deduction</th>
+              <th class="pe-4 py-3 fw-semibold text-end">Net Salary</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in payroll_rows %}
+            <tr class="border-bottom">
+              <td class="ps-4">
+                <div class="fw-semibold">{{ row.employee_name }}</div>
+                <div class="d-flex flex-wrap gap-2 mt-1">
+                  <span class="badge bg-light text-dark rounded-pill fs-10">{{ row.department|title }}</span>
+                  <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill fs-10">
+                    <i class="bi bi-check-circle-fill me-1"></i>{{ row.present_days }} Present
+                  </span>
+                  {% if row.half_days > 0 %}
+                  <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill fs-10">
+                    <i class="bi bi-clock me-1"></i>{{ row.half_days }} Half Day
+                  </span>
+                  {% endif %}
+                </div>
+              </td>
+              <td class="text-center">
+                <span class="fw-semibold">{{ row.working_days }}</span>
+                <small class="text-muted d-block">Holiday: {{ row.holiday_count }}</small>
+              </td>
+              <td class="text-center fw-semibold text-success">{{ row.paid_days }}</td>
+              <td class="text-center">
+                {% if row.absent_days > 0 %}
+                <span class="text-danger fw-semibold">{{ row.absent_days }}</span>
+                {% else %}
+                <span class="text-muted">0</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                {% if row.monthly_salary > 0 %}
+                <span class="fw-medium">₹{{ "%.2f"|format(row.monthly_salary) }}</span>
+                {% else %}
+                <span class="badge bg-warning text-dark rounded-pill">Salary Not Set</span>
+                {% endif %}
+              </td>
+              <td class="text-end text-danger fw-medium">-₹{{ "%.2f"|format(row.deduction) }}</td>
+              <td class="pe-4 text-end">
+                {% if row.monthly_salary > 0 %}
+                <span class="fw-bold fs-6 text-success">₹{{ "%.2f"|format(row.net_salary) }}</span>
+                {% else %}
+                <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7" class="text-center py-5">
+                <div class="d-flex flex-column align-items-center gap-2">
+                  <i class="bi bi-inbox fs-1 text-muted"></i>
+                  <p class="text-muted mb-0">No payroll data available for the selected period.</p>
+                  <small class="text-muted">Try selecting a different month or ensure attendance records exist.</small>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          {% if payroll_rows %}
+          <tfoot class="bg-light">
+            <tr>
+              <td colspan="5" class="ps-4 py-3 fw-semibold">Totals</td>
+              <td class="text-end py-3 fw-semibold text-danger">-₹{{ "%.2f"|format(payroll_rows|sum(attribute='deduction')) }}</td>
+              <td class="pe-4 text-end py-3 fw-bold fs-6 text-success">₹{{ "%.2f"|format(payroll_rows|sum(attribute='net_salary')) }}</td>
+            </tr>
+          </tfoot>
+          {% endif %}
+        </table>
+      </div>
+    </div>
+    {% if payroll_rows and payroll_rows|sum(attribute='net_salary') > 0 %}
+    <div class="card-footer bg-transparent border-0 py-3 px-4">
+      <div class="d-flex justify-content-end gap-2">
+        <button class="btn btn-sm btn-outline-secondary rounded-3" onclick="window.print()">
+          <i class="bi bi-printer me-1"></i>Print Report
+        </button>
+        <button class="btn btn-sm btn-outline-success rounded-3" onclick="exportToCSV()">
+          <i class="bi bi-download me-1"></i>Export CSV
+        </button>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Enhanced Styles -->
+<style>
+  .rounded-4 {
+    border-radius: 20px !important;
+  }
+  
+  .rounded-3 {
+    border-radius: 12px !important;
+  }
+  
+  .fs-10 {
+    font-size: 0.7rem;
+  }
+  
+  .bg-primary.bg-opacity-10 {
+    background-color: rgba(39, 174, 96, 0.1) !important;
+  }
+  
+  .table > :not(caption) > * > * {
+    padding: 1rem 0.75rem;
+  }
+  
+  .table tbody tr:hover {
+    background-color: rgba(39, 174, 96, 0.02);
+  }
+  
+  .form-select, .form-control {
+    border-color: #e9ecef;
+    transition: all 0.2s ease;
+  }
+  
+  .form-select:focus, .form-control:focus {
+    border-color: #27ae60;
+    box-shadow: 0 0 0 0.2rem rgba(39, 174, 96, 0.15);
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    border: none;
+  }
+  
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #229954 0%, #27ae60 100%);
+    transform: translateY(-1px);
+  }
+  
+  .btn-outline-secondary:hover {
+    transform: translateY(-1px);
+  }
+  
+  .badge.bg-light {
+    background-color: #f8f9fa !important;
+    color: #2c3e50 !important;
+  }
+  
+  @media (max-width: 768px) {
+    .container-fluid {
+      padding: 1rem !important;
+    }
+    
+    .table-responsive {
+      font-size: 0.85rem;
+    }
+    
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+    }
+    
+    .d-flex.gap-3 {
+      gap: 0.75rem !important;
+    }
+  }
+  
+  @media print {
+    .btn, .form-select, .btn-outline-secondary, .card-footer, .btn-outline-success {
+      display: none !important;
+    }
+    
+    .card {
+      box-shadow: none !important;
+      border: 1px solid #ddd !important;
+    }
+    
+    body {
+      background: white;
+    }
+  }
+</style>
+
+<script>
+  // Export to CSV functionality
+  function exportToCSV() {
+    const table = document.querySelector('.table-responsive table');
+    if (!table) return;
+    
+    const rows = table.querySelectorAll('tr');
+    let csvContent = [];
+    
+    // Get headers (excluding action columns from salary table if needed)
+    const headers = [];
+    const firstRow = rows[0];
+    if (firstRow) {
+      const headerCells = firstRow.querySelectorAll('th');
+      headerCells.forEach(cell => {
+        let text = cell.innerText.trim();
+        if (text === 'Action') return; // Skip action column
+        if (text === 'Employee Details') text = 'Employee';
+        if (text === 'Base Salary') text = 'Base Salary (₹)';
+        if (text === 'Deduction') text = 'Deduction (₹)';
+        if (text === 'Net Salary') text = 'Net Salary (₹)';
+        headers.push(text);
+      });
+    }
+    csvContent.push(headers.join(','));
+    
+    // Get data rows (skip footer)
+    rows.forEach((row, index) => {
+      if (index === 0) return;
+      if (row.querySelector('td[colspan]')) return;
+      
+      const cells = row.querySelectorAll('td');
+      if (cells.length === 0) return;
+      
+      const rowData = [];
+      cells.forEach((cell, idx) => {
+        // Skip action column (usually last or second last)
+        if (headers[idx] === 'Action') return;
+        
+        let text = cell.innerText.trim();
+        // Clean up numbers
+        text = text.replace(/[₹,]/g, '');
+        if (text === '—' || text === 'Salary Not Set') text = '';
+        rowData.push(text);
+      });
+      if (rowData.length > 0 && rowData.some(d => d !== '')) {
+        csvContent.push(rowData.join(','));
+      }
+    });
+    
+    // Download file
+    const blob = new Blob([csvContent.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `payroll_{{ month }}_{{ year }}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+  
+  // Auto-hide flash messages (if any)
+  setTimeout(() => {
+    const flashes = document.querySelectorAll('.alert');
+    flashes.forEach(flash => {
+      flash.style.transition = 'opacity 0.3s';
+      flash.style.opacity = '0';
+      setTimeout(() => flash.remove(), 300);
+    });
+  }, 5000);
+</script>
+{% endblock %}

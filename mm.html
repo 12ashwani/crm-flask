@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GATE DA – Practice Paper</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600;700&display=swap');
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #141820;
+    --border: #1e2535;
+    --accent: #3b82f6;
+    --accent2: #10b981;
+    --accent3: #f59e0b;
+    --danger: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+  .logo { font-family: var(--mono); font-size: 1rem; color: var(--accent); letter-spacing: 0.1em; }
+  .logo span { color: var(--muted); }
+  .timer-box {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    color: var(--accent3);
+    background: rgba(245,158,11,0.08);
+    border: 1px solid rgba(245,158,11,0.25);
+    padding: 4px 14px;
+    border-radius: 4px;
+  }
+  .header-right { display: flex; gap: 1rem; align-items: center; }
+  .score-pill {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--accent2);
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.2);
+    padding: 4px 12px;
+    border-radius: 100px;
+  }
+
+  /* ── Layout ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: calc(100vh - 56px);
+  }
+
+  /* ── Sidebar ── */
+  aside {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 1.2rem;
+    position: sticky;
+    top: 56px;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+  }
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    margin-top: 1rem;
+  }
+  .section-label:first-child { margin-top: 0; }
+  .q-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    margin-bottom: 0.5rem;
+  }
+  .q-btn {
+    width: 100%;
+    aspect-ratio: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .q-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .q-btn.active { border-color: var(--accent); background: rgba(59,130,246,0.15); color: var(--accent); }
+  .q-btn.answered { background: rgba(16,185,129,0.15); border-color: var(--accent2); color: var(--accent2); }
+  .q-btn.marked { background: rgba(245,158,11,0.12); border-color: var(--accent3); color: var(--accent3); }
+  .q-btn.wrong { background: rgba(239,68,68,0.12); border-color: var(--danger); color: var(--danger); }
+  .legend { margin-top: 1rem; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; color: var(--muted); margin-bottom: 4px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  /* ── Main ── */
+  main { padding: 2rem; max-width: 860px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-tag {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 3px;
+  }
+  .tag-ga { background: rgba(245,158,11,0.15); color: var(--accent3); border: 1px solid rgba(245,158,11,0.3); }
+  .tag-tech { background: rgba(59,130,246,0.15); color: var(--accent); border: 1px solid rgba(59,130,246,0.3); }
+  .section-title { font-size: 0.95rem; color: var(--muted); font-weight: 400; }
+
+  /* ── Question Card ── */
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.6rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .question-card:hover { border-color: #2a3448; }
+  .question-card.answered-card { border-left: 3px solid var(--accent2); }
+  .question-card.marked-card { border-left: 3px solid var(--accent3); }
+
+  .q-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+  }
+  .q-num {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    background: rgba(59,130,246,0.1);
+    border: 1px solid rgba(59,130,246,0.2);
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+  .q-marks {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+  .q-marks .pos { color: var(--accent2); }
+  .q-marks .neg { color: var(--danger); }
+  .q-type-tag {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 2px 7px;
+    border-radius: 100px;
+  }
+  .mark-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-family: var(--mono);
+    padding: 2px 8px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .mark-btn:hover, .mark-btn.active { border-color: var(--accent3); color: var(--accent3); background: rgba(245,158,11,0.08); }
+
+  .q-text {
+    font-size: 0.92rem;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 1.2rem;
+  }
+  .q-text strong { color: var(--accent); font-weight: 600; }
+  .q-text code {
+    font-family: var(--mono);
+    background: rgba(255,255,255,0.05);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.88em;
+    color: var(--accent2);
+  }
+  .q-text .math {
+    font-family: var(--mono);
+    color: #a5b4fc;
+  }
+
+  /* Code block */
+  .code-block {
+    background: #0a0c10;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem 1.2rem;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: #94a3b8;
+    overflow-x: auto;
+    margin: 0.8rem 0;
+    line-height: 1.6;
+    white-space: pre;
+  }
+  .code-block .kw { color: #818cf8; }
+  .code-block .fn { color: #34d399; }
+  .code-block .str { color: #fbbf24; }
+  .code-block .num { color: #f87171; }
+  .code-block .cm { color: #475569; }
+
+  /* Table */
+  .q-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.84rem;
+    margin: 0.8rem 0;
+  }
+  .q-table th {
+    background: rgba(59,130,246,0.08);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+  }
+  .q-table td {
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    color: var(--text);
+  }
+  .q-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+  /* Options */
+  .options { display: flex; flex-direction: column; gap: 0.55rem; }
+  .option-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.65rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+  .option-label:hover { border-color: var(--accent); background: rgba(59,130,246,0.04); }
+  .option-label input { display: none; }
+  .opt-letter {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    width: 22px; height: 22px;
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all 0.15s;
+  }
+  .option-label input:checked ~ .opt-letter { background: rgba(59,130,246,0.2); border-color: var(--accent); color: var(--accent); }
+  .option-label:has(input:checked) { border-color: var(--accent); background: rgba(59,130,246,0.06); }
+  .opt-text { color: var(--text); }
+  .opt-text code { font-family: var(--mono); background: rgba(255,255,255,0.05); padding: 1px 4px; border-radius: 2px; font-size: 0.9em; color: var(--accent2); }
+
+  /* NAT input */
+  .nat-input {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+  .nat-input input[type=number] {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 1rem;
+    padding: 8px 14px;
+    width: 180px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .nat-input input[type=number]:focus { border-color: var(--accent); }
+  .nat-hint { font-size: 0.75rem; color: var(--muted); font-family: var(--mono); }
+
+  /* Actions */
+  .q-actions {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 1.2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .btn {
+    padding: 7px 18px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-family: var(--mono);
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #2563eb; }
+  .btn-ghost { background: none; color: var(--muted); }
+  .btn-ghost:hover { color: var(--text); border-color: #2a3448; }
+  .btn-answer { background: none; border-color: var(--accent2); color: var(--accent2); }
+  .btn-answer:hover { background: rgba(16,185,129,0.08); }
+
+  /* Answer reveal */
+  .answer-reveal {
+    display: none;
+    margin-top: 1rem;
+    background: rgba(16,185,129,0.06);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 6px;
+    padding: 0.9rem 1.1rem;
+  }
+  .answer-reveal.show { display: block; }
+  .ans-correct { font-family: var(--mono); font-size: 0.8rem; color: var(--accent2); margin-bottom: 0.4rem; }
+  .ans-explanation { font-size: 0.84rem; color: #94a3b8; line-height: 1.6; }
+
+  /* Progress bar */
+  .progress-bar-wrap { margin-bottom: 1.5rem; }
+  .progress-bar-bg {
+    height: 3px;
+    background: var(--border);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 100px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-label { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); margin-top: 5px; }
+
+  /* Submit modal */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 2rem;
+    width: 440px;
+    max-width: 95vw;
+  }
+  .modal h2 { font-size: 1.1rem; margin-bottom: 0.4rem; }
+  .modal p { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.5; }
+  .modal-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem; }
+  .stat-box { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.8rem; text-align: center; }
+  .stat-num { font-family: var(--mono); font-size: 1.4rem; font-weight: 600; }
+  .stat-lbl { font-size: 0.68rem; color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .modal-btns { display: flex; gap: 0.6rem; justify-content: flex-end; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">GATE <span>2026</span> · DA</div>
+  <div class="timer-box" id="timer">03:00:00</div>
+  <div class="header-right">
+    <div class="score-pill" id="score-pill">Score: 0 / 100</div>
+    <button class="btn btn-primary" onclick="openSubmit()">Submit Paper</button>
+  </div>
+</header>
+
+<div class="layout">
+  <aside>
+    <div class="section-label">General Aptitude</div>
+    <div class="q-grid" id="grid-ga"></div>
+    <div class="section-label">Core Technical</div>
+    <div class="q-grid" id="grid-tech"></div>
+    <div class="legend">
+      <div class="section-label">Legend</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(59,130,246,0.4);border:1px solid #3b82f6"></div> Current</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(16,185,129,0.3);border:1px solid #10b981"></div> Answered</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(245,158,11,0.2);border:1px solid #f59e0b"></div> Marked</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(100,116,139,0.2);border:1px solid #475569"></div> Not visited</div>
+    </div>
+  </aside>
+
+  <main id="main-content">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill"></div></div>
+      <div class="progress-label" id="prog-label">0 of 65 answered</div>
+    </div>
+    <div id="questions-container"></div>
+  </main>
+</div>
+
+<!-- Submit Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h2>Submit Paper?</h2>
+    <p>Once submitted, you'll see your score and answer key. Make sure you've reviewed all questions.</p>
+    <div class="modal-stats">
+      <div class="stat-box"><div class="stat-num" id="m-answered">0</div><div class="stat-lbl">Answered</div></div>
+      <div class="stat-box"><div class="stat-num" id="m-marked" style="color:var(--accent3)">0</div><div class="stat-lbl">Marked</div></div>
+      <div class="stat-box"><div class="stat-num" id="m-unattempted" style="color:var(--danger)">65</div><div class="stat-lbl">Not attempted</div></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeSubmit()">Continue Paper</button>
+      <button class="btn btn-answer" onclick="submitPaper()">Submit & View Score</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// QUESTION BANK
+// ─────────────────────────────────────────────
+const questions = [
+  // ── GENERAL APTITUDE Q1–Q5 (1 mark each) ──
+  {
+    id:1, section:'ga', marks:1, neg:-0.33, type:'mcq',
+    text:'Select the word that is most similar in meaning to <strong>EPHEMERAL</strong>.',
+    options:['Permanent','Transient','Robust','Ancient'],
+    answer:1,
+    explanation:'"Ephemeral" means lasting for a very short time — synonymous with transient.'
+  },
+  {
+    id:2, section:'ga', marks:1, neg:-0.33, type:'mcq',
+    text:'A train travels 300 km at a uniform speed. If the speed had been 15 km/h more, the journey would have taken 1 hour less. What is the original speed of the train?',
+    options:['45 km/h','60 km/h','75 km/h','50 km/h'],
+    answer:1,
+    explanation:'Let speed = v. Then 300/v − 300/(v+15) = 1 → v² + 15v − 4500 = 0 → v = 60 km/h.'
+  },
+  {
+    id:3, section:'ga', marks:1, neg:-0.33, type:'mcq',
+    text:'The ratio of the number of boys to girls in a class is 4:3. If there are 35 students in total, how many girls are there?',
+    options:['12','15','20','18'],
+    answer:1,
+    explanation:'Girls = 3/(4+3) × 35 = 3/7 × 35 = 15.'
+  },
+  {
+    id:4, section:'ga', marks:1, neg:-0.33, type:'mcq',
+    text:'Complete the analogy: <strong>Doctor : Hospital :: Teacher : ______</strong>',
+    options:['Student','Book','School','Chalk'],
+    answer:2,
+    explanation:'A doctor works at a hospital; a teacher works at a school.'
+  },
+  {
+    id:5, section:'ga', marks:1, neg:-0.33, type:'mcq',
+    text:'A is twice as old as B. Five years ago A was three times as old as B. What is the current age of B?',
+    options:['5','10','15','20'],
+    answer:1,
+    explanation:'Let B = x. A = 2x. Five years ago: 2x−5 = 3(x−5) → 2x−5 = 3x−15 → x = 10.'
+  },
+
+  // ── GENERAL APTITUDE Q6–Q10 (2 marks each) ──
+  {
+    id:6, section:'ga', marks:2, neg:-0.66, type:'mcq',
+    text:'In a room of 30 people, 18 speak English, 15 speak French, and 5 speak neither. How many people speak both English and French?',
+    options:['6','7','8','10'],
+    answer:2,
+    explanation:'|E ∪ F| = 30 − 5 = 25. By inclusion-exclusion: 18 + 15 − |E ∩ F| = 25 → |E ∩ F| = 8.'
+  },
+  {
+    id:7, section:'ga', marks:2, neg:-0.66, type:'mcq',
+    text:'The sum of three consecutive even integers is 78. What is the largest of the three integers?',
+    options:['24','26','28','30'],
+    answer:2,
+    explanation:'Let integers be n, n+2, n+4. Sum = 3n+6 = 78 → n = 24. Largest = 28.'
+  },
+  {
+    id:8, section:'ga', marks:2, neg:-0.66, type:'mcq',
+    text:'A shopkeeper marks up goods by 40% and then gives a 20% discount. What is the net profit percentage?',
+    options:['8%','12%','10%','20%'],
+    answer:1,
+    explanation:'SP = 1.4 × 0.8 × CP = 1.12 × CP. Profit = 12%.'
+  },
+  {
+    id:9, section:'ga', marks:2, neg:-0.66, type:'mcq',
+    text:'If FRIEND is coded as HUMJTK, how is CANDLE coded?',
+    options:['ECOFLG','ECPFNG','DCPFNG','ECOFNG'],
+    answer:1,
+    explanation:'Each letter is shifted forward by +2 positions. C→E, A→C, N→P, D→F, L→N, E→G → ECPFNG.'
+  },
+  {
+    id:10, section:'ga', marks:2, neg:-0.66, type:'mcq',
+    text:'Two pipes A and B can fill a tank in 20 and 30 minutes respectively. Both pipes are opened simultaneously. After how many minutes should pipe A be closed so the tank fills in exactly 18 minutes?',
+    options:['6','8','9','10'],
+    answer:2,
+    explanation:'Let A be open for t min, B for 18 min. t/20 + 18/30 = 1 → t/20 = 2/5 → t = 8. Wait — recalculate: 18/30 = 0.6, remainder = 0.4. t = 0.4 × 20 = 8. Close A after 8 minutes means A runs for (18−t)=... Actually A is closed after t min from start: t/20 + 18/30 = 1 → t = 8 is correct if A runs for t then B alone. Close A after 8 min → A runs 8 min, B runs 18 min: 8/20 + 18/30 = 0.4 + 0.6 = 1. ✓'
+  },
+
+  // ── TECHNICAL Q11–Q35 (1 mark) ──
+  {
+    id:11, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'Which of the following activation functions suffers from the <strong>vanishing gradient problem</strong> for large positive inputs?',
+    options:['ReLU','Leaky ReLU','Sigmoid','ELU'],
+    answer:2,
+    explanation:'The sigmoid function σ(x) = 1/(1+e^−x) saturates (gradient ≈ 0) for large |x|, causing vanishing gradients.'
+  },
+  {
+    id:12, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'Consider the matrix <span class="math">A = [[3,1],[0,2]]</span>. Which ONE of the following is TRUE?',
+    options:[
+      'A has eigenvalues 3 and 2',
+      'A has eigenvalues 1 and 2',
+      'A is not diagonalizable',
+      'Determinant of A is 5'
+    ],
+    answer:0,
+    explanation:'A is upper triangular; eigenvalues are the diagonal entries: 3 and 2. det(A) = 3×2 = 6.'
+  },
+  {
+    id:13, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'In Python, what is the output of the following code?<br><br><code>x = [1, 2, 3]\ny = x\ny.append(4)\nprint(len(x))</code>',
+    options:['3','4','Error','None'],
+    answer:1,
+    explanation:'y = x makes y a reference to the same list. Appending to y also modifies x. len(x) = 4.'
+  },
+  {
+    id:14, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'The time complexity of searching in a <strong>balanced Binary Search Tree</strong> with n nodes is:',
+    options:['O(1)','O(log n)','O(n)','O(n log n)'],
+    answer:1,
+    explanation:'In a balanced BST, the height is O(log n), so search, insert, and delete are all O(log n).'
+  },
+  {
+    id:15, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'If X ~ Binomial(n=10, p=0.5), what is <strong>E[X²]</strong>?',
+    options:['25','27.5','30','25.5'],
+    answer:1,
+    explanation:'E[X] = np = 5. Var(X) = np(1−p) = 2.5. E[X²] = Var(X) + E[X]² = 2.5 + 25 = 27.5.'
+  },
+  {
+    id:16, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'Which normal form eliminates <strong>transitive dependencies</strong>?',
+    options:['1NF','2NF','3NF','BCNF'],
+    answer:2,
+    explanation:'3NF eliminates transitive dependencies (non-key attributes depending on other non-key attributes).'
+  },
+  {
+    id:17, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'In gradient descent, if the learning rate is <strong>too large</strong>, the optimization is likely to:',
+    options:[
+      'Converge slowly but correctly',
+      'Diverge or oscillate around the minimum',
+      'Always converge to the global minimum',
+      'Get stuck in a local minimum'
+    ],
+    answer:1,
+    explanation:'A learning rate that is too large causes gradient descent to overshoot the minimum, leading to divergence or oscillation.'
+  },
+  {
+    id:18, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'What does the SQL keyword <code>HAVING</code> filter on?',
+    options:[
+      'Individual rows before grouping',
+      'Grouped aggregate results',
+      'Column names only',
+      'Table join conditions'
+    ],
+    answer:1,
+    explanation:'HAVING is used to filter groups formed by GROUP BY — it operates on aggregated results, unlike WHERE.'
+  },
+  {
+    id:19, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'In a Bayesian network, if X ⊥ Y | Z, which statement is correct?',
+    options:[
+      'X and Y are marginally independent',
+      'X and Y are independent given Z',
+      'X causes Y through Z',
+      'Z is independent of X and Y'
+    ],
+    answer:1,
+    explanation:'X ⊥ Y | Z means X and Y are conditionally independent given Z — knowing Z makes X and Y independent.'
+  },
+  {
+    id:20, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'Which data structure is used in BFS (Breadth-First Search)?',
+    options:['Stack','Priority Queue','Queue','Deque'],
+    answer:2,
+    explanation:'BFS uses a FIFO Queue to explore nodes level by level. DFS uses a Stack (or recursion).'
+  },
+  {
+    id:21, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'The <strong>precision</strong> metric in binary classification is defined as:',
+    options:[
+      'TP / (TP + FN)',
+      'TP / (TP + FP)',
+      'TN / (TN + FP)',
+      '(TP + TN) / (TP + TN + FP + FN)'
+    ],
+    answer:1,
+    explanation:'Precision = TP / (TP + FP). It measures how many predicted positives are actually positive.'
+  },
+  {
+    id:22, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'Which sorting algorithm has the best worst-case time complexity?',
+    options:['Quick Sort','Bubble Sort','Merge Sort','Selection Sort'],
+    answer:2,
+    explanation:'Merge Sort has O(n log n) worst-case. QuickSort is O(n²) in the worst case (though O(n log n) average).'
+  },
+  {
+    id:23, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'PCA (Principal Component Analysis) maximizes:',
+    options:[
+      'The covariance between features',
+      'The variance along projected directions',
+      'The classification accuracy',
+      'The number of non-zero components'
+    ],
+    answer:1,
+    explanation:'PCA finds orthogonal directions (principal components) that maximize the variance of projected data.'
+  },
+  {
+    id:24, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'What is the output of this Python snippet?<br><div class="code-block"><span class="kw">def</span> <span class="fn">f</span>(x, lst=[]):\n    lst.append(x)\n    <span class="kw">return</span> lst\n\n<span class="fn">print</span>(<span class="fn">f</span>(<span class="num">1</span>))\n<span class="fn">print</span>(<span class="fn">f</span>(<span class="num">2</span>))</div>',
+    options:['[1] then [2]','[1] then [1, 2]','[1, 2] then [1, 2]','Error'],
+    answer:1,
+    explanation:'Default mutable arguments in Python are created once. The same list is reused across calls: first call gives [1], second gives [1, 2].'
+  },
+  {
+    id:25, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'In a <strong>min-heap</strong> with n elements, what is the time complexity of extracting the minimum element?',
+    options:['O(1)','O(log n)','O(n)','O(n log n)'],
+    answer:1,
+    explanation:'Extracting the minimum takes O(log n) because after removing the root, the heap property must be restored by heapifying down.'
+  },
+
+  // ── TECHNICAL Q26–Q35 (1 mark) ──
+  {
+    id:26, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'The <strong>entropy</strong> H(X) of a fair coin is:',
+    options:['0 bits','0.5 bits','1 bit','2 bits'],
+    answer:2,
+    explanation:'H(X) = −[0.5 log₂ 0.5 + 0.5 log₂ 0.5] = −[−0.5 − 0.5] = 1 bit.'
+  },
+  {
+    id:27, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'In k-fold cross-validation with k=5 and 1000 samples, how many samples are used for training in each fold?',
+    options:['200','800','500','600'],
+    answer:1,
+    explanation:'Each fold uses 1 part (200 samples) for validation and 4 parts (800 samples) for training.'
+  },
+  {
+    id:28, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'Which of the following is a property of a <strong>consistent heuristic</strong> in A* search?',
+    options:[
+      'h(n) ≤ actual cost from n to goal',
+      'h(n) ≤ h(n\') + cost(n, n\') for all neighbors n\'',
+      'h(n) is always 0',
+      'h(n) = g(n) for all nodes'
+    ],
+    answer:1,
+    explanation:'A heuristic is consistent (monotone) if h(n) ≤ c(n,n\') + h(n\') for every successor n\'. Consistent implies admissible.'
+  },
+  {
+    id:29, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'If X and Y are independent random variables, then <strong>Cov(X, Y)</strong> equals:',
+    options:['Var(X) × Var(Y)','E[X] × E[Y]','0','1'],
+    answer:2,
+    explanation:'Independence implies zero covariance: Cov(X,Y) = E[XY] − E[X]E[Y] = E[X]E[Y] − E[X]E[Y] = 0.'
+  },
+  {
+    id:30, section:'tech', marks:1, neg:-0.33, type:'mcq',
+    text:'Which of the following is <strong>NOT</strong> a regularization technique?',
+    options:['L1 (Lasso)','L2 (Ridge)','Dropout','Batch Normalization'],
+    answer:3,
+    explanation:'Batch Normalization normalizes layer activations to stabilize training but is not a regularization technique in the strict sense. L1, L2, and Dropout are all regularization methods.'
+  },
+
+  // NAT Questions (Q31–Q35, 1 mark)
+  {
+    id:31, section:'tech', marks:1, neg:0, type:'nat',
+    text:'Consider a binary tree with 7 nodes arranged as a complete binary tree. What is the height of this tree? (Height = number of edges on the longest path from root to a leaf)',
+    answer_nat:2,
+    explanation:'A complete binary tree with 7 nodes has 3 levels (root at level 0). Height = 2 (edges from root to deepest leaf).'
+  },
+  {
+    id:32, section:'tech', marks:1, neg:0, type:'nat',
+    text:'In a hash table of size 10 using the hash function h(k) = k mod 10, if keys 15, 25, 35 are inserted using separate chaining, how many keys are stored in the bucket for index 5?',
+    answer_nat:3,
+    explanation:'All three keys (15, 25, 35) map to index 5 via mod 10. All are in the same chain → 3 keys.'
+  },
+  {
+    id:33, section:'tech', marks:1, neg:0, type:'nat',
+    text:'If P(A) = 0.4, P(B) = 0.5, and P(A ∩ B) = 0.2, find P(A | B). Enter the answer as a decimal rounded to 1 decimal place.',
+    answer_nat:0.4,
+    explanation:'P(A|B) = P(A ∩ B) / P(B) = 0.2 / 0.5 = 0.4.'
+  },
+  {
+    id:34, section:'tech', marks:1, neg:0, type:'nat',
+    text:'What is the minimum number of comparisons needed to find both the maximum AND minimum of an array of 8 elements? (Using the tournament method)',
+    answer_nat:10,
+    explanation:'Using the divide & conquer tournament approach: first pair up 8 elements (4 comparisons to find 4 winners/losers). Then 3 comparisons for max among winners, 3 for min among losers = 4 + 3 + 3 = 10 comparisons.'
+  },
+  {
+    id:35, section:'tech', marks:1, neg:0, type:'nat',
+    text:'Given the function f(x) = x³ − 3x + 2, find f\'(1) (the derivative evaluated at x = 1).',
+    answer_nat:0,
+    explanation:'f\'(x) = 3x² − 3. f\'(1) = 3(1)² − 3 = 3 − 3 = 0.'
+  },
+
+  // ── TECHNICAL Q36–Q65 (2 marks each) ──
+  {
+    id:36, section:'tech', marks:2, neg:-0.66, type:'mcq',
+    text:'Consider performing linear regression with features x₁ and x₂ to predict y. The model is y = w₀ + w₁x₁ + w₂x₂. We observe that x₂ = 3x₁ in all training samples. What problem does this create?',
+    options:[
+      'Overfitting',
+      'Perfect multicollinearity — the normal equations have no unique solution',
+      'High bias',
+      'Vanishing gradients'
+    ],
+    answer:1,
+    explanation:'Perfect multicollinearity (x₂ = 3x₁) makes the design matrix X singular, so X^T X is not invertible and the normal equations have infinitely many solutions.'
+  },
+  {
+    id:37, section:'tech', marks:2, neg:-0.66, type:'mcq',
+    text:'A decision tree is built on training data achieving 100% accuracy. When tested on unseen data, accuracy drops to 60%. What is the most likely cause?',
+    options:[
+      'Underfitting due to too few features',
+      'Overfitting due to the tree being too deep (memorized training data)',
+      'The test data has a different distribution — concept drift',
+      'The learning rate was too high'
+    ],
+    answer:1,
+    explanation:'A decision tree with 100% training accuracy but poor test accuracy is a classic sign of overfitting — the tree has memorized the training data including noise.'
+  },
+  {
+    id:38, section:'tech', marks:2, neg:-0.66, type:'mcq',
+    text:'Consider the SQL query:<br><div class="code-block"><span class="kw">SELECT</span> dept, <span class="fn">AVG</span>(salary)\n<span class="kw">FROM</span> Employees\n<span class="kw">GROUP BY</span> dept\n<span class="kw">HAVING</span> <span class="fn">AVG</span>(salary) > <span class="num">50000</span>;</div>Which departments are returned?',
+    options:[
+      'Departments where at least one employee earns > 50000',
+      'Departments where the average salary exceeds 50000',
+      'All departments, filtered to employees earning > 50000',
+      'Departments with salary sum > 50000'
+    ],
+    answer:1,
+    explanation:'HAVING filters groups (departments) where the aggregate function (AVG salary) satisfies the condition — departments where the average salary > 50000.'
+  },
+  {
+    id:39, section:'tech', marks:2, neg:-0.66, type:'mcq',
+    text:'Let A be a 3×3 matrix with eigenvalues λ₁=1, λ₂=2, λ₃=3. What is the determinant of A²?',
+    options:['6','12','36','216'],
+    answer:2,
+    explanation:'det(A) = λ₁ × λ₂ × λ₃ = 1 × 2 × 3 = 6. det(A²) = det(A)² = 36.'
+  },
+  {
+    id:40, section:'tech', marks:2, neg:-0.66, type:'mcq',
+    text:'In a Support Vector Machine (SVM) with a linear kernel, the margin is:',
+    options:[
+      '2 / ||w||',
+      '1 / ||w||²',
+      '||w|| / 2',
+      '2||w||'
+    ],
+    answer:0,
+    explanation:'The margin between the two hyperplanes w·x + b = ±1 is 2/||w||. SVM maximizes this by minimizing ||w||.'
+  },
+  {
+    id:41, section:'tech', marks:2, neg:-0.66, type:'mcq',
+    text:'What does the following Python code print?<div class="code-block"><span class="kw">def</span> <span class="fn">mystery</span>(n):\n    <span class="kw">if</span> n <= <span class="num">1</span>: <span class="kw">return</span> n\n    <span class="kw">return</span> <span class="fn">mystery</span>(n-<span class="num">1</span>) + <span class="fn">mystery</span>(n-<span class="num">2</span>)\n\n<span class="fn">print</span>(<span class="fn">mystery</span>(<span class="num">7</span>))</div>',
+    options:['11','13','21','8'],
+    answer:1,
+    explanation:'This is the Fibonacci function. mystery(7) = F(7) = 13. (Sequence: 0,1,1,2,3,5,8,13...)'
+  },
+  {
+    id:42, section:'tech', marks:2, neg:-0.66, type:'mcq',
+    text:'Consider Dijkstra\'s algorithm on a weighted directed graph. Which of the following is a <strong>necessary precondition</strong> for correctness?',
+    options:[
+      'All edge weights must be positive',
+      'The graph must be undirected',
+      'The graph must have no cycles',
+      'The graph must be a tree'
+    ],
+    answer:0,
+    explanation:'Dijkstra\'s algorithm requires all edge weights to be non-negative (positive). Negative weights can cause incorrect results; use Bellman-Ford for graphs with negative edges.'
+  },
+  {
+    id:43, section:'tech', marks:2, neg:-0.66, type:'mcq',
+    text:'The <strong>F1-score</strong> is the harmonic mean of precision and recall. If precision = 0.8 and recall = 0.6, what is the F1-score?',
+    options:['0.68','0.70','0.686','0.72'],
+    answer:2,
+    explanation:'F1 = 2 × (P × R) / (P + R) = 2 × (0.8 × 0.6) / (0.8 + 0.6) = 2 × 0.48 / 1.4 = 0.96/1.4 ≈ 0.686.'
+  },
+  {
+    id:44, section:'tech', marks:2, neg:-0.66, type:'mcq',
+    text:'In the <strong>Expectation-Maximization (EM)</strong> algorithm for Gaussian Mixture Models, the E-step computes:',
+    options:[
+      'The maximum likelihood parameters',
+      'The posterior probability (responsibility) of each component for each data point',
+      'The covariance matrices for each Gaussian',
+      'The gradient of the log-likelihood'
+    ],
+    answer:1,
+    explanation:'In the E-step, we compute the "responsibility" r(k|x) = P(z=k|x) — the posterior probability that data point x belongs to component k, given current parameters.'
+  },
+  {
+    id:45, section:'tech', marks:2, neg:-0.66, type:'mcq',
+    text:'Which relational algebra operation is equivalent to the SQL query:<br><code>SELECT * FROM R WHERE age > 25</code>?',
+    options:[
+      'π_{age > 25}(R)',
+      'σ_{age > 25}(R)',
+      'R ⋈_{age > 25} R',
+      'ρ_{age}(R)'
+    ],
+    answer:1,
+    explanation:'σ (sigma) is the selection operator in relational algebra, corresponding to the WHERE clause in SQL.'
+  },
+  {
+    id:46, section:'tech', marks:2, neg:-0.66, type:'mcq',
+    text:'The <strong>ROC curve</strong> plots:',
+    options:[
+      'Precision vs. Recall',
+      'True Positive Rate vs. False Positive Rate',
+      'Accuracy vs. Threshold',
+      'Loss vs. Epoch'
+    ],
+    answer:1,
+    explanation:'ROC (Receiver Operating Characteristic) curve plots TPR (Sensitivity) on the y-axis against FPR (1 − Specificity) on the x-axis across different classification thresholds.'
+  },
+  {
+    id:47, section:'tech', marks:2, neg:-0.66, type:'mcq',
+    text:'Consider a Markov chain with states {A, B, C} and transition matrix:<br><table class="q-table"><tr><th></th><th>A</th><th>B</th><th>C</th></tr><tr><td>A</td><td>0.5</td><td>0.3</td><td>0.2</td></tr><tr><td>B</td><td>0.2</td><td>0.6</td><td>0.2</td></tr><tr><td>C</td><td>0.1</td><td>0.3</td><td>0.6</td></tr></table>Starting in state A, what is the probability of being in state B after 1 step?',
+    options:['0.2','0.3','0.6','0.5'],
+    answer:1,
+    explanation:'From the transition matrix row A: P(A→B) = 0.3.'
+  },
+  {
+    id:48, section:'tech', marks:2, neg:-0.66, type:'mcq',
+    text:'In Convolutional Neural Networks, what is the purpose of <strong>max pooling</strong>?',
+    options:[
+      'To increase the number of parameters',
+      'To introduce non-linearity',
+      'To reduce spatial dimensions and provide translation invariance',
+      'To normalize activations across batches'
+    ],
+    answer:2,
+    explanation:'Max pooling downsamples feature maps, reducing spatial dimensions and the number of parameters, while also providing a degree of translation invariance.'
+  },
+  {
+    id:49, section:'tech', marks:2, neg:-0.66, type:'mcq',
+    text:'What is the space complexity of the Merge Sort algorithm?',
+    options:['O(1)','O(log n)','O(n)','O(n log n)'],
+    answer:2,
+    explanation:'Merge Sort requires O(n) auxiliary space for the temporary arrays used during merging.'
+  },
+  {
+    id:50, section:'tech', marks:2, neg:-0.66, type:'mcq',
+    text:'In <strong>ridge regression</strong> (L2 regularization), as the regularization parameter λ → ∞, the estimated coefficients approach:',
+    options:['The OLS estimates','Infinity','Zero','The mean of the response'],
+    answer:2,
+    explanation:'As λ → ∞, the penalty term dominates, shrinking all coefficients toward 0. This is the bias-variance tradeoff in action.'
+  },
+
+  // NAT questions (2 marks)
+  {
+    id:51, section:'tech', marks:2, neg:0, type:'nat',
+    text:'A random variable X is uniformly distributed over [0, 4]. What is <strong>P(1 ≤ X ≤ 3)</strong>? Enter as a decimal.',
+    answer_nat:0.5,
+    explanation:'P(1 ≤ X ≤ 3) = (3−1)/(4−0) = 2/4 = 0.5.'
+  },
+  {
+    id:52, section:'tech', marks:2, neg:0, type:'nat',
+    text:'Consider a fully connected neural network with input layer (3 nodes), one hidden layer (4 nodes), and output layer (2 nodes). Count only weight parameters (not biases). How many weight parameters are there?',
+    answer_nat:20,
+    explanation:'Layer 1→2: 3×4 = 12 weights. Layer 2→3: 4×2 = 8 weights. Total = 20 weights.'
+  },
+  {
+    id:53, section:'tech', marks:2, neg:0, type:'nat',
+    text:'The information gain of a feature in a decision tree is 0.3 bits. The entropy of the dataset before the split is 0.9 bits. What is the entropy after the split on this feature?',
+    answer_nat:0.6,
+    explanation:'Information Gain = H(before) − H(after). 0.3 = 0.9 − H(after) → H(after) = 0.6.'
+  },
+  {
+    id:54, section:'tech', marks:2, neg:0, type:'nat',
+    text:'What is the number of distinct topological orderings of a DAG with 4 nodes: A→B, A→C, B→D, C→D?',
+    answer_nat:2,
+    explanation:'Valid orderings: (1) A,B,C,D and (2) A,C,B,D. Total = 2.'
+  },
+  {
+    id:55, section:'tech', marks:2, neg:0, type:'nat',
+    text:'In k-nearest neighbor classification with k=3, a query point has the 3 nearest neighbors with labels [+1, +1, −1]. What probability does the classifier assign to class +1? Enter as a fraction (decimal).',
+    answer_nat:0.667,
+    explanation:'2 out of 3 neighbors are +1. P(+1) = 2/3 ≈ 0.667.'
+  },
+
+  // Multi-select questions (Q56–Q65, 2 marks)
+  {
+    id:56, section:'tech', marks:2, neg:0, type:'multi',
+    text:'Which of the following statements about <strong>random forests</strong> are TRUE? (Select all correct)',
+    options:[
+      'Each tree in a random forest is trained on a bootstrap sample of the data',
+      'Random forests reduce variance compared to a single decision tree',
+      'Random forests are always better than a single decision tree on all datasets',
+      'Feature subsampling is used when building each split in a tree'
+    ],
+    answer:[0,1,3],
+    explanation:'Random forests use bagging (bootstrap sampling) and random feature subsets at each split, reducing variance. They are not universally better — on very small clean datasets, a single tree may suffice.'
+  },
+  {
+    id:57, section:'tech', marks:2, neg:0, type:'multi',
+    text:'Which of the following are properties of a <strong>projection matrix</strong> P = X(XᵀX)⁻¹Xᵀ? (Select all correct)',
+    options:[
+      'P² = P (idempotent)',
+      'Pᵀ = P (symmetric)',
+      'All eigenvalues of P are 0 or 1',
+      'P is always invertible'
+    ],
+    answer:[0,1,2],
+    explanation:'Projection matrices are symmetric and idempotent. Eigenvalues are 0 or 1. P is generally not invertible (singular if rank < n).'
+  },
+  {
+    id:58, section:'tech', marks:2, neg:0, type:'multi',
+    text:'Which of the following search strategies are <strong>complete</strong> (guaranteed to find a solution if one exists)?',
+    options:[
+      'Breadth-First Search (on finite graphs)',
+      'Depth-First Search (on infinite graphs without repeated state checking)',
+      'Iterative Deepening DFS',
+      'A* with admissible heuristic'
+    ],
+    answer:[0,2,3],
+    explanation:'BFS is complete on finite graphs. DFS is not complete on infinite graphs (can go infinitely deep). IDDFS and A* (with admissible h) are both complete.'
+  },
+  {
+    id:59, section:'tech', marks:2, neg:0, type:'multi',
+    text:'Which of the following statements about <strong>gradient boosting</strong> are TRUE?',
+    options:[
+      'Each tree is trained on the residuals (negative gradients) of the previous ensemble',
+      'Gradient boosting reduces bias by adding trees sequentially',
+      'Gradient boosting trains all trees in parallel',
+      'A lower learning rate generally requires more trees but can improve generalization'
+    ],
+    answer:[0,1,3],
+    explanation:'Gradient boosting is sequential — each tree fits residuals. It reduces bias (unlike bagging which reduces variance). Trees are built sequentially, not in parallel. Lower learning rate + more trees is a common good practice.'
+  },
+  {
+    id:60, section:'tech', marks:2, neg:0, type:'multi',
+    text:'Which of the following conditions must hold for a function f: ℝ → ℝ to be <strong>convex</strong>?',
+    options:[
+      'f(λx + (1-λ)y) ≤ λf(x) + (1-λ)f(y) for all x, y and λ ∈ [0,1]',
+      'f\'\'(x) ≥ 0 for all x (if f is twice differentiable)',
+      'f has a unique global minimum',
+      'f is differentiable everywhere'
+    ],
+    answer:[0,1],
+    explanation:'Convexity is defined by the Jensen inequality condition (A). For twice-differentiable functions, f\'\'(x) ≥ 0 is equivalent (B). A convex function need not have a unique minimum (could be flat) and need not be differentiable everywhere (e.g., |x|).'
+  },
+  {
+    id:61, section:'tech', marks:2, neg:0, type:'multi',
+    text:'Which of the following are <strong>unsupervised learning</strong> algorithms?',
+    options:[
+      'K-Means Clustering',
+      'DBSCAN',
+      'Support Vector Regression',
+      'Autoencoders'
+    ],
+    answer:[0,1,3],
+    explanation:'K-Means, DBSCAN, and Autoencoders are all unsupervised — they learn from unlabeled data. SVR is a supervised regression method.'
+  },
+  {
+    id:62, section:'tech', marks:2, neg:0, type:'multi',
+    text:'Consider a relation R(A, B, C) with functional dependencies A→B and B→C. Which of the following normal form violations are present?',
+    options:[
+      'R violates 2NF if A is the primary key',
+      'R violates 3NF due to the transitive dependency A→B→C',
+      'R is already in BCNF',
+      'R violates 3NF if A is the primary key'
+    ],
+    answer:[1,3],
+    explanation:'With primary key A: A→B (fine, direct). But A→C via B is a transitive dependency, violating 3NF. 2NF is about partial dependencies on composite keys, not applicable here since key is single attribute A. R is not in BCNF since B→C and B is not a superkey.'
+  },
+  {
+    id:63, section:'tech', marks:2, neg:0, type:'multi',
+    text:'Which of the following statements about <strong>Long Short-Term Memory (LSTM)</strong> networks are TRUE?',
+    options:[
+      'LSTMs address the vanishing gradient problem in vanilla RNNs',
+      'LSTMs use gating mechanisms (input, forget, output gates)',
+      'LSTMs cannot process sequential data',
+      'The cell state in an LSTM acts as a long-term memory'
+    ],
+    answer:[0,1,3],
+    explanation:'LSTMs were designed to combat vanishing gradients through gating mechanisms and the cell state as long-term memory. They excel at sequential data processing.'
+  },
+  {
+    id:64, section:'tech', marks:2, neg:0, type:'multi',
+    text:'Which of the following are TRUE about the <strong>bias-variance tradeoff</strong>?',
+    options:[
+      'High model complexity typically leads to low bias and high variance',
+      'Regularization reduces variance at the cost of increased bias',
+      'Increasing training data typically reduces bias',
+      'A model with zero training error always has zero bias'
+    ],
+    answer:[0,1],
+    explanation:'High complexity → low bias, high variance (A true). Regularization adds constraints → higher bias, lower variance (B true). More data helps reduce variance not bias. Zero training error means low bias on training data but can still have high generalization error due to variance.'
+  },
+  {
+    id:65, section:'tech', marks:2, neg:0, type:'multi',
+    text:'Which of the following graph traversal properties are TRUE for <strong>Dijkstra\'s algorithm</strong>?',
+    options:[
+      'It uses a priority queue (min-heap)',
+      'It produces the shortest path tree from a source vertex',
+      'It works correctly with negative edge weights',
+      'Its time complexity with a binary min-heap is O((V + E) log V)'
+    ],
+    answer:[0,1,3],
+    explanation:'Dijkstra\'s uses a min-heap (A), produces shortest path tree (B), and runs in O((V+E) log V) with binary heap (D). It does NOT work with negative edge weights (C is false).'
+  }
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+const state = {
+  answers: {},    // qid -> selected option index or nat value
+  multiAnswers: {}, // qid -> Set of selected indices
+  marked: new Set(),
+  revealed: new Set(),
+  submitted: false
+};
+
+// ─────────────────────────────────────────────
+// BUILD QUESTION NAVIGATOR
+// ─────────────────────────────────────────────
+function buildNav() {
+  const gaQ = questions.filter(q => q.section === 'ga');
+  const techQ = questions.filter(q => q.section === 'tech');
+  function makeBtn(q) {
+    const btn = document.createElement('button');
+    btn.className = 'q-btn';
+    btn.textContent = q.id;
+    btn.id = `nav-${q.id}`;
+    btn.onclick = () => scrollToQ(q.id);
+    return btn;
+  }
+  const gaGrid = document.getElementById('grid-ga');
+  gaQ.forEach(q => gaGrid.appendChild(makeBtn(q)));
+  const techGrid = document.getElementById('grid-tech');
+  techQ.forEach(q => techGrid.appendChild(makeBtn(q)));
+}
+
+function scrollToQ(id) {
+  document.getElementById(`q-${id}`)?.scrollIntoView({behavior:'smooth', block:'start'});
+  document.querySelectorAll('.q-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`nav-${id}`)?.classList.add('active');
+}
+
+function updateNav(id) {
+  const btn = document.getElementById(`nav-${id}`);
+  if (!btn) return;
+  btn.classList.remove('answered','marked','active');
+  const isAnswered = state.answers[id] !== undefined || (state.multiAnswers[id] && state.multiAnswers[id].size > 0);
+  if (state.marked.has(id)) btn.classList.add('marked');
+  else if (isAnswered) btn.classList.add('answered');
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = questions.filter(q => {
+    if (q.type === 'multi') return state.multiAnswers[q.id] && state.multiAnswers[q.id].size > 0;
+    return state.answers[q.id] !== undefined;
+  }).length;
+  const pct = (answered / questions.length * 100).toFixed(0);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = `${answered} of ${questions.length} answered`;
+
+  // Update score pill
+  if (state.submitted) {
+    let score = 0;
+    questions.forEach(q => {
+      if (q.type === 'mcq') {
+        if (state.answers[q.id] === q.answer) score += q.marks;
+        else if (state.answers[q.id] !== undefined) score += q.neg;
+      } else if (q.type === 'nat') {
+        if (state.answers[q.id] !== undefined && Math.abs(parseFloat(state.answers[q.id]) - q.answer_nat) < 0.01) score += q.marks;
+      } else if (q.type === 'multi') {
+        const sel = state.multiAnswers[q.id] || new Set();
+        const correct = new Set(q.answer);
+        const isExact = sel.size === correct.size && [...sel].every(x => correct.has(x));
+        if (isExact) score += q.marks;
+      }
+    });
+    document.getElementById('score-pill').textContent = `Score: ${score.toFixed(1)} / 100`;
+  }
+}
+
+// ─────────────────────────────────────────────
+// BUILD QUESTIONS
+// ─────────────────────────────────────────────
+function buildQuestions() {
+  const container = document.getElementById('questions-container');
+
+  let currentSection = null;
+  questions.forEach((q, idx) => {
+    // Section header
+    if (q.section !== currentSection) {
+      currentSection = q.section;
+      const hdr = document.createElement('div');
+      hdr.className = 'section-header';
+      if (q.section === 'ga') {
+        hdr.innerHTML = `<span class="section-tag tag-ga">General Aptitude</span><span class="section-title">Q.1 – Q.10 | Q.1–Q.5 carry 1 mark, Q.6–Q.10 carry 2 marks</span>`;
+      } else {
+        hdr.innerHTML = `<span class="section-tag tag-tech">Technical Section</span><span class="section-title">Q.11 – Q.65 | Q.11–Q.35 carry 1 mark, Q.36–Q.65 carry 2 marks</span>`;
+      }
+      container.appendChild(hdr);
+    }
+
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `q-${q.id}`;
+
+    // Meta
+    const meta = document.createElement('div');
+    meta.className = 'q-meta';
+    const negStr = q.neg < 0 ? `<span class="neg">−${Math.abs(q.neg)}</span>` : '<span style="color:var(--muted)">0</span>';
+    meta.innerHTML = `
+      <span class="q-num">Q.${q.id}</span>
+      <span class="q-marks"><span class="pos">+${q.marks}</span> / ${negStr}</span>
+      <button class="mark-btn" id="mark-${q.id}" onclick="toggleMark(${q.id})">☆ Mark</button>
+      <span class="q-type-tag">${q.type === 'nat' ? 'NAT' : q.type === 'multi' ? 'MSQ' : 'MCQ'}</span>
+    `;
+    card.appendChild(meta);
+
+    // Question text
+    const qtext = document.createElement('div');
+    qtext.className = 'q-text';
+    qtext.innerHTML = q.text;
+    card.appendChild(qtext);
+
+    // Options / input
+    if (q.type === 'mcq') {
+      const opts = document.createElement('div');
+      opts.className = 'options';
+      q.options.forEach((opt, i) => {
+        const lbl = document.createElement('label');
+        lbl.className = 'option-label';
+        lbl.id = `opt-${q.id}-${i}`;
+        lbl.innerHTML = `
+          <input type="radio" name="q${q.id}" value="${i}" onchange="selectAnswer(${q.id}, ${i})">
+          <span class="opt-letter">${'ABCD'[i]}</span>
+          <span class="opt-text">${opt}</span>
+        `;
+        opts.appendChild(lbl);
+      });
+      card.appendChild(opts);
+    } else if (q.type === 'multi') {
+      state.multiAnswers[q.id] = new Set();
+      const opts = document.createElement('div');
+      opts.className = 'options';
+      q.options.forEach((opt, i) => {
+        const lbl = document.createElement('label');
+        lbl.className = 'option-label';
+        lbl.id = `opt-${q.id}-${i}`;
+        lbl.innerHTML = `
+          <input type="checkbox" name="q${q.id}" value="${i}" onchange="selectMulti(${q.id}, ${i}, this.checked)">
+          <span class="opt-letter">${'ABCD'[i]}</span>
+          <span class="opt-text">${opt}</span>
+        `;
+        opts.appendChild(lbl);
+      });
+      card.appendChild(opts);
+    } else if (q.type === 'nat') {
+      const natDiv = document.createElement('div');
+      natDiv.className = 'nat-input';
+      natDiv.innerHTML = `
+        <input type="number" step="any" placeholder="Enter numeric answer" 
+          id="nat-${q.id}" oninput="saveNAT(${q.id}, this.value)">
+        <span class="nat-hint">Type your answer</span>
+      `;
+      card.appendChild(natDiv);
+    }
+
+    // Actions
+    const actions = document.createElement('div');
+    actions.className = 'q-actions';
+    actions.innerHTML = `
+      <button class="btn btn-ghost" onclick="clearAnswer(${q.id})">Clear</button>
+      <button class="btn btn-answer" onclick="revealAnswer(${q.id})">Show Answer</button>
+    `;
+    card.appendChild(actions);
+
+    // Answer reveal div
+    const reveal = document.createElement('div');
+    reveal.className = 'answer-reveal';
+    reveal.id = `reveal-${q.id}`;
+    if (q.type === 'nat') {
+      reveal.innerHTML = `<div class="ans-correct">✓ Correct Answer: ${q.answer_nat}</div><div class="ans-explanation">${q.explanation}</div>`;
+    } else if (q.type === 'multi') {
+      const letters = q.answer.map(i => 'ABCD'[i]).join(', ');
+      reveal.innerHTML = `<div class="ans-correct">✓ Correct Answers: ${letters}</div><div class="ans-explanation">${q.explanation}</div>`;
+    } else {
+      reveal.innerHTML = `<div class="ans-correct">✓ Correct Answer: ${'ABCD'[q.answer]}</div><div class="ans-explanation">${q.explanation}</div>`;
+    }
+    card.appendChild(reveal);
+
+    container.appendChild(card);
+  });
+}
+
+// ─────────────────────────────────────────────
+// INTERACTIONS
+// ─────────────────────────────────────────────
+function selectAnswer(qid, idx) {
+  state.answers[qid] = idx;
+  document.getElementById(`q-${qid}`)?.classList.add('answered-card');
+  updateNav(qid);
+}
+
+function selectMulti(qid, idx, checked) {
+  if (!state.multiAnswers[qid]) state.multiAnswers[qid] = new Set();
+  if (checked) state.multiAnswers[qid].add(idx);
+  else state.multiAnswers[qid].delete(idx);
+  document.getElementById(`q-${qid}`)?.classList.add('answered-card');
+  updateNav(qid);
+}
+
+function saveNAT(qid, val) {
+  state.answers[qid] = val;
+  document.getElementById(`q-${qid}`)?.classList.add('answered-card');
+  updateNav(qid);
+}
+
+function clearAnswer(qid) {
+  delete state.answers[qid];
+  if (state.multiAnswers[qid]) state.multiAnswers[qid].clear();
+  // Clear radio/checkboxes
+  document.querySelectorAll(`input[name="q${qid}"]`).forEach(i => i.checked = false);
+  const natInput = document.getElementById(`nat-${qid}`);
+  if (natInput) natInput.value = '';
+  document.getElementById(`q-${qid}`)?.classList.remove('answered-card');
+  updateNav(qid);
+}
+
+function toggleMark(qid) {
+  const btn = document.getElementById(`mark-${qid}`);
+  const card = document.getElementById(`q-${qid}`);
+  if (state.marked.has(qid)) {
+    state.marked.delete(qid);
+    btn.classList.remove('active');
+    btn.textContent = '☆ Mark';
+    card.classList.remove('marked-card');
+  } else {
+    state.marked.add(qid);
+    btn.classList.add('active');
+    btn.textContent = '★ Marked';
+    card.classList.add('marked-card');
+  }
+  updateNav(qid);
+}
+
+function revealAnswer(qid) {
+  const reveal = document.getElementById(`reveal-${qid}`);
+  if (reveal) {
+    reveal.classList.toggle('show');
+    state.revealed.add(qid);
+  }
+}
+
+// ─────────────────────────────────────────────
+// SUBMIT
+// ─────────────────────────────────────────────
+function openSubmit() {
+  const answered = questions.filter(q => {
+    if (q.type === 'multi') return state.multiAnswers[q.id] && state.multiAnswers[q.id].size > 0;
+    return state.answers[q.id] !== undefined;
+  }).length;
+  document.getElementById('m-answered').textContent = answered;
+  document.getElementById('m-marked').textContent = state.marked.size;
+  document.getElementById('m-unattempted').textContent = questions.length - answered;
+  document.getElementById('modal').classList.add('open');
+}
+function closeSubmit() { document.getElementById('modal').classList.remove('open'); }
+
+function submitPaper() {
+  state.submitted = true;
+  closeSubmit();
+
+  // Reveal all answers and highlight correct/wrong
+  questions.forEach(q => {
+    const reveal = document.getElementById(`reveal-${q.id}`);
+    if (reveal) reveal.classList.add('show');
+
+    if (q.type === 'mcq') {
+      q.options.forEach((_, i) => {
+        const lbl = document.getElementById(`opt-${q.id}-${i}`);
+        if (!lbl) return;
+        if (i === q.answer) lbl.style.borderColor = 'var(--accent2)';
+        else if (state.answers[q.id] === i) lbl.style.borderColor = 'var(--danger)';
+      });
+    } else if (q.type === 'multi') {
+      q.options.forEach((_, i) => {
+        const lbl = document.getElementById(`opt-${q.id}-${i}`);
+        if (!lbl) return;
+        if (q.answer.includes(i)) lbl.style.borderColor = 'var(--accent2)';
+        else if (state.multiAnswers[q.id] && state.multiAnswers[q.id].has(i)) lbl.style.borderColor = 'var(--danger)';
+      });
+    }
+  });
+  updateProgress();
+}
+
+// ─────────────────────────────────────────────
+// TIMER
+// ─────────────────────────────────────────────
+let totalSeconds = 3 * 3600;
+function updateTimer() {
+  if (state.submitted) return;
+  totalSeconds--;
+  if (totalSeconds < 0) { submitPaper(); return; }
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  const timerEl = document.getElementById('timer');
+  timerEl.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if (totalSeconds < 600) timerEl.style.color = 'var(--danger)';
+  else if (totalSeconds < 1800) timerEl.style.color = 'var(--accent3)';
+}
+setInterval(updateTimer, 1000);
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+buildNav();
+buildQuestions();
+updateProgress();
+
+// Intersection observer to highlight nav
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id.replace('q-','');
+      document.querySelectorAll('.q-btn').forEach(b => b.classList.remove('active'));
+      const btn = document.getElementById(`nav-${id}`);
+      if (btn && !btn.classList.contains('answered') && !btn.classList.contains('marked')) {
+        btn.classList.add('active');
+      }
+    }
+  });
+}, {threshold: 0.3});
+
+document.querySelectorAll('.question-card').forEach(c => observer.observe(c));
+</script>
+</body>
+</html>

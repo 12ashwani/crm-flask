@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leave Management · Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#0d0d0f;--surface:#141416;--surface2:#1c1c1f;--border:#2a2a2e;--accent:#e8ff47;--accent2:#47d4ff;--text:#f0f0f0;--muted:#888;--danger:#ff5353;--success:#4dff91;--warning:#ffb347;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;}
+    .sidebar{width:240px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:32px 0;position:fixed;top:0;left:0;z-index:100;}
+    .sidebar-logo{padding:0 24px 32px;border-bottom:1px solid var(--border);}
+    .sidebar-logo span{display:inline-block;background:var(--accent);color:#0d0d0f;font-weight:800;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;padding:6px 12px;}
+    .sidebar-logo p{margin-top:8px;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.05em;}
+    nav{padding:24px 12px;flex:1;}
+    nav a{display:flex;align-items:center;gap:10px;padding:10px 14px;color:var(--muted);text-decoration:none;font-size:13px;font-weight:600;letter-spacing:0.04em;border-radius:6px;margin-bottom:4px;transition:all 0.2s;}
+    nav a:hover{color:var(--text);background:var(--surface2);}
+    nav a.active{color:var(--accent);background:rgba(232,255,71,0.08);}
+    nav a .dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+    .sidebar-footer{padding:20px 24px;border-top:1px solid var(--border);}
+    .sf-name{font-size:13px;font-weight:700;color:var(--text);}
+    .sf-role{font-size:11px;color:var(--accent);font-family:'DM Mono',monospace;margin-top:2px;text-transform:uppercase;letter-spacing:0.06em;}
+    .logout-link{display:flex;align-items:center;gap:7px;margin-top:12px;padding:8px 12px;border-radius:6px;border:1px solid var(--border);color:var(--muted);text-decoration:none;font-size:12px;font-weight:700;letter-spacing:0.04em;transition:all 0.2s;}
+    .logout-link:hover{color:var(--danger);border-color:var(--danger);background:rgba(255,83,83,0.06);}
+    .logout-link svg{width:13px;height:13px;}
+    .main{margin-left:240px;flex:1;display:flex;flex-direction:column;}
+    .topbar{padding:20px 40px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+    .topbar-title{font-size:14px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);}
+    .topbar-right{display:flex;align-items:center;gap:12px;}
+    .user-badge{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);padding:6px 14px 6px 8px;border-radius:100px;font-size:12px;font-weight:600;}
+    .user-badge .avatar{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#0d0d0f;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;}
+    .btn-logout{display:inline-flex;align-items:center;gap:6px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--muted);background:none;border:1px solid var(--border);padding:7px 16px;border-radius:6px;cursor:pointer;letter-spacing:0.06em;text-transform:uppercase;transition:all 0.2s;text-decoration:none;}
+    .btn-logout:hover{color:var(--danger);border-color:var(--danger);}
+    .content{padding:40px;}
+    .page-header{margin-bottom:28px;}
+    .page-header h1{font-size:30px;font-weight:800;letter-spacing:-0.02em;}
+    .page-header h1 em{font-style:normal;color:var(--accent);}
+    .page-header p{margin-top:8px;color:var(--muted);font-size:12px;font-family:'DM Mono',monospace;}
+    .flash-messages{margin-bottom:24px;}
+    .flash{padding:12px 18px;border-radius:6px;font-size:13px;font-weight:600;margin-bottom:8px;border-left:3px solid;}
+    .flash.success{background:rgba(77,255,145,0.07);border-color:var(--success);color:var(--success);}
+    .flash.danger{background:rgba(255,83,83,0.07);border-color:var(--danger);color:var(--danger);}
+    .flash.warning{background:rgba(255,179,71,0.07);border-color:var(--warning);color:var(--warning);}
+
+    /* Tabs */
+    .tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:16px;}
+    .tab-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:'Syne',sans-serif;font-size:12px;font-weight:600;padding:8px 16px;border-radius:6px 6px 0 0;cursor:pointer;text-transform:uppercase;letter-spacing:0.04em;transition:all 0.2s;border-bottom:none;}
+    .tab-btn.active{background:var(--surface);color:var(--accent);border-color:var(--accent);}
+    .tab-btn:hover:not(.active){color:var(--text);}
+
+    /* Leave Requests Table */
+    .requests-table{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px;}
+    .table-header{padding:16px 20px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);font-family:'DM Mono',monospace;}
+    .data-table{width:100%;border-collapse:collapse;}
+    .data-table th,.data-table td{padding:14px 20px;text-align:left;border-bottom:1px solid var(--border);}
+    .data-table th{font-size:10px;font-family:'DM Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);}
+    .data-table tbody tr:hover{background:rgba(255,255,255,0.02);}
+    .leave-type-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-family:'DM Mono',monospace;font-weight:700;padding:4px 8px;border-radius:100px;}
+    .type-casual{background:rgba(71,212,255,0.1);color:var(--accent2);}
+    .type-sick{background:rgba(255,83,83,0.1);color:var(--danger);}
+    .type-annual{background:rgba(77,255,145,0.1);color:var(--success);}
+    .type-maternity,.type-paternity,.type-emergency{background:rgba(255,179,71,0.1);color:var(--warning);}
+    .status-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-family:'DM Mono',monospace;font-weight:700;padding:4px 8px;border-radius:100px;}
+    .status-pending{background:rgba(255,179,71,0.1);color:var(--warning);}
+    .status-approved{background:rgba(77,255,145,0.1);color:var(--success);}
+    .status-rejected{background:rgba(255,83,83,0.1);color:var(--danger);}
+    .action-btn{display:inline-flex;align-items:center;gap:4px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:'Syne',sans-serif;font-size:11px;font-weight:600;padding:6px 12px;border-radius:4px;cursor:pointer;text-decoration:none;text-transform:uppercase;letter-spacing:0.04em;transition:all 0.15s;}
+    .action-btn:hover{color:var(--text);border-color:#555;}
+    .action-btn.approve:hover{border-color:var(--success);color:var(--success);}
+    .action-btn.reject:hover{border-color:var(--danger);color:var(--danger);}
+
+    /* Modal */
+    .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.78);backdrop-filter:blur(4px);z-index:999;align-items:center;justify-content:center;}
+    .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:90%;max-width:480px;overflow:hidden;}
+    .modal-hdr{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .modal-hdr h3{font-size:15px;font-weight:800;}
+    .modal-close{background:var(--surface2);border:1px solid var(--border);color:var(--muted);width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
+    .modal-close:hover{color:var(--danger);border-color:var(--danger);}
+    .modal-body{padding:20px 22px;}
+    .modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+    .fl{font-size:10px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);display:block;margin-bottom:5px;}
+    .fi{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;padding:9px 12px;outline:none;width:100%;transition:border-color 0.2s;margin-bottom:12px;}
+    .fi:focus{border-color:var(--accent2);}
+    .fi::placeholder{color:#444;font-weight:400;}
+    textarea.fi{resize:vertical;min-height:80px;}
+    .btn-modal{display:inline-flex;align-items:center;gap:6px;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;letter-spacing:0.04em;padding:9px 18px;border-radius:6px;border:none;cursor:pointer;text-transform:uppercase;transition:all 0.18s;}
+    .btn-cancel{background:none;border:1px solid var(--border);color:var(--muted);}
+    .btn-cancel:hover{color:var(--text);}
+    .btn-success{background:var(--success);color:#0d0d0f;}
+    .btn-danger{background:var(--danger);color:#fff;}
+
+    /* Navigation */
+    .nav-links{display:flex;gap:12px;margin-bottom:24px;}
+    .nav-link{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);text-decoration:none;font-size:12px;font-weight:600;padding:8px 16px;border-radius:6px;letter-spacing:0.04em;text-transform:uppercase;transition:all 0.2s;}
+    .nav-link:hover{color:var(--text);border-color:#555;}
+
+    @media(max-width:900px){.sidebar{display:none;}.main{margin-left:0;}.content{padding:20px;}}
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span>AdminPanel</span>
+    <p>v1.0 · Control Center</p>
+  </div>
+  <nav>
+    <a href="{{ url_for('admin.admin_dashboard') }}">
+      <span class="dot"></span> Dashboard
+    </a>
+    <a href="{{ url_for('admin.employees_list') }}">
+      <span class="dot"></span> Employees
+    </a>
+    <a href="{{ url_for('admin.create_employee') }}">
+      <span class="dot"></span> Add Employee
+    </a>
+    <a href="{{ url_for('attendance') }}">
+      <span class="dot"></span> Attendance
+    </a>
+    <a href="{{ url_for('admin.leave_management') }}" class="active">
+      <span class="dot"></span> Leave Management
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sf-name">{{ current_user.name or current_user.username }}</div>
+    <div class="sf-role">● Admin</div>
+    <a href="{{ url_for('auth.logout') }}" class="logout-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <span class="topbar-title">Leave Management</span>
+    <div class="topbar-right">
+      <div class="user-badge">
+        <div class="avatar">{{ (current_user.name or current_user.username)[0].upper() }}</div>
+        {{ current_user.name or current_user.username }}
+      </div>
+      <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
+    </div>
+  </header>
+
+  <div class="content">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="nav-links">
+      <a href="{{ url_for('admin.leave_management') }}" class="nav-link">📋 Leave Requests</a>
+      <a href="{{ url_for('admin.leave_balance') }}" class="nav-link">⚖️ Leave Balance</a>
+    </div>
+
+    <div class="page-header">
+      <h1>Leave <em>Management</em></h1>
+      <p>// Approve, reject and manage employee leave requests</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('pending')">Pending ({{ pending_requests|length }})</button>
+      <button class="tab-btn" onclick="showTab('approved')">Approved ({{ approved_requests|length }})</button>
+      <button class="tab-btn" onclick="showTab('rejected')">Rejected ({{ rejected_requests|length }})</button>
+    </div>
+
+    <!-- Pending Requests -->
+    <div id="pending-tab" class="tab-content">
+      {% if pending_requests %}
+      <div class="requests-table">
+        <div class="table-header">Pending Leave Requests</div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Type</th>
+              <th>Duration</th>
+              <th>Days</th>
+              <th>Reason</th>
+              <th>Applied On</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for request in pending_requests %}
+            <tr>
+              <td>
+                <div style="font-weight:700;">{{ request.employee_name }}</div>
+                <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">{{ request.department }}</div>
+              </td>
+              <td>
+                {% set type_class = 'type-' + request.leave_type %}
+                <span class="leave-type-badge {{ type_class }}">{{ request.leave_type|title }}</span>
+              </td>
+              <td style="font-family:'DM Mono',monospace;">
+                {{ request.start_date.strftime('%b %d') }} - {{ request.end_date.strftime('%b %d') }}
+              </td>
+              <td style="font-family:'DM Mono',monospace;">{{ request.total_days }}</td>
+              <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">{{ request.reason or '—' }}</td>
+              <td style="font-family:'DM Mono',monospace;font-size:12px;">{{ request.applied_on.strftime('%b %d, %Y') }}</td>
+              <td>
+                <div style="display:flex;gap:6px;">
+                  <button class="action-btn approve" onclick="openApproveModal({{ request.id }}, '{{ request.employee_name }}')">✓ Approve</button>
+                  <button class="action-btn reject" onclick="openRejectModal({{ request.id }}, '{{ request.employee_name }}')">✗ Reject</button>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:48px;color:var(--muted);font-family:'DM Mono',monospace;">
+        No pending leave requests
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Approved Requests -->
+    <div id="approved-tab" class="tab-content" style="display:none;">
+      {% if approved_requests %}
+      <div class="requests-table">
+        <div class="table-header">Approved Leave Requests</div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Type</th>
+              <th>Duration</th>
+              <th>Days</th>
+              <th>Approved By</th>
+              <th>Approved On</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for request in approved_requests %}
+            <tr>
+              <td>
+                <div style="font-weight:700;">{{ request.employee_name }}</div>
+                <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">{{ request.department }}</div>
+              </td>
+              <td>
+                {% set type_class = 'type-' + request.leave_type %}
+                <span class="leave-type-badge {{ type_class }}">{{ request.leave_type|title }}</span>
+              </td>
+              <td style="font-family:'DM Mono',monospace;">
+                {{ request.start_date.strftime('%b %d') }} - {{ request.end_date.strftime('%b %d') }}
+              </td>
+              <td style="font-family:'DM Mono',monospace;">{{ request.total_days }}</td>
+              <td>{{ request.approved_by_name or 'System' }}</td>
+              <td style="font-family:'DM Mono',monospace;font-size:12px;">{{ request.approved_on.strftime('%b %d, %Y') if request.approved_on else '—' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:48px;color:var(--muted);font-family:'DM Mono',monospace;">
+        No approved leave requests
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Rejected Requests -->
+    <div id="rejected-tab" class="tab-content" style="display:none;">
+      {% if rejected_requests %}
+      <div class="requests-table">
+        <div class="table-header">Rejected Leave Requests</div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Type</th>
+              <th>Duration</th>
+              <th>Days</th>
+              <th>Rejected By</th>
+              <th>Rejected On</th>
+              <th>Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for request in rejected_requests %}
+            <tr>
+              <td>
+                <div style="font-weight:700;">{{ request.employee_name }}</div>
+                <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">{{ request.department }}</div>
+              </td>
+              <td>
+                {% set type_class = 'type-' + request.leave_type %}
+                <span class="leave-type-badge {{ type_class }}">{{ request.leave_type|title }}</span>
+              </td>
+              <td style="font-family:'DM Mono',monospace;">
+                {{ request.start_date.strftime('%b %d') }} - {{ request.end_date.strftime('%b %d') }}
+              </td>
+              <td style="font-family:'DM Mono',monospace;">{{ request.total_days }}</td>
+              <td>{{ request.approved_by_name or 'System' }}</td>
+              <td style="font-family:'DM Mono',monospace;font-size:12px;">{{ request.approved_on.strftime('%b %d, %Y') if request.approved_on else '—' }}</td>
+              <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;">{{ request.remarks or '—' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:48px;color:var(--muted);font-family:'DM Mono',monospace;">
+        No rejected leave requests
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<!-- APPROVE MODAL -->
+<div id="approve-modal" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3 style="color:var(--success);">✓ Approve Leave Request</h3>
+      <button class="modal-close" onclick="closeModal('approve-modal')">✕</button>
+    </div>
+    <form method="POST" id="approve-form">
+      <div class="modal-body">
+        <p style="margin-bottom:16px;font-size:14px;">Approve leave request for <strong id="approve-employee"></strong>?</p>
+        <label class="fl">Remarks (optional)</label>
+        <textarea name="remarks" class="fi" placeholder="Approval notes..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal btn-cancel" onclick="closeModal('approve-modal')">Cancel</button>
+        <button type="submit" class="btn-modal btn-success">✓ Approve Leave</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- REJECT MODAL -->
+<div id="reject-modal" class="modal-backdrop">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3 style="color:var(--danger);">✗ Reject Leave Request</h3>
+      <button class="modal-close" onclick="closeModal('reject-modal')">✕</button>
+    </div>
+    <form method="POST" id="reject-form">
+      <div class="modal-body">
+        <p style="margin-bottom:16px;font-size:14px;">Reject leave request for <strong id="reject-employee"></strong>?</p>
+        <label class="fl">Reason for rejection <span style="color:var(--danger);">*</span></label>
+        <textarea name="remarks" class="fi" placeholder="Reason for rejection..." required></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal btn-cancel" onclick="closeModal('reject-modal')">Cancel</button>
+        <button type="submit" class="btn-modal btn-danger">✗ Reject Leave</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function showTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+    // Show selected tab
+    document.getElementById(tabName + '-tab').style.display = 'block';
+    event.target.classList.add('active');
+  }
+
+  function openApproveModal(leaveId, employeeName) {
+    document.getElementById('approve-employee').textContent = employeeName;
+    document.getElementById('approve-form').action = `/admin/leave/approve/${leaveId}`;
+    document.getElementById('approve-modal').style.display = 'flex';
+  }
+
+  function openRejectModal(leaveId, employeeName) {
+    document.getElementById('reject-employee').textContent = employeeName;
+    document.getElementById('reject-form').action = `/admin/leave/reject/${leaveId}`;
+    document.getElementById('reject-modal').style.display = 'flex';
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+  }
+
+  // Close modal when clicking outside
+  document.querySelectorAll('.modal-backdrop').forEach(modal => {
+    modal.addEventListener('click', e => {
+      if (e.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

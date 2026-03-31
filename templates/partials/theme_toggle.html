@@ -1,0 +1,102 @@
+<style>
+  .theme-toggle {
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 5px;
+    background-color: var(--bg-secondary, #f8f9fa);
+    color: var(--text-primary, #000);
+    border: 1px solid var(--border-color, #dee2e6);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+  }
+  
+  .theme-toggle:hover {
+    background-color: var(--border-color, #dee2e6);
+  }
+</style>
+
+<button class="theme-toggle" id="themeToggleBtn" title="Toggle Theme">
+  <span id="themeIcon">🌙</span>
+</button>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    const htmlElement = document.documentElement;
+    
+    function setTheme(theme) {
+      if (!['light', 'dark'].includes(theme)) return;
+      htmlElement.setAttribute('data-bs-theme', theme);
+      localStorage.setItem('theme', theme);
+      updateThemeIcon(theme);
+      applyThemeVariables(theme);
+
+      fetch('/toggle-theme', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ theme })
+      }).catch(() => {
+        // fallback is already persisted locally
+      });
+    }
+
+    function updateThemeIcon(theme) {
+      themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+
+    function applyThemeVariables(theme) {
+      const root = document.documentElement;
+      if (theme === 'dark') {
+        root.style.setProperty('--bg', '#0d0d0f');
+        root.style.setProperty('--surface', '#1a1a1d');
+        root.style.setProperty('--surface2', '#242428');
+        root.style.setProperty('--border', '#333333');
+        root.style.setProperty('--text', '#e0e0e0');
+        root.style.setProperty('--muted', '#a0a0a0');
+        root.style.setProperty('--muted2', '#707070');
+        root.style.setProperty('--bg-primary', '#1a1a1a');
+        root.style.setProperty('--bg-secondary', '#2d2d2d');
+        root.style.setProperty('--text-primary', '#ffffff');
+        root.style.setProperty('--text-secondary', '#aaaaaa');
+        root.style.setProperty('--border-color', '#444444');
+        root.style.setProperty('--card-bg', '#2d2d2d');
+        root.style.setProperty('--sidebar-bg', '#1a1a1a');
+      } else {
+        root.style.setProperty('--bg', '#f5f4f1');
+        root.style.setProperty('--surface', '#ffffff');
+        root.style.setProperty('--surface2', '#f0efe9');
+        root.style.setProperty('--border', '#e2e0d8');
+        root.style.setProperty('--text', '#1a1a1a');
+        root.style.setProperty('--muted', '#6b7280');
+        root.style.setProperty('--muted2', '#9ca3af');
+        root.style.setProperty('--bg-primary', '#ffffff');
+        root.style.setProperty('--bg-secondary', '#f8f9fa');
+        root.style.setProperty('--text-primary', '#000000');
+        root.style.setProperty('--text-secondary', '#666666');
+        root.style.setProperty('--border-color', '#dee2e6');
+        root.style.setProperty('--card-bg', '#ffffff');
+        root.style.setProperty('--sidebar-bg', '#f8f9fa');
+      }
+    }
+
+    const currentTheme = localStorage.getItem('theme') || htmlElement.getAttribute('data-bs-theme') || 'light';
+    setTheme(currentTheme);
+
+    if (themeToggleBtn) {
+      themeToggleBtn.addEventListener('click', function() {
+        const nextTheme = htmlElement.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light';
+        setTheme(nextTheme);
+      });
+    }
+  });
+</script>

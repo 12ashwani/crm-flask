@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leave Balance · Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#0d0d0f;--surface:#141416;--surface2:#1c1c1f;--border:#2a2a2e;--accent:#e8ff47;--accent2:#47d4ff;--text:#f0f0f0;--muted:#888;--danger:#ff5353;--success:#4dff91;--warning:#ffb347;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;}
+    .sidebar{width:240px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:32px 0;position:fixed;top:0;left:0;z-index:100;}
+    .sidebar-logo{padding:0 24px 32px;border-bottom:1px solid var(--border);}
+    .sidebar-logo span{display:inline-block;background:var(--accent);color:#0d0d0f;font-weight:800;font-size:13px;letter-spacing:0.1em;text-transform:uppercase;padding:6px 12px;}
+    .sidebar-logo p{margin-top:8px;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.05em;}
+    nav{padding:24px 12px;flex:1;}
+    nav a{display:flex;align-items:center;gap:10px;padding:10px 14px;color:var(--muted);text-decoration:none;font-size:13px;font-weight:600;letter-spacing:0.04em;border-radius:6px;margin-bottom:4px;transition:all 0.2s;}
+    nav a:hover{color:var(--text);background:var(--surface2);}
+    nav a.active{color:var(--accent);background:rgba(232,255,71,0.08);}
+    nav a .dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+    .sidebar-footer{padding:20px 24px;border-top:1px solid var(--border);}
+    .sf-name{font-size:13px;font-weight:700;color:var(--text);}
+    .sf-role{font-size:11px;color:var(--accent);font-family:'DM Mono',monospace;margin-top:2px;text-transform:uppercase;letter-spacing:0.06em;}
+    .logout-link{display:flex;align-items:center;gap:7px;margin-top:12px;padding:8px 12px;border-radius:6px;border:1px solid var(--border);color:var(--muted);text-decoration:none;font-size:12px;font-weight:700;letter-spacing:0.04em;transition:all 0.2s;}
+    .logout-link:hover{color:var(--danger);border-color:var(--danger);background:rgba(255,83,83,0.06);}
+    .logout-link svg{width:13px;height:13px;}
+    .main{margin-left:240px;flex:1;display:flex;flex-direction:column;}
+    .topbar{padding:20px 40px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+    .topbar-title{font-size:14px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);}
+    .topbar-right{display:flex;align-items:center;gap:12px;}
+    .user-badge{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);padding:6px 14px 6px 8px;border-radius:100px;font-size:12px;font-weight:600;}
+    .user-badge .avatar{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#0d0d0f;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;}
+    .btn-logout{display:inline-flex;align-items:center;gap:6px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--muted);background:none;border:1px solid var(--border);padding:7px 16px;border-radius:6px;cursor:pointer;letter-spacing:0.06em;text-transform:uppercase;transition:all 0.2s;text-decoration:none;}
+    .btn-logout:hover{color:var(--danger);border-color:var(--danger);}
+    .content{padding:40px;}
+    .page-header{margin-bottom:28px;}
+    .page-header h1{font-size:30px;font-weight:800;letter-spacing:-0.02em;}
+    .page-header h1 em{font-style:normal;color:var(--accent);}
+    .page-header p{margin-top:8px;color:var(--muted);font-size:12px;font-family:'DM Mono',monospace;}
+    .flash-messages{margin-bottom:24px;}
+    .flash{padding:12px 18px;border-radius:6px;font-size:13px;font-weight:600;margin-bottom:8px;border-left:3px solid;}
+    .flash.success{background:rgba(77,255,145,0.07);border-color:var(--success);color:var(--success);}
+    .flash.danger{background:rgba(255,83,83,0.07);border-color:var(--danger);color:var(--danger);}
+    .flash.warning{background:rgba(255,179,71,0.07);border-color:var(--warning);color:var(--warning);}
+
+    /* Leave Balance Cards */
+    .balance-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:20px;}
+    .balance-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px;}
+    .employee-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .emp-info{display:flex;flex-direction:column;}
+    .emp-name{font-size:18px;font-weight:700;}
+    .emp-dept{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;}
+    .leave-types{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+    .leave-type{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;}
+    .leave-type-name{font-size:12px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:8px;}
+    .leave-balance{font-size:24px;font-weight:800;color:var(--accent);margin-bottom:4px;}
+    .leave-used{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;}
+    .leave-used.used{color:var(--warning);}
+
+    /* Navigation */
+    .nav-links{display:flex;gap:12px;margin-bottom:24px;}
+    .nav-link{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);text-decoration:none;font-size:12px;font-weight:600;padding:8px 16px;border-radius:6px;letter-spacing:0.04em;text-transform:uppercase;transition:all 0.2s;}
+    .nav-link:hover{color:var(--text);border-color:#555;}
+
+    @media(max-width:900px){.sidebar{display:none;}.main{margin-left:0;}.content{padding:20px;}.balance-grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <span>AdminPanel</span>
+    <p>v1.0 · Control Center</p>
+  </div>
+  <nav>
+    <a href="{{ url_for('admin.admin_dashboard') }}">
+      <span class="dot"></span> Dashboard
+    </a>
+    <a href="{{ url_for('admin.employees_list') }}">
+      <span class="dot"></span> Employees
+    </a>
+    <a href="{{ url_for('admin.create_employee') }}">
+      <span class="dot"></span> Add Employee
+    </a>
+    <a href="{{ url_for('attendance') }}">
+      <span class="dot"></span> Attendance
+    </a>
+    <a href="{{ url_for('admin.leave_management') }}">
+      <span class="dot"></span> Leave Management
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sf-name">{{ current_user.name or current_user.username }}</div>
+    <div class="sf-role">● Admin</div>
+    <a href="{{ url_for('auth.logout') }}" class="logout-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <span class="topbar-title">Leave Balance</span>
+    <div class="topbar-right">
+      <div class="user-badge">
+        <div class="avatar">{{ (current_user.name or current_user.username)[0].upper() }}</div>
+        {{ current_user.name or current_user.username }}
+      </div>
+      <a href="{{ url_for('auth.logout') }}" class="btn-logout">Logout</a>
+    </div>
+  </header>
+
+  <div class="content">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <div class="nav-links">
+      <a href="{{ url_for('admin.leave_management') }}" class="nav-link">📋 Leave Requests</a>
+      <a href="{{ url_for('admin.leave_balance') }}" class="nav-link">⚖️ Leave Balance</a>
+    </div>
+
+    <div class="page-header">
+      <h1>Leave <em>Balance</em></h1>
+      <p>// Current leave balances for all employees</p>
+    </div>
+
+    <div class="balance-grid">
+      {% for item in employee_balances %}
+      <div class="balance-card">
+        <div class="employee-header">
+          <div class="emp-info">
+            <div class="emp-name">{{ item.employee.name }}</div>
+            <div class="emp-dept">{{ item.employee.department }} · {{ item.employee.role }}</div>
+          </div>
+        </div>
+
+        <div class="leave-types">
+          <div class="leave-type">
+            <div class="leave-type-name">Casual Leave</div>
+            <div class="leave-balance">{{ item.balance.casual }}</div>
+            <div class="leave-used">Available</div>
+          </div>
+
+          <div class="leave-type">
+            <div class="leave-type-name">Sick Leave</div>
+            <div class="leave-balance">{{ item.balance.sick }}</div>
+            <div class="leave-used">Available</div>
+          </div>
+
+          <div class="leave-type">
+            <div class="leave-type-name">Annual Leave</div>
+            <div class="leave-balance">{{ item.balance.annual }}</div>
+            <div class="leave-used">Available</div>
+          </div>
+
+          <div class="leave-type">
+            <div class="leave-type-name">Total Balance</div>
+            <div class="leave-balance">{{ item.balance.casual + item.balance.sick + item.balance.annual }}</div>
+            <div class="leave-used">Days</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

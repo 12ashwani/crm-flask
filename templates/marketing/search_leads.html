@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Search Leads | CRM Marketing</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fef9f0;
+      --surface: #ffffff;
+      --surface2: #fff5e6;
+      --border: #ffe0b5;
+      --accent: #f59e0b;
+      --accent-dark: #d97706;
+      --accent-bg: #fffbeb;
+      --accent-text: #b45309;
+      --green: #10b981;
+      --green-bg: #ecfdf5;
+      --red: #ef4444;
+      --red-bg: #fef2f2;
+      --blue: #3b82f6;
+      --blue-bg: #eff6ff;
+      --purple: #8b5cf6;
+      --purple-bg: #f5f3ff;
+      --text: #1e293b;
+      --muted: #78716c;
+      --muted2: #a8a29e;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --gradient-primary: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      --gradient-blue: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f0f12;
+      --surface: #1a1a1f;
+      --surface2: #1f1f24;
+      --border: #2d2d35;
+      --accent: #f59e0b;
+      --accent-dark: #d97706;
+      --accent-bg: #2d1a0c;
+      --accent-text: #fdba74;
+      --green: #10b981;
+      --green-bg: #064e3b;
+      --red: #ef4444;
+      --red-bg: #7f1a1a;
+      --blue: #3b82f6;
+      --blue-bg: #1e3a8a;
+      --purple: #8b5cf6;
+      --purple-bg: #2e1065;
+      --text: #fafafa;
+      --muted: #a1a1aa;
+      --muted2: #71717a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      transition: all 0.3s ease;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 260px;
+      min-height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-logo {
+      padding: 28px 24px;
+      border-bottom: 1px solid var(--border);
+      animation: slideInLeft 0.5s ease;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      background: var(--gradient-primary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 18px;
+      box-shadow: var(--shadow-sm);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .brand-text {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .sidebar-logo p {
+      margin-top: 8px;
+      font-size: 10px;
+      color: var(--muted2);
+      letter-spacing: 0.5px;
+    }
+
+    .nav-section {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--muted2);
+      padding: 0 16px;
+      margin: 20px 0 8px;
+    }
+
+    nav {
+      flex: 1;
+      padding: 16px 12px;
+    }
+
+    nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 4px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    nav a::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: var(--gradient-primary);
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 0;
+    }
+
+    nav a:hover::before {
+      left: 0;
+      opacity: 0.1;
+    }
+
+    nav a i {
+      font-size: 18px;
+      width: 22px;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.3s ease;
+    }
+
+    nav a:hover i {
+      transform: translateX(3px);
+    }
+
+    nav a span {
+      position: relative;
+      z-index: 1;
+    }
+
+    nav a:hover {
+      color: var(--accent);
+      transform: translateX(4px);
+    }
+
+    nav a.active {
+      color: var(--accent);
+      background: var(--accent-bg);
+      position: relative;
+    }
+
+    nav a.active::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 24px;
+      background: var(--gradient-primary);
+      border-radius: 0 4px 4px 0;
+      animation: slideInLeft 0.3s ease;
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateY(-50%) scaleY(0);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(-50%) scaleY(1);
+      }
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      margin: 16px;
+      background: var(--surface2);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      animation: fadeInUp 0.5s ease;
+    }
+
+    .sf-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .sf-role {
+      font-size: 10px;
+      color: var(--accent);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .logout-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--surface);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logout-link::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #dc2626, #ef4444);
+      transition: all 0.3s ease;
+      z-index: 0;
+    }
+
+    .logout-link:hover::before {
+      left: 0;
+    }
+
+    .logout-link i, .logout-link span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .logout-link:hover {
+      color: white;
+      border-color: transparent;
+      transform: translateX(-2px);
+    }
+
+    /* MAIN */
+    .main {
+      margin-left: 260px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      padding: 16px 32px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      animation: slideInDown 0.5s ease;
+    }
+
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .topbar-left h2 {
+      font-size: 20px;
+      font-weight: 700;
+      background: var(--gradient-blue);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .topbar-left p {
+      font-size: 11px;
+      color: var(--muted2);
+      margin-top: 4px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .theme-toggle {
+      width: 38px;
+      height: 38px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      color: var(--muted);
+    }
+
+    .theme-toggle:hover {
+      background: var(--gradient-primary);
+      color: white;
+      transform: rotate(15deg) scale(1.1);
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 6px 16px 6px 10px;
+      border-radius: 40px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      transition: all 0.3s ease;
+    }
+
+    .user-badge:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .user-badge .av {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--gradient-primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      animation: rotateIn 0.5s ease;
+    }
+
+    @keyframes rotateIn {
+      from {
+        opacity: 0;
+        transform: rotate(-180deg) scale(0);
+      }
+      to {
+        opacity: 1;
+        transform: rotate(0) scale(1);
+      }
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-primary {
+      background: var(--gradient-primary);
+      color: white;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    /* CONTENT */
+    .content {
+      padding: 32px;
+    }
+
+    /* FLASH MESSAGES */
+    .flash-messages {
+      margin-bottom: 24px;
+    }
+
+    .flash {
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 10px;
+      border-left: 4px solid;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideInRight 0.4s ease;
+      transition: all 0.3s ease;
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .flash.success {
+      background: var(--green-bg);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .flash.danger {
+      background: var(--red-bg);
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    /* SEARCH HERO */
+    .search-hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 28px;
+      animation: fadeInUp 0.5s ease;
+      transition: all 0.3s ease;
+    }
+
+    .search-hero:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    .search-hero h3 {
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--muted2);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .search-form {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      color: var(--muted2);
+      transition: all 0.3s ease;
+    }
+
+    .search-box input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      padding: 12px 16px 12px 44px;
+      outline: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .search-box input::placeholder {
+      color: var(--muted2);
+    }
+
+    .result-meta {
+      margin-top: 16px;
+      font-size: 12px;
+      color: var(--muted2);
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .result-meta strong {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* TABLE CARD */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      animation: fadeInUp 0.6s ease;
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+    }
+
+    .tbl-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th {
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--muted2);
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 14px 16px;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+      color: var(--text);
+    }
+
+    tbody tr {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    tbody tr:hover {
+      background: var(--surface2);
+      transform: scale(1.01);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* COMPANY CELL */
+    .co-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .co-av {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--gradient-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      color: white;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    tr:hover .co-av {
+      transform: scale(1.05) rotate(3deg);
+    }
+
+    .co-n {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .co-e {
+      font-size: 11px;
+      color: var(--muted2);
+    }
+
+    /* PERSON CHIP */
+    .pchip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pav {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+    }
+
+    .pav.mkt {
+      background: var(--accent-bg);
+      color: var(--accent);
+    }
+
+    .pav.ops {
+      background: var(--green-bg);
+      color: var(--green);
+    }
+
+    tr:hover .pav {
+      transform: scale(1.1);
+    }
+
+    .pn {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* SERVICE BADGES */
+    .svc {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      transition: all 0.3s ease;
+    }
+
+    .svc:hover {
+      transform: translateY(-2px);
+    }
+
+    .svc-plastic {
+      background: var(--green-bg);
+      color: var(--green);
+    }
+    .svc-battery {
+      background: var(--warning-bg);
+      color: var(--warning);
+    }
+    .svc-ewaste {
+      background: var(--blue-bg);
+      color: var(--blue);
+    }
+    .svc-bis {
+      background: var(--accent-bg);
+      color: var(--accent);
+    }
+    .svc-lmpc {
+      background: var(--red-bg);
+      color: var(--red);
+    }
+    .svc-cdsco {
+      background: var(--purple-bg);
+      color: var(--purple);
+    }
+    .svc-default {
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    /* BADGES */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 100px;
+      white-space: nowrap;
+      transition: all 0.3s ease;
+      animation: badgePop 0.4s ease;
+    }
+
+    @keyframes badgePop {
+      0% {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .badge:hover {
+      transform: scale(1.05);
+    }
+
+    .badge-new {
+      background: var(--blue-bg);
+      color: var(--blue);
+    }
+    .badge-assigned {
+      background: var(--green-bg);
+      color: var(--green);
+    }
+    .badge-progress {
+      background: var(--accent-bg);
+      color: var(--accent);
+    }
+    .badge-closed {
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .badge-pending {
+      background: var(--warning-bg);
+      color: var(--warning);
+    }
+
+    /* ASSIGN FORM */
+    .aform {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .msel {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 6px 10px;
+      outline: none;
+      cursor: pointer;
+      max-width: 130px;
+      transition: all 0.3s ease;
+    }
+
+    .msel:focus {
+      border-color: var(--accent);
+      transform: scale(1.02);
+    }
+
+    .mbtn {
+      background: var(--gradient-primary);
+      border: none;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .mbtn:hover {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    /* EMPTY STATE */
+    .empty {
+      text-align: center;
+      padding: 80px 20px;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    .empty i {
+      font-size: 64px;
+      color: var(--muted2);
+      margin-bottom: 20px;
+      opacity: 0.5;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .empty h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .empty p {
+      font-size: 13px;
+      color: var(--muted2);
+    }
+
+    .empty a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .empty a:hover {
+      text-decoration: underline;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 200;
+      }
+      
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      
+      .main {
+        margin-left: 0;
+      }
+      
+      .content {
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .search-form {
+        flex-direction: column;
+      }
+      
+      .search-box {
+        width: 100%;
+      }
+      
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+      
+      th, td {
+        padding: 10px 12px;
+      }
+    }
+  </style>
+</head>
+<body data-theme="light">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">
+      <div class="brand-mark">M</div>
+      <div class="brand-text">MarketHub</div>
+    </div>
+    <p>Marketing Portal</p>
+  </div>
+  <nav>
+    <div class="nav-section">Main</div>
+    <a href="{{ url_for('marketing.dashboard') }}">
+      <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
+    </a>
+    <a href="{{ url_for('marketing.marketing_leads') }}">
+      <i class="bi bi-clipboard-data"></i> <span>All Leads</span>
+    </a>
+    <a href="{{ url_for('marketing.search') }}" class="active">
+      <i class="bi bi-search"></i> <span>Search Leads</span>
+    </a>
+    <a href="{{ url_for('marketing.analytics') }}">
+      <i class="bi bi-graph-up"></i> <span>Analytics</span>
+    </a>
+    <div class="nav-section">Leads</div>
+    <a href="{{ url_for('marketing.filter_by_status', status='New') }}">
+      <i class="bi bi-star"></i> <span>New Leads</span>
+    </a>
+    <a href="{{ url_for('marketing.assigned_leads') }}">
+      <i class="bi bi-person-check"></i> <span>Assigned</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sf-name">{{ current_user.name or current_user.username }}</div>
+    <div class="sf-role">● Marketing</div>
+    <a href="{{ url_for('auth.logout') }}" class="logout-link">
+      <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
+    </a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h2><i class="bi bi-search"></i> Search Results</h2>
+      <p>// lead search · "{{ request.args.get('q', '') }}"</p>
+    </div>
+    <div class="topbar-right">
+      <button id="themeToggle" class="theme-toggle" title="Toggle Theme">
+        <i class="bi bi-moon-fill" id="themeIcon"></i>
+      </button>
+      <div class="user-badge">
+        <div class="av">{{ (current_user.name or current_user.username)[0].upper() }}</div>
+        {{ current_user.name or current_user.username }}
+      </div>
+      <a href="{{ url_for('marketing.marketing_leads') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> All Leads
+      </a>
+    </div>
+  </header>
+
+  <div class="content">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">
+              <i class="bi bi-{% if category == 'success' %}check-circle-fill{% else %}exclamation-triangle-fill{% endif %}"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- SEARCH HERO -->
+    <div class="search-hero">
+      <h3><i class="bi bi-search"></i> Search Leads</h3>
+      <form method="GET" action="{{ url_for('marketing.search') }}" class="search-form">
+        <div class="search-box">
+          <i class="bi bi-search"></i>
+          <input type="text" name="q" value="{{ request.args.get('q', '') }}" placeholder="Search by company name, service, or contact..." autofocus>
+        </div>
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-search"></i> Search
+        </button>
+        {% if request.args.get('q') %}
+          <a href="{{ url_for('marketing.marketing_leads') }}" class="btn btn-secondary">
+            <i class="bi bi-x-lg"></i> Clear
+          </a>
+        {% endif %}
+      </form>
+      {% if request.args.get('q') %}
+        <div class="result-meta">
+          <i class="bi bi-info-circle"></i> Found <strong>{{ leads|length }}</strong> result{{ 's' if leads|length != 1 else '' }} for "<strong>{{ request.args.get('q') }}</strong>"
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- RESULTS -->
+    <div class="card">
+      {% if leads %}
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Service</th>
+              <th>Contact</th>
+              <th>Created By</th>
+              <th>Assigned To</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for lead in leads %}
+            <tr>
+              <td>
+                <div class="co-cell">
+                  <div class="co-av">{{ lead.company_name[0].upper() if lead.company_name else '?' }}</div>
+                  <div>
+                    <div class="co-n">{{ lead.company_name or '—' }}</div>
+                    <div class="co-e"><i class="bi bi-envelope"></i> {{ lead.email or 'No email' }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                {% if lead.service %}
+                  {% set sl = lead.service|lower|replace('-','') %}
+                  <span class="svc {% if 'plastic' in sl %}svc-plastic{% elif 'battery' in sl %}svc-battery{% elif 'waste' in sl %}svc-ewaste{% elif sl=='bis' %}svc-bis{% elif sl=='lmpc' %}svc-lmpc{% elif sl=='cdsco' %}svc-cdsco{% else %}svc-default{% endif %}">
+                    {{ lead.service }}
+                  </span>
+                {% else %}
+                  <span style="color: var(--muted2); font-size: 11px;">—</span>
+                {% endif %}
+              </td>
+              <td>
+                <div style="font-size: 13px; font-weight: 600;">{{ lead.get('auth_person_name') or '—' }}</div>
+                <div style="font-size: 10px; color: var(--muted2); margin-top: 2px;">
+                  <i class="bi bi-telephone"></i> {{ lead.get('auth_person_number') or 'No phone' }}
+                </div>
+              </td>
+              <td>
+                <div class="pchip">
+                  <div class="pav mkt">{{ (lead.get('created_by_name') or current_user.username)[0].upper() }}</div>
+                  <span class="pn">{{ lead.get('created_by_name') or current_user.username }}</span>
+                </div>
+              </td>
+              <td>
+                {% if lead.get('assigned_to_name') %}
+                  <div class="pchip">
+                    <div class="pav ops">{{ lead.assigned_to_name[0].upper() }}</div>
+                    <span class="pn" style="color: var(--green);">{{ lead.assigned_to_name }}</span>
+                  </div>
+                {% else %}
+                  <span style="font-size: 11px; color: var(--muted2);">— unassigned</span>
+                {% endif %}
+              </td>
+              <td>
+                {% set s = (lead.status or '')|lower %}
+                {% if 'new' in s %}
+                  <span class="badge badge-new"><i class="bi bi-star-fill"></i> New</span>
+                {% elif 'assigned' in s %}
+                  <span class="badge badge-assigned"><i class="bi bi-person-check-fill"></i> Assigned</span>
+                {% elif 'progress' in s %}
+                  <span class="badge badge-progress"><i class="bi bi-arrow-repeat"></i> In Progress</span>
+                {% elif 'closed' in s %}
+                  <span class="badge badge-closed"><i class="bi bi-check-circle-fill"></i> Closed</span>
+                {% else %}
+                  <span class="badge badge-pending">{{ lead.status or 'Pending' }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if lead.status != 'Assigned to Operations' %}
+                <form method="POST" action="{{ url_for('marketing.assign_ops', lead_id=lead.id) }}" class="aform">
+                  <select name="operation_executive" class="msel" required>
+                    <option value="" disabled selected>Pick exec…</option>
+                    {% for emp in ops_employees %}
+                      <option value="{{ emp.id }}">{{ emp.name }}</option>
+                    {% endfor %}
+                  </select>
+                  <button type="submit" class="mbtn"><i class="bi bi-arrow-right"></i></button>
+                </form>
+                {% else %}
+                  <span style="font-size: 11px; color: var(--green); font-weight: 600;">
+                    <i class="bi bi-check-circle-fill"></i> Done
+                  </span>
+                {% endif %}
+               </td>
+             </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty">
+        <i class="bi bi-search"></i>
+        <h3>No results found</h3>
+        <p>Try a different search term or <a href="{{ url_for('marketing.marketing_leads') }}">view all leads</a></p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  // Theme Toggle
+  const html = document.documentElement;
+  const themeToggle = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+
+  function setTheme(theme) {
+    html.setAttribute('data-theme', theme);
+    localStorage.setItem('marketing_theme', theme);
+    
+    if (theme === 'light') {
+      themeIcon.className = 'bi bi-sun-fill';
+    } else {
+      themeIcon.className = 'bi bi-moon-fill';
+    }
+  }
+
+  const savedTheme = localStorage.getItem('marketing_theme') || 'light';
+  setTheme(savedTheme);
+
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+  });
+
+  // Auto-dismiss flash messages
+  setTimeout(() => {
+    const flashes = document.querySelectorAll('.flash');
+    flashes.forEach(flash => {
+      flash.style.opacity = '0';
+      flash.style.transform = 'translateX(-30px)';
+      setTimeout(() => flash.remove(), 300);
+    });
+  }, 5000);
+</script>
+</body>
+</html>

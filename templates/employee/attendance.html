@@ -1,0 +1,812 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+  
+  <!-- Modern Minimalist Header -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <div class="modern-header">
+        <div class="header-content">
+          <div class="header-left">
+            <div class="header-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 8V12L15 15M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <h1 class="header-title">Attendance Tracker</h1>
+              <p class="header-subtitle">Manage your daily attendance with ease</p>
+            </div>
+          </div>
+          <div class="header-right">
+            <div class="date-chip">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              <span id="currentDateModern"></span>
+            </div>
+            <div class="time-chip">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span id="currentTimeModern"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Today's Status Card - Clean Design -->
+  <div class="status-card mb-4">
+    <div class="status-card-inner">
+      <div class="status-left">
+        <div class="status-label">Today's Status</div>
+        {% if today_record %}
+          <div class="status-value {% if today_record.status == 'present' %}status-present{% elif today_record.status == 'half_day' %}status-halfday{% else %}status-absent{% endif %}">
+            {{ today_record.status|replace('_', ' ')|title }}
+          </div>
+          <div class="status-time-info">
+            <div class="time-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 8v4l3 3M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+              </svg>
+              <span>Check In: <strong>{{ today_record.check_in_display or 'Not yet' }}</strong></span>
+            </div>
+            <div class="time-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 8v4l3 3M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+              </svg>
+              <span>Check Out: <strong>{{ today_record.check_out_display or 'Not yet' }}</strong></span>
+            </div>
+          </div>
+          {% if today_record.working_hours %}
+            <div class="working-hours">
+              <span>Today's Work: <strong>{{ today_record.working_hours }}</strong></span>
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="status-value status-not-marked">Not Marked</div>
+          <p class="status-message">You haven't checked in yet today</p>
+        {% endif %}
+      </div>
+      <div class="status-right">
+        {% if not today_record or not today_record.check_in_display %}
+          <button class="action-btn checkin-btn" onclick="submitAttendanceForm('{{ url_for('employee.check_in') }}')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            Check In
+          </button>
+        {% endif %}
+        {% if today_record and today_record.check_in_display and not today_record.check_out_display %}
+          <button class="action-btn checkout-btn" onclick="submitAttendanceForm('{{ url_for('employee.check_out') }}')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            Check Out
+          </button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid mb-4">
+    <div class="stat-item">
+      <div class="stat-icon present-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M20 6L9 17L4 12" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="stat-info">
+        <div class="stat-number">{{ present_count|default(0) }}</div>
+        <div class="stat-label">Present Days</div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon halfday-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M12 3v1M12 20v1M3 12h1M20 12h1M5.64 5.64l.7.7M17.66 17.66l.7.7" stroke-width="2"/>
+          <circle cx="12" cy="12" r="4" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="stat-info">
+        <div class="stat-number">{{ halfday_count|default(0) }}</div>
+        <div class="stat-label">Half Days</div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon absent-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M18 6L6 18M6 6L18 18" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="stat-info">
+        <div class="stat-number">{{ absent_count|default(0) }}</div>
+        <div class="stat-label">Absent Days</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- History Section -->
+  <div class="history-section">
+    <div class="history-header">
+      <h3 class="history-title">Attendance History</h3>
+      <div class="history-actions">
+        <div class="search-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="11" cy="11" r="8" stroke-width="2"/>
+            <path d="M21 21L17 17" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input type="text" id="searchHistory" placeholder="Search by date...">
+        </div>
+        <button class="export-btn" onclick="exportAttendance()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M12 3v12m0 0l-3-3m3 3l3-3M5 21h14" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Export
+        </button>
+      </div>
+    </div>
+
+    <div class="history-table-wrapper">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Check In</th>
+            <th>Check Out</th>
+            <th>Hours</th>
+          </tr>
+        </thead>
+        <tbody id="historyTableBody">
+          {% for record in records %}
+          <tr>
+            <td class="date-cell">{{ record.date_display }}</td>
+            <td>
+              <span class="status-chip {% if record.status == 'present' %}chip-present{% elif record.status == 'half_day' %}chip-halfday{% else %}chip-absent{% endif %}">
+                {{ record.status|replace('_', ' ')|title }}
+              </span>
+            </td>
+            <td>{{ record.check_in_display or '—' }}</td>
+            <td>{{ record.check_out_display or '—' }}</td>
+            <td class="hours-cell">{{ record.working_hours or '—' }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" class="empty-state">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M12 8v4l3 3M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" stroke-width="1.5"/>
+              </svg>
+              <p>No attendance records found</p>
+              <small>Start by checking in today</small>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Rules Section - Compact -->
+  <div class="rules-section">
+    <div class="rules-header">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <circle cx="12" cy="12" r="10" stroke-width="2"/>
+        <path d="M12 16v-4M12 8h.01" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>Attendance Guidelines</span>
+    </div>
+    <div class="rules-grid">
+      <div class="rule-chip">
+        <span class="dot dot-primary"></span>
+        Check-in by {{ standard_check_in }}:00 AM
+      </div>
+      <div class="rule-chip">
+        <span class="dot dot-success"></span>
+        On-time = Full day
+      </div>
+      <div class="rule-chip">
+        <span class="dot dot-warning"></span>
+        After {{ half_day_cutoff }}:00 AM = Half day
+      </div>
+      <div class="rule-chip">
+        <span class="dot dot-danger"></span>
+        No check-in = Absent
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Modern Header */
+.modern-header {
+  background: white;
+  border-radius: 24px;
+  padding: 24px 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.header-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0 0 4px 0;
+}
+
+.header-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  gap: 12px;
+}
+
+.date-chip, .time-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #f5f5f5;
+  border-radius: 40px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Status Card */
+.status-card {
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.status-card-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32px;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.status-left {
+  flex: 1;
+}
+
+.status-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.status-value {
+  font-size: 48px;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.status-present {
+  color: #10b981;
+}
+
+.status-halfday {
+  color: #f59e0b;
+}
+
+.status-absent {
+  color: #ef4444;
+}
+
+.status-not-marked {
+  color: #6b7280;
+}
+
+.status-message {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.status-time-info {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 12px;
+}
+
+.time-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.working-hours {
+  background: #f0fdf4;
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 40px;
+  font-size: 14px;
+  color: #10b981;
+}
+
+.status-right {
+  flex-shrink: 0;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.checkin-btn {
+  background: #10b981;
+  color: white;
+}
+
+.checkin-btn:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+.checkout-btn {
+  background: #f59e0b;
+  color: white;
+}
+
+.checkout-btn:hover {
+  background: #d97706;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.stat-item {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.present-icon {
+  background: #d1fae5;
+  color: #10b981;
+}
+
+.halfday-icon {
+  background: #fed7aa;
+  color: #f59e0b;
+}
+
+.absent-icon {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-number {
+  font-size: 28px;
+  font-weight: 800;
+  color: #1a1a2e;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* History Section */
+.history-section {
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.history-header {
+  padding: 24px 32px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.history-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0;
+}
+
+.history-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.search-box {
+  position: relative;
+}
+
+.search-box svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
+
+.search-box input {
+  padding: 8px 16px 8px 40px;
+  border: 1px solid #e5e7eb;
+  border-radius: 40px;
+  font-size: 14px;
+  width: 220px;
+  transition: all 0.2s ease;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 40px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.export-btn:hover {
+  background: #e5e7eb;
+  transform: translateY(-1px);
+}
+
+/* History Table */
+.history-table-wrapper {
+  overflow-x: auto;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-table thead tr {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.history-table th {
+  text-align: left;
+  padding: 16px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.history-table td {
+  padding: 16px 20px;
+  font-size: 14px;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.history-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.date-cell {
+  font-weight: 500;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 40px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.chip-present {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.chip-halfday {
+  background: #fed7aa;
+  color: #92400e;
+}
+
+.chip-absent {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.hours-cell {
+  font-weight: 500;
+  color: #667eea;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px !important;
+  color: #9ca3af;
+}
+
+.empty-state svg {
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  margin: 8px 0 4px;
+  font-weight: 500;
+}
+
+/* Rules Section */
+.rules-section {
+  background: white;
+  border-radius: 20px;
+  padding: 20px 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.rules-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.rules-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.rule-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: #f9fafb;
+  border-radius: 40px;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot-primary {
+  background: #667eea;
+}
+
+.dot-success {
+  background: #10b981;
+}
+
+.dot-warning {
+  background: #f59e0b;
+}
+
+.dot-danger {
+  background: #ef4444;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .status-value {
+    font-size: 32px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .status-time-info {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .history-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .search-box input {
+    width: 100%;
+  }
+}
+</style>
+
+<script>
+// Update date and time
+function updateDateTimeModern() {
+  const now = new Date();
+  const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+  
+  const dateEl = document.getElementById('currentDateModern');
+  const timeEl = document.getElementById('currentTimeModern');
+  
+  if (dateEl) dateEl.textContent = now.toLocaleDateString('en-US', dateOptions);
+  if (timeEl) timeEl.textContent = now.toLocaleTimeString('en-US', timeOptions);
+}
+
+updateDateTimeModern();
+setInterval(updateDateTimeModern, 1000);
+
+// Search functionality
+const searchInputModern = document.getElementById('searchHistory');
+if (searchInputModern) {
+  searchInputModern.addEventListener('keyup', function() {
+    const searchTerm = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#historyTableBody tr');
+    
+    rows.forEach(row => {
+      const dateCell = row.querySelector('.date-cell');
+      if (dateCell) {
+        const dateText = dateCell.textContent.toLowerCase();
+        if (dateText.includes(searchTerm) || searchTerm === '') {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      }
+    });
+  });
+}
+
+// Export function
+function exportAttendance() {
+  const rows = document.querySelectorAll('#historyTableBody tr');
+  const csvData = [['Date', 'Status', 'Check In', 'Check Out', 'Hours']];
+  
+  rows.forEach(row => {
+    if (row.style.display !== 'none') {
+      const cells = row.querySelectorAll('td');
+      if (cells.length === 5) {
+        const rowData = [
+          cells[0].textContent.trim(),
+          cells[1].textContent.trim(),
+          cells[2].textContent.trim(),
+          cells[3].textContent.trim(),
+          cells[4].textContent.trim()
+        ];
+        csvData.push(rowData);
+      }
+    }
+  });
+  
+  const csvContent = csvData.map(row => row.join(',')).join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `attendance_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Form submission
+window.submitAttendanceForm = function(actionUrl) {
+  const isCheckOut = actionUrl.includes('check_out');
+  if (isCheckOut && !confirm('Are you sure you want to check out?')) return;
+  
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = actionUrl;
+  document.body.appendChild(form);
+  form.submit();
+};
+</script>
+{% endblock %}
