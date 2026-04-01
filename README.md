@@ -1,7 +1,7 @@
 # 🚀 Flask CRM System
 
 A role-based **Customer Relationship Management (CRM)** web application built using **Flask**, **MySQL**, and **Bootstrap**.  
-This system helps manage leads across **Marketing**, **Operations**, and **Accounts** teams with admin-level control.
+This system helps manage leads across **Marketing**, **Operations**, **Accounts**, and **HR** teams with admin-level control.
 
 ---
 
@@ -43,6 +43,27 @@ This system helps manage leads across **Marketing**, **Operations**, and **Accou
 - Monthly report  
 - Profit report  
 
+## 🕒 Attendance Management
+- Daily employee attendance tracking  
+- Admin attendance control  
+- Present / Absent marking  
+- Employee-wise attendance history  
+- Department-wise attendance view  
+
+## 🏖️ Leave Management
+- Apply for leave  
+- Admin leave approval / rejection  
+- Leave status tracking  
+- Leave history  
+- Employee-wise leave records  
+
+## 💵 Payroll Management
+- Employee salary management  
+- Monthly payroll generation  
+- Attendance-based salary calculation  
+- Payroll records tracking  
+- Payment status update  
+
 ---
 
 # 🛠️ Tech Stack
@@ -64,26 +85,6 @@ This system helps manage leads across **Marketing**, **Operations**, and **Accou
 ---
 
 # 📁 Project Structure
-crm-flask/
-│
-├── app.py
-├── database.py
-├── routes/
-│ ├── auth.py
-│ ├── admin.py
-│ ├── marketing.py
-│ ├── operations.py
-│ └── accounts.py
-│
-├── templates/
-├── static/
-└── README.md
-
----
-
-# ⚙️ Installation
-
-Clone repository:
 
 
 ---
@@ -94,6 +95,7 @@ Clone repository:
 - Marketing  
 - Operations  
 - Accounts  
+- HR (Attendance & Payroll Management)
 
 ---
 
@@ -104,22 +106,38 @@ This CRM system is useful for:
 - Sales team management  
 - Lead tracking  
 - Business workflow automation  
-- Small business CRM  
+- Employee attendance tracking  
+- Leave management system  
+- Payroll management system  
 - Internal office management  
 
 ---
 
 # 📷 Screenshots
 
-Add screenshots here:
-- Login page  ![alt text](image.png)
-- Admin dashboard  ![alt text](image-1.png)
-- Marketing dashboard  ![alt text](image-2.png)
-- Operations dashboard  ![alt text](image-3.png)
-- Accounts dashboard ![alt text](image-4.png)
-- HR Admin Dasbhoard ![alt text](image-5.png)
-- Attendace  ![alt text](image-7.png)
-- Payroll ![alt text](image-6.png)
+- Login page  
+![Login](image.png)
+
+- Admin dashboard  
+![Admin](image-1.png)
+
+- Marketing dashboard  
+![Marketing](image-2.png)
+
+- Operations dashboard  
+![Operations](image-3.png)
+
+- Accounts dashboard  
+![Accounts](image-4.png)
+
+- HR Admin Dashboard  
+![HR](image-5.png)
+
+- Attendance Management  
+![Attendance](image-7.png)
+
+- Payroll Management  
+![Payroll](image-6.png)
 
 ---
 
