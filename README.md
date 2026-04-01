@@ -116,29 +116,28 @@ This CRM system is useful for:
 # 📷 Screenshots
 
 - Login page  
-![Login](image.png)
+![Login](images/image.png)
 
 - Admin dashboard  
-![Admin](image-1.png)
+![Admin](images/image-1.png)
 
 - Marketing dashboard  
-![Marketing](image-2.png)
+![Marketing](images/image-2.png)
 
 - Operations dashboard  
-![Operations](image-3.png)
+![Operations](images/image-3.png)
 
 - Accounts dashboard  
-![Accounts](image-4.png)
+![Accounts](images/image-4.png)
 
 - HR Admin Dashboard  
-![HR](image-5.png)
+![HR](images/image-5.png)
 
 - Attendance Management  
-![Attendance](image-7.png)
+![Attendance](images/image-7.png)
 
 - Payroll Management  
-![Payroll](image-6.png)
-
+![Payroll](images/image-6.png)
 ---
 
 # 📄 License
