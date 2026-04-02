@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="{{ current_user.theme if current_user and current_user.theme else 'light' }}">
+<head>
+  <meta charset="utf-8">
+  <script>
+    (function() {
+      try {
+        var stored = localStorage.getItem('theme');
+        if (stored === 'dark' || stored === 'light') {
+          document.documentElement.setAttribute('data-bs-theme', stored);
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}CRM Self Service{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    :root {
+      --shell-bg: #f5f7fb;
+      --shell-surface: #ffffff;
+      --shell-surface-alt: #eef2ff;
+      --shell-border: #dde5f0;
+      --shell-text: #172033;
+      --shell-muted: #64748b;
+      --shell-accent: #4f46e5;
+      --shell-accent-soft: rgba(79, 70, 229, 0.12);
+      --shell-success: #10b981;
+      --shell-danger: #ef4444;
+      --shell-warning: #f59e0b;
+      --shell-info: #3b82f6;
+      --shell-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+      --shell-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-bs-theme="dark"] {
+      --shell-bg: #0f172a;
+      --shell-surface: #111827;
+      --shell-surface-alt: #1e293b;
+      --shell-border: #243244;
+      --shell-text: #e5eefb;
+      --shell-muted: #94a3b8;
+      --shell-accent: #818cf8;
+      --shell-accent-soft: rgba(129, 140, 248, 0.16);
+      --shell-shadow: 0 18px 45px rgba(2, 6, 23, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(79, 70, 229, 0.12), transparent 28%),
+        linear-gradient(180deg, var(--shell-bg), color-mix(in srgb, var(--shell-bg) 86%, black 14%));
+      color: var(--shell-text);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Enhanced Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    .employee-shell {
+      min-height: 100vh;
+      display: flex;
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    .employee-sidebar {
+      width: 290px;
+      flex-shrink: 0;
+      background: color-mix(in srgb, var(--shell-surface) 96%, transparent);
+      border-right: 1px solid var(--shell-border);
+      padding: 24px 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: var(--shell-shadow);
+      backdrop-filter: blur(14px);
+      transition: var(--shell-transition);
+    }
+
+    .employee-brand {
+      padding: 10px 10px 18px;
+      border-bottom: 1px solid var(--shell-border);
+    }
+
+    .employee-brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--shell-accent), #06b6d4);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: var(--shell-transition);
+    }
+
+    .employee-brand-badge:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .employee-brand p {
+      margin: 12px 0 0;
+      color: var(--shell-muted);
+      font-size: 13px;
+    }
+
+    .employee-nav-section {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--shell-muted);
+      padding: 0 10px;
+      margin-top: 6px;
+    }
+
+    .employee-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .employee-nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      color: var(--shell-text);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      transition: var(--shell-transition);
+      border: 1px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .employee-nav a::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 3px;
+      height: 100%;
+      background: var(--shell-accent);
+      transform: scaleY(0);
+      transition: transform 0.3s ease;
+    }
+
+    .employee-nav a:hover::before,
+    .employee-nav a.active::before {
+      transform: scaleY(1);
+    }
+
+    .employee-nav a:hover,
+    .employee-nav a.active {
+      background: var(--shell-accent-soft);
+      border-color: color-mix(in srgb, var(--shell-accent) 25%, var(--shell-border));
+      color: var(--shell-accent);
+      transform: translateX(4px);
+    }
+
+    .employee-nav a i {
+      font-size: 17px;
+      transition: var(--shell-transition);
+    }
+
+    .employee-nav a:hover i {
+      transform: scale(1.1);
+    }
+
+    .employee-sidebar-footer {
+      margin-top: auto;
+      border-top: 1px solid var(--shell-border);
+      padding: 18px 10px 0;
+    }
+
+    .employee-user-card {
+      padding: 16px;
+      border-radius: 18px;
+      background: var(--shell-surface-alt);
+      border: 1px solid var(--shell-border);
+      transition: var(--shell-transition);
+      cursor: pointer;
+    }
+
+    .employee-user-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shell-shadow);
+    }
+
+    .employee-user-name {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .employee-user-role {
+      margin-top: 6px;
+      color: var(--shell-muted);
+      font-size: 12px;
+      text-transform: capitalize;
+    }
+
+    .employee-logout {
+      margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--shell-danger);
+      font-weight: 600;
+      transition: var(--shell-transition);
+      padding: 8px 12px;
+      border-radius: 12px;
+    }
+
+    .employee-logout:hover {
+      background: color-mix(in srgb, var(--shell-danger) 10%, transparent);
+      transform: translateX(4px);
+    }
+
+    .employee-main {
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .employee-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 22px 28px;
+      border-bottom: 1px solid var(--shell-border);
+      background: color-mix(in srgb, var(--shell-surface) 94%, transparent);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    .employee-topbar h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--shell-text), var(--shell-accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .employee-topbar p {
+      margin: 4px 0 0;
+      color: var(--shell-muted);
+      font-size: 13px;
+    }
+
+    .employee-topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .employee-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: var(--shell-surface-alt);
+      border: 1px solid var(--shell-border);
+      color: var(--shell-text);
+      font-size: 13px;
+      font-weight: 600;
+      transition: var(--shell-transition);
+    }
+
+    .employee-pill:hover {
+      transform: translateY(-1px);
+      border-color: var(--shell-accent);
+    }
+
+    .theme-toggle {
+      border: 1px solid var(--shell-border);
+      background: var(--shell-surface);
+      color: var(--shell-text);
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: var(--shell-transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .theme-toggle:hover {
+      transform: translateY(-1px);
+      border-color: var(--shell-accent);
+      color: var(--shell-accent);
+      background: var(--shell-accent-soft);
+    }
+
+    .employee-content {
+      padding: 28px;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .alert {
+      border-radius: 16px;
+      border: 1px solid var(--shell-border);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .employee-footer {
+      padding: 18px 28px 24px;
+      color: var(--shell-muted);
+      font-size: 12px;
+      border-top: 1px solid var(--shell-border);
+      margin-top: auto;
+    }
+
+    /* Enhanced Card Styles */
+    .holiday-card {
+      background: var(--shell-surface);
+      border-radius: 20px;
+      border: 1px solid var(--shell-border);
+      transition: var(--shell-transition);
+      overflow: hidden;
+    }
+
+    .holiday-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shell-shadow);
+    }
+
+    .holiday-card-header {
+      padding: 16px 20px;
+      background: var(--shell-surface-alt);
+      border-bottom: 1px solid var(--shell-border);
+    }
+
+    .holiday-card-body {
+      padding: 20px;
+    }
+
+    /* Button Styles */
+    .btn-custom {
+      border-radius: 12px;
+      padding: 8px 16px;
+      font-weight: 600;
+      transition: var(--shell-transition);
+      border: 1px solid transparent;
+    }
+
+    .btn-custom-primary {
+      background: var(--shell-accent);
+      color: white;
+    }
+
+    .btn-custom-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-custom-danger {
+      background: var(--shell-danger);
+      color: white;
+    }
+
+    .btn-custom-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    /* Table Styles */
+    .holiday-table {
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .holiday-table thead {
+      background: var(--shell-surface-alt);
+    }
+
+    .holiday-table th {
+      padding: 15px;
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .holiday-table td {
+      padding: 15px;
+      vertical-align: middle;
+    }
+
+    /* Badge Styles */
+    .badge-custom {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-upcoming {
+      background: var(--shell-warning);
+      color: #000;
+    }
+
+    .badge-today {
+      background: var(--shell-success);
+      color: white;
+    }
+
+    .badge-past {
+      background: var(--shell-muted);
+      color: white;
+    }
+
+    /* Modal Styles */
+    .modal-content-custom {
+      background: var(--shell-surface);
+      border-radius: 24px;
+      border: 1px solid var(--shell-border);
+    }
+
+    /* Loading Animation */
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid var(--shell-border);
+      border-top-color: var(--shell-accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Tooltip */
+    .tooltip-custom {
+      position: relative;
+      cursor: help;
+    }
+
+    .tooltip-custom:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 4px 8px;
+      background: var(--shell-surface-alt);
+      border: 1px solid var(--shell-border);
+      border-radius: 8px;
+      font-size: 12px;
+      white-space: nowrap;
+      z-index: 1000;
+    }
+
+    @media (max-width: 991.98px) {
+      .employee-shell {
+        flex-direction: column;
+      }
+
+      .employee-sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+      }
+
+      .employee-topbar {
+        position: relative;
+      }
+
+      .employee-content,
+      .employee-footer,
+      .employee-topbar {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .holiday-table {
+        font-size: 12px;
+      }
+
+      .holiday-table th,
+      .holiday-table td {
+        padding: 10px;
+      }
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--shell-surface-alt);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--shell-accent);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: color-mix(in srgb, var(--shell-accent) 80%, black);
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  {% set department_labels = {
+    'employee': 'Employee',
+    'marketing': 'Marketing',
+    'operations': 'Operations',
+    'accounts': 'Accounts',
+    'hr': 'HR',
+    'admin': 'Admin'
+  } %}
+  {% set current_department = current_user.department if current_user else 'employee' %}
+  {% set department_label = department_labels.get(current_department, current_department|title) %}
+  {% if current_department == 'marketing' %}
+    {% set home_endpoint = 'marketing.dashboard' %}
+    {% set home_label = 'Marketing Panel' %}
+  {% elif current_department == 'operations' %}
+    {% set home_endpoint = 'operations.dashboard' %}
+    {% set home_label = 'Operations Panel' %}
+  {% elif current_department == 'accounts' %}
+    {% set home_endpoint = 'accounts.payments' %}
+    {% set home_label = 'Accounts Panel' %}
+  {% elif current_department == 'hr' %}
+    {% set home_endpoint = 'hr.dashboard' %}
+    {% set home_label = 'HR Panel' %}
+  {% elif current_department == 'admin' %}
+    {% set home_endpoint = 'admin.admin_dashboard' %}
+    {% set home_label = 'Admin Panel' %}
+  {% else %}
+    {% set home_endpoint = 'employee.dashboard' %}
+    {% set home_label = 'My Dashboard' %}
+  {% endif %}
+
+  <div class="employee-shell">
+    <aside class="employee-sidebar">
+      <div class="employee-brand">
+        <div class="employee-brand-badge">
+          <i class="bi bi-buildings-fill"></i>
+          CRM Workspace
+        </div>
+        <p>{{ department_label }} self-service and department navigation</p>
+      </div>
+
+      <div class="employee-nav-section">Department</div>
+      <nav class="employee-nav">
+        <a href="{{ url_for(home_endpoint) }}" class="{% if request.endpoint == home_endpoint %}active{% endif %}">
+          <i class="bi bi-grid-1x2-fill"></i>
+          <span>{{ home_label }}</span>
+        </a>
+      </nav>
+
+      <div class="employee-nav-section">Self Service</div>
+      <nav class="employee-nav">
+        <a href="{{ url_for('employee.dashboard') }}" class="{% if request.endpoint == 'employee.dashboard' %}active{% endif %}">
+          <i class="bi bi-house-door-fill"></i>
+          <span>Self Dashboard</span>
+        </a>
+        {% if current_department in ['employee', 'marketing', 'operations', 'accounts'] %}
+        <a href="{{ url_for('employee.attendance') }}" class="{% if request.endpoint == 'employee.attendance' %}active{% endif %}">
+          <i class="bi bi-calendar-check-fill"></i>
+          <span>Attendance</span>
+          {% if attendance_status %}
+          <span class="badge bg-success ms-auto" style="font-size: 10px;">Today</span>
+          {% endif %}
+        </a>
+        {% endif %}
+        <a href="{{ url_for('employee.leave_request') }}" class="{% if request.endpoint == 'employee.leave_request' %}active{% endif %}">
+          <i class="bi bi-send-plus-fill"></i>
+          <span>Apply Leave</span>
+        </a>
+        <a href="{{ url_for('employee.leave_status') }}" class="{% if request.endpoint == 'employee.leave_status' %}active{% endif %}">
+          <i class="bi bi-ui-checks-grid"></i>
+          <span>Leave Status</span>
+          {% if pending_leaves > 0 %}
+          <span class="badge bg-warning ms-auto" style="font-size: 10px;">{{ pending_leaves }}</span>
+          {% endif %}
+        </a>
+        <a href="{{ url_for('employee.leave_balance') }}" class="{% if request.endpoint == 'employee.leave_balance' %}active{% endif %}">
+          <i class="bi bi-pie-chart-fill"></i>
+          <span>Leave Balance</span>
+        </a>
+        <a href="{{ url_for('employee.holidays') }}" class="{% if request.endpoint == 'employee.holidays' %}active{% endif %}">
+          <i class="bi bi-calendar2-week-fill"></i>
+          <span>Holidays</span>
+          {% if upcoming_holidays > 0 %}
+          <span class="badge bg-info ms-auto" style="font-size: 10px;">{{ upcoming_holidays }}</span>
+          {% endif %}
+        </a>
+      </nav>
+
+      <!-- HR/Admin Additional Section (only visible for HR/Admin) -->
+      {% if current_department in ['hr', 'admin'] %}
+      <div class="employee-nav-section">Administration</div>
+      <nav class="employee-nav">
+        <a href="{{ url_for('holidays.manage') }}" class="{% if request.endpoint == 'holidays.manage' %}active{% endif %}">
+          <i class="bi bi-calendar-plus-fill"></i>
+          <span>Manage Holidays</span>
+        </a>
+        <a href="{{ url_for('holidays.add') }}" class="{% if request.endpoint == 'holidays.add' %}active{% endif %}">
+          <i class="bi bi-plus-circle-fill"></i>
+          <span>Add New Holiday</span>
+        </a>
+      </nav>
+      {% endif %}
+
+      <div class="employee-sidebar-footer">
+        <div class="employee-user-card" data-bs-toggle="modal" data-bs-target="#userProfileModal">
+          <div class="employee-user-name">
+            <i class="bi bi-person-circle"></i>
+            {{ current_user.name or current_user.username }}
+          </div>
+          <div class="employee-user-role">{{ department_label }}{% if current_user.role and current_user.role != current_department %} · {{ current_user.role|title }}{% endif %}</div>
+          <div class="employee-user-role mt-2">
+            <i class="bi bi-envelope-fill"></i> {{ current_user.email or 'No email' }}
+          </div>
+        </div>
+        <a href="{{ url_for('auth.logout') }}" class="employee-logout">
+          <i class="bi bi-box-arrow-right"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </aside>
+
+    <main class="employee-main">
+      <header class="employee-topbar">
+        <div>
+          <h1>{% block page_title %}Self-Service Portal{% endblock %}</h1>
+          <p>{% block page_subtitle %}Department-aware workspace for attendance, leave, and holidays.{% endblock %}</p>
+        </div>
+        <div class="employee-topbar-actions">
+          <div class="employee-pill tooltip-custom" data-tooltip="Current Department">
+            <i class="bi bi-person-badge-fill"></i>
+            <span>{{ department_label }}</span>
+          </div>
+          <div class="employee-pill tooltip-custom" data-tooltip="Current Date & Time">
+            <i class="bi bi-calendar3"></i>
+            <span id="currentDateTime"></span>
+          </div>
+          <button id="themeToggleBtn" class="theme-toggle" type="button" title="Toggle theme">
+            <i id="themeIcon" class="bi bi-moon-stars-fill"></i>
+          </button>
+        </div>
+      </header>
+
+      <section class="employee-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show mb-3" role="alert">
+                <i class="bi bi-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' if category == 'danger' else 'info-circle' }} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+      </section>
+
+      <div class="employee-footer">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <i class="bi bi-c-circle"></i> {{ now.year }} CRM Self-Service Portal
+          </div>
+          <div>
+            <i class="bi bi-shield-check"></i> Version 2.0 | Secure Access
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- User Profile Modal -->
+  <div class="modal fade" id="userProfileModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content modal-content-custom">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="bi bi-person-circle"></i> User Profile
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="text-center mb-3">
+            <i class="bi bi-person-circle" style="font-size: 64px;"></i>
+          </div>
+          <table class="table table-borderless">
+            <tr>
+              <th>Username:</th>
+              <td>{{ current_user.username }}</td>
+            </tr>
+            <tr>
+              <th>Name:</th>
+              <td>{{ current_user.name or 'Not set' }}</td>
+            </tr>
+            <tr>
+              <th>Email:</th>
+              <td>{{ current_user.email or 'Not set' }}</td>
+            </tr>
+            <tr>
+              <th>Department:</th>
+              <td>{{ department_label }}</td>
+            </tr>
+            <tr>
+              <th>Role:</th>
+              <td>{{ current_user.role|title if current_user.role else department_label }}</td>
+            </tr>
+            <tr>
+              <th>Joined:</th>
+              <td>{{ current_user.date_joined.strftime('%B %d, %Y') if current_user.date_joined else 'N/A' }}</td>
+            </tr>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-custom btn-custom-primary" data-bs-dismiss="modal">
+            <i class="bi bi-check2"></i> Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Update date and time
+    function updateDateTime() {
+      const now = new Date();
+      const options = { 
+        weekday: 'short', 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      };
+      const dateTimeElement = document.getElementById('currentDateTime');
+      if (dateTimeElement) {
+        dateTimeElement.textContent = now.toLocaleDateString(undefined, options);
+      }
+    }
+    updateDateTime();
+    setInterval(updateDateTime, 60000);
+
+    function updateThemeIcon(theme, iconElement) {
+      if (!iconElement) return;
+      iconElement.className = theme === 'dark' ? 'bi bi-brightness-high-fill' : 'bi bi-moon-stars-fill';
+    }
+
+    function getCsrfToken() {
+      const token = document.querySelector('meta[name="csrf-token"]');
+      return token ? token.getAttribute('content') : '';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
+      const themeIcon = document.getElementById('themeIcon');
+      const htmlElement = document.documentElement;
+      let currentTheme = localStorage.getItem('theme') || htmlElement.getAttribute('data-bs-theme') || 'light';
+      htmlElement.setAttribute('data-bs-theme', currentTheme);
+      updateThemeIcon(currentTheme, themeIcon);
+
+      if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', function() {
+          const activeTheme = htmlElement.getAttribute('data-bs-theme');
+          const nextTheme = activeTheme === 'light' ? 'dark' : 'light';
+
+          fetch('/toggle-theme', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({ theme: nextTheme })
+          })
+          .then(function(response) { return response.json(); })
+          .then(function(data) {
+            if (data.success || data.status === 'success') {
+              htmlElement.setAttribute('data-bs-theme', nextTheme);
+              localStorage.setItem('theme', nextTheme);
+              updateThemeIcon(nextTheme, themeIcon);
+            }
+          })
+          .catch(function() {
+            htmlElement.setAttribute('data-bs-theme', nextTheme);
+            localStorage.setItem('theme', nextTheme);
+            updateThemeIcon(nextTheme, themeIcon);
+          });
+        });
+      }
+
+      // Auto-dismiss alerts after 5 seconds
+      const alerts = document.querySelectorAll('.alert');
+      alerts.forEach(alert => {
+        setTimeout(() => {
+          const bsAlert = new bootstrap.Alert(alert);
+          bsAlert.close();
+        }, 5000);
+      });
+
+      // Add hover effect to navigation items
+      const navItems = document.querySelectorAll('.employee-nav a');
+      navItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+          this.style.transform = 'translateX(4px)';
+        });
+        item.addEventListener('mouseleave', function() {
+          this.style.transform = 'translateX(0)';
+        });
+      });
+    });
+  </script>
+  <meta name="csrf-token" content="{{ csrf_token() if csrf_token else '' }}">
+  {% block scripts %}{% endblock %}
+</body>
+</html>

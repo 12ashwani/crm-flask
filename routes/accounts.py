@@ -236,6 +236,9 @@ def mark_received(lead_id):
 @accounts_bp.route("/payment/pending/<int:lead_id>", methods=["POST"])
 @login_required
 def mark_pending(lead_id):
+    """ Mark payment as pending. This can be used when payment is expected but not yet received, or 
+    if you want to reset the status after marking as received by mistake.
+    """
     if not require_accounts():
         return redirect(url_for("index"))
 
@@ -254,6 +257,8 @@ def mark_pending(lead_id):
 @accounts_bp.route("/payment/failed/<int:lead_id>", methods=["POST"])
 @login_required
 def mark_failed(lead_id):
+    ''' Mark payment as failed with optional reason. 
+    This sets govt and professional payment status to failed, and overall status to failed.'''
     if not require_accounts():
         return redirect(url_for("index"))
 
@@ -276,6 +281,8 @@ def mark_failed(lead_id):
 @accounts_bp.route("/payment/remark/<int:lead_id>", methods=["POST"])
 @login_required
 def add_remark(lead_id):
+    ''' Add a remark to the payment. 
+    This can be used to note follow-up actions, reasons for pending/failed status, or any other relevant information. '''
     if not require_accounts():
         return redirect(url_for("index"))
 
@@ -300,6 +307,7 @@ def add_remark(lead_id):
 @accounts_bp.route("/payment/<int:lead_id>")
 @login_required
 def payment_detail(lead_id):
+    ''' View detailed payment information for a specific lead, including payment status, amounts, and any remarks. '''
     if not require_accounts():
         return redirect(url_for("index"))
 
@@ -320,6 +328,8 @@ def payment_detail(lead_id):
 @accounts_bp.route("/all-leads")
 @login_required
 def all_leads():
+    ''' View all leads assigned to accounts department, regardless of payment status. 
+    This provides a comprehensive overview of all accounts-related leads for better management and follow-up. '''
     if not require_accounts():
         return redirect(url_for("index"))
 
@@ -335,9 +345,13 @@ def all_leads():
 # =========================
 # 📅 DEPARTMENT ATTENDANCE MANAGEMENT
 # =========================
+""" This part of the code handles attendance management for accounts department.
+Since accounts users should not have access to attendance pages, these routes will simply redirect back to the payments dashboard with a warning message. This ensures that accounts users are aware of the access restrictions while maintaining a smooth user experience. """
 @accounts_bp.route("/return/<int:lead_id>", methods=["POST"])
 @login_required
 def return_lead(lead_id):
+    ''' Return a lead to the previous workflow stage. 
+    This can be used if a lead was marked as ready for accounts but needs to be sent back to operations or another department for additional work before payment can be processed. '''
     if not require_accounts():
         return redirect(url_for("index"))
 
@@ -358,7 +372,8 @@ def return_lead(lead_id):
 @accounts_bp.route("/attendance")
 @login_required
 def attendance():
-    """Accounts users cannot access attendance pages."""
+    """Accounts users cannot access attendance pages
+    """
     if not require_accounts():
         return redirect(url_for("index"))
     flash("Attendance access is restricted to HR and employee self-service.", "warning")

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "employee/base.html" %}
 
 {% block content %}
 <div class="container-fluid py-4">
@@ -30,7 +30,7 @@
               </div>
               <div class="mt-3 d-flex gap-2">
                 <span class="badge bg-white text-primary px-3 py-2 rounded-pill shadow-sm">
-                  <i class="bi bi-calendar-check me-1"></i> {{ total_requests|length }} Total Requests
+                  <i class="bi bi-calendar-check me-1"></i> {{ requests|length }} Total Requests
                 </span>
               </div>
             </div>
@@ -70,10 +70,10 @@
           <div class="progress-stats mt-3">
             <div class="progress-label d-flex justify-content-between small mb-1">
               <span>Awaiting approval</span>
-              <span class="fw-semibold">{{ pending_requests|length }} / {{ total_requests|length }}</span>
+              <span class="fw-semibold">{{ pending_requests|length }} / {{ requests|length }}</span>
             </div>
             <div class="progress-custom">
-              <div class="progress-fill bg-warning" style="width: {{ (pending_requests|length / total_requests|length * 100) if total_requests|length > 0 else 0 }}%"></div>
+              <div class="progress-fill bg-warning" style="width: {{ (pending_requests|length / requests|length * 100) if requests|length > 0 else 0 }}%"></div>
             </div>
           </div>
         </div>
@@ -96,10 +96,10 @@
           <div class="progress-stats mt-3">
             <div class="progress-label d-flex justify-content-between small mb-1">
               <span>Approved requests</span>
-              <span class="fw-semibold">{{ approved_requests|length }} / {{ total_requests|length }}</span>
+              <span class="fw-semibold">{{ approved_requests|length }} / {{ requests|length }}</span>
             </div>
             <div class="progress-custom">
-              <div class="progress-fill bg-success" style="width: {{ (approved_requests|length / total_requests|length * 100) if total_requests|length > 0 else 0 }}%"></div>
+              <div class="progress-fill bg-success" style="width: {{ (approved_requests|length / requests|length * 100) if requests|length > 0 else 0 }}%"></div>
             </div>
           </div>
         </div>
@@ -122,10 +122,10 @@
           <div class="progress-stats mt-3">
             <div class="progress-label d-flex justify-content-between small mb-1">
               <span>Rejected requests</span>
-              <span class="fw-semibold">{{ rejected_requests|length }} / {{ total_requests|length }}</span>
+              <span class="fw-semibold">{{ rejected_requests|length }} / {{ requests|length }}</span>
             </div>
             <div class="progress-custom">
-              <div class="progress-fill bg-danger" style="width: {{ (rejected_requests|length / total_requests|length * 100) if total_requests|length > 0 else 0 }}%"></div>
+              <div class="progress-fill bg-danger" style="width: {{ (rejected_requests|length / requests|length * 100) if requests|length > 0 else 0 }}%"></div>
             </div>
           </div>
         </div>

@@ -16,8 +16,9 @@ from database import (
 
 employee_bp = Blueprint("employee", __name__, url_prefix="/employee")
 
-SELF_SERVICE_DEPARTMENTS = {"employee", "marketing", "operations", "accounts", "hr"}
+SELF_SERVICE_DEPARTMENTS = {"admin", "employee", "marketing", "operations", "accounts", "hr"}
 PERSONAL_ATTENDANCE_DEPARTMENTS = {"employee", "marketing", "operations", "accounts"}
+HOLIDAY_VIEW_DEPARTMENTS = {"employee", "marketing", "operations", "accounts"}
 
 DEPARTMENT_DASHBOARD_ENDPOINTS = {
     "admin": "admin.admin_dashboard",
@@ -43,7 +44,8 @@ def require_employee_self_service():
         flash("Attendance and leave are available only to employees and HR.", "warning")
         return False
 
-    if not current_user.employee_id:
+    # Admin may not have an employee_id in this app but still should view holiday/activity data.
+    if current_user.department != "admin" and not current_user.employee_id:
         flash("Employee profile not found.", "danger")
         return False
 
@@ -337,6 +339,36 @@ def holidays():
     if not require_employee_self_service():
         return redirect_to_role_dashboard()
 
+    if current_user.department in {"admin", "hr"}:
+        return redirect(url_for("hr.holidays"))
+
+    if current_user.department not in HOLIDAY_VIEW_DEPARTMENTS:
+        flash("Holiday list is available only to employees, HR, and admin.", "warning")
+        return redirect_to_role_dashboard()
+
     today = datetime.now().date()
-    upcoming = get_holidays(start_date=str(today))
-    return render_template("employee/holidays.html", today=today, upcoming=upcoming)
+    try:
+        upcoming = get_holidays(start_date=str(today))
+        
+        # Parse holiday dates
+        for holiday in upcoming:
+            h_date = holiday.get("holiday_date")
+            if isinstance(h_date, str):
+                try:
+                    holiday["holiday_date"] = datetime.strptime(h_date, "%Y-%m-%d").date()
+                except Exception:
+                    pass
+        
+        # Count holidays in current month
+        current_month_count = len([h for h in upcoming if h.get('holiday_date') and hasattr(h['holiday_date'], 'month') and h['holiday_date'].month == today.month])
+        
+        return render_template("employee/holidays_view.html", today=today, upcoming=upcoming, current_month_count=current_month_count)
+    except Exception as e:
+        flash(f"Error loading holidays: {str(e)}", "danger")
+        return render_template("employee/holidays_view.html", today=today, upcoming=[], current_month_count=0)
+
+
+@employee_bp.route("/test")
+@login_required
+def test():
+    return render_template("employee/holidays_view.html", today=datetime.now().date(), upcoming=[], current_month_count=0)

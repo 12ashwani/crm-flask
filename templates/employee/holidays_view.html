@@ -1,0 +1,228 @@
+{% extends "employee/base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <!-- Enhanced Header with Gradient Background -->
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-5 p-4 rounded-4" 
+       style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-2">
+        <i class="bi bi-calendar-heart-fill text-white fs-4"></i>
+        <span class="badge bg-white bg-opacity-20 text-white px-3 py-2 rounded-pill">
+          <i class="bi bi-star-fill me-1 small"></i> Celebrations
+        </span>
+      </div>
+      <h1 class="h2 mb-1 text-white">Holiday & Festival List</h1>
+      <p class="text-white-50 mb-0">View upcoming company holidays announced by HR.</p>
+    </div>
+    <a href="{{ url_for('employee.dashboard') }}" class="btn btn-light btn-lg rounded-pill px-4 shadow-sm">
+      <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+    </a>
+  </div>
+
+  <!-- Statistics Cards - Visual Enhancement -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 hover-shadow transition-all">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <p class="text-muted mb-1">Total Holidays</p>
+              <h2 class="display-6 fw-bold mb-0 text-primary">{{ upcoming|length }}</h2>
+              <small class="text-success"><i class="bi bi-calendar-check"></i> Upcoming events</small>
+            </div>
+            <div class="bg-primary bg-opacity-10 rounded-3 p-3">
+              <i class="bi bi-calendar-event fs-1 text-primary"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 hover-shadow transition-all">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <p class="text-muted mb-1">Status</p>
+              <h2 class="display-6 fw-bold mb-0 text-info">
+                {% if upcoming %}Active{% else %}None{% endif %}
+              </h2>
+              <small class="text-info"><i class="bi bi-calendar-week"></i> Holiday season</small>
+            </div>
+            <div class="bg-info bg-opacity-10 rounded-3 p-3">
+              <i class="bi bi-calendar-heart fs-1 text-info"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm rounded-4 hover-shadow transition-all">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <p class="text-muted mb-1">Upcoming Celebrations</p>
+              <h5 class="fw-bold mb-0 text-truncate" style="max-width: 180px;">
+                {% if upcoming %}
+                  {{ upcoming[0].title }}
+                {% else %}
+                  No holidays
+                {% endif %}
+              </h5>
+              <small class="text-warning"><i class="bi bi-calendar-heart"></i> Next celebration</small>
+            </div>
+            <div class="bg-warning bg-opacity-10 rounded-3 p-3">
+              <i class="bi bi-gift-fill fs-1 text-warning"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enhanced Holiday Card Grid - More Visual Appeal -->
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-header bg-white border-bottom-0 py-3 px-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h5 class="mb-0 fw-bold">
+            <i class="bi bi-gift me-2 text-primary"></i>Upcoming Holidays
+          </h5>
+          <p class="text-muted small mb-0 mt-1">Celebrate and enjoy these special occasions</p>
+        </div>
+        <span class="badge bg-primary rounded-pill px-3 py-2">
+          <i class="bi bi-calendar me-1"></i>{{ upcoming|length }} Total
+        </span>
+      </div>
+    </div>
+    <div class="card-body p-4">
+      <div class="row g-4">
+        {% for holiday in upcoming %}
+        <div class="col-md-6 col-lg-4">
+          <div class="card border-0 shadow-sm hover-lift transition-all rounded-4 h-100">
+            {% set colors = ['primary', 'success', 'info', 'warning', 'danger'] %}
+            {% set color = colors[loop.index0 % colors|length] %}
+            <div class="position-relative" style="height: 4px; background: linear-gradient(90deg, var(--bs-{{ color }}) 0%, var(--bs-{{ color }}-light) 100%);"></div>
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="bg-{{ color }} bg-opacity-10 rounded-3 p-3">
+                  <i class="bi bi-calendar-heart fs-3 text-{{ color }}"></i>
+                </div>
+                <span class="badge bg-{{ color }} bg-opacity-10 text-{{ color }} rounded-pill px-3 py-2">
+                  <i class="bi bi-star-fill me-1 small"></i> Holiday
+                </span>
+              </div>
+              <h5 class="fw-bold mb-3">{{ holiday.title }}</h5>
+              <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                <i class="bi bi-calendar3 text-{{ color }}"></i>
+                <span class="small">
+                  {% if holiday.holiday_date %}
+                    {% if holiday.holiday_date is string %}
+                      <strong>{{ holiday.holiday_date }}</strong>
+                    {% else %}
+                      <strong>{{ holiday.holiday_date.strftime('%A') }}</strong>
+                      <span class="text-muted">, {{ holiday.holiday_date.strftime('%d %B %Y') }}</span>
+                    {% endif %}
+                  {% else %}
+                    <span class="text-muted">Date to be announced</span>
+                  {% endif %}
+                </span>
+              </div>
+              {% if holiday.description %}
+              <p class="text-muted small mb-0">
+                <i class="bi bi-info-circle me-1"></i>
+                {{ holiday.description }}
+              </p>
+              {% else %}
+              <p class="text-muted small mb-0">
+                <i class="bi bi-emoji-smile me-1"></i>
+                Enjoy this special occasion!
+              </p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+          <div class="text-center py-5">
+            <div class="mb-4">
+              <i class="bi bi-calendar-x fs-1 text-muted"></i>
+            </div>
+            <h5 class="text-muted mb-2">No Upcoming Holidays</h5>
+            <p class="text-muted mb-0">No upcoming holidays available right now.</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Custom Animations & Effects */
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+.hover-shadow {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-shadow:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
+}
+
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.12) !important;
+}
+
+.rounded-4 {
+  border-radius: 1rem !important;
+}
+
+/* Gradient text for better visual */
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card hover effects */
+.card {
+  transition: all 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .display-6 {
+    font-size: 1.75rem;
+  }
+  
+  .rounded-4 {
+    border-radius: 0.75rem !important;
+  }
+}
+
+/* Smooth gradient background */
+.bg-gradient-custom {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Enhanced badge styling */
+.badge {
+  font-weight: 500;
+}
+
+/* Card inner elements spacing */
+.card-body .border-bottom {
+  border-bottom-color: rgba(0,0,0,0.08) !important;
+}
+</style>
+{% endblock %}

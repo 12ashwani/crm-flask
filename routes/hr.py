@@ -50,6 +50,18 @@ def require_hr():
     return True
 
 
+def require_holiday_management():
+    user_role = (getattr(current_user, "role", "") or "").strip().lower()
+    user_department = (getattr(current_user, "department", "") or "").strip().lower()
+
+    if user_role not in {"admin", "hr"} and user_department not in {"admin", "hr"}:
+        flash("Holiday management is available only to HR and admin.", "warning")
+        return False
+
+    session["last_panel"] = "hr" if user_role == "hr" or user_department == "hr" else "admin"
+    return True
+
+
 def calculate_working_hours(date_str, check_in_time, check_out_time):
     if not check_in_time or not check_out_time:
         return None
@@ -316,19 +328,35 @@ def save_salary():
 @hr_bp.route("/holidays")
 @login_required
 def holidays():
-    if not require_hr():
+    if not require_holiday_management():
         return redirect_to_role_dashboard()
 
     today = date.today()
     upcoming = get_holidays(start_date=str(today))
     all_holidays = get_holidays()
-    return render_template("hr/holidays.html", today=today, upcoming=upcoming, all_holidays=all_holidays)
+
+    for holiday in upcoming + all_holidays:
+        h_date = holiday.get("holiday_date")
+        if isinstance(h_date, str):
+            try:
+                holiday["holiday_date"] = datetime.strptime(h_date, "%Y-%m-%d").date()
+            except Exception:
+                pass
+
+    return render_template(
+        "hr/holidays.html",
+        today=today,
+        upcoming=upcoming,
+        all_holidays=all_holidays,
+        holiday_home_endpoint="admin.admin_dashboard" if getattr(current_user, "department", "") == "admin" or getattr(current_user, "role", "") == "admin" else "hr.dashboard",
+        holiday_home_label="Admin Panel" if getattr(current_user, "department", "") == "admin" or getattr(current_user, "role", "") == "admin" else "HR Panel",
+    )
 
 
 @hr_bp.route("/holidays/add", methods=["POST"])
 @login_required
 def add_holiday_route():
-    if not require_hr():
+    if not require_holiday_management():
         return redirect_to_role_dashboard()
 
     holiday_date = request.form.get("holiday_date")
@@ -357,7 +385,7 @@ def add_holiday_route():
 @hr_bp.route("/holidays/delete/<int:holiday_id>", methods=["POST"])
 @login_required
 def delete_holiday_route(holiday_id):
-    if not require_hr():
+    if not require_holiday_management():
         return redirect_to_role_dashboard()
 
     try:

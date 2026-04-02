@@ -242,8 +242,11 @@
           <i class="bi bi-cash-coin me-2"></i>Payroll
         </a>
       </li>
+      {% endif %}
+
+      {% if current_user.department in ['admin', 'hr', 'employee', 'marketing', 'operations', 'accounts'] %}
       <li>
-        <a href="{{ url_for('hr.holidays') }}" class="nav-link {% if request.path.startswith('/hr/holidays') %}active{% endif %}">
+        <a href="{{ url_for('employee.holidays') }}" class="nav-link {% if request.path.startswith('/employee/holidays') or request.path.startswith('/hr/holidays') %}active{% endif %}">
           <i class="bi bi-calendar2-week me-2"></i>Holiday Calendar
         </a>
       </li>
@@ -255,7 +258,7 @@
           <i class="bi bi-person-circle me-2"></i>My Profile
         </a>
         <ul class="dropdown-menu">
-          {% if current_user.department in ['employee', 'hr', 'marketing', 'operations', 'accounts'] %}
+          {% if current_user.department in ['admin', 'employee', 'hr', 'marketing', 'operations', 'accounts'] %}
           <li><h6 class="dropdown-header">Employee Section</h6></li>
           <li>
             <a href="{{ url_for('employee.dashboard') }}" class="dropdown-item">
