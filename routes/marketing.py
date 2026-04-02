@@ -22,7 +22,10 @@ marketing_bp = Blueprint("marketing", __name__, url_prefix="/marketing")
 # 🔒 HELPER: ROLE CHECK
 # ================================
 def check_marketing_access():
-    if current_user.role != "marketing":
+    role = (getattr(current_user, "role", "") or "").strip().lower()
+    dept = (getattr(current_user, "department", "") or "").strip().lower()
+
+    if role != "marketing" and dept != "marketing":
         flash("Access denied. Marketing only.", "danger")
         return False
     session["last_panel"] = "marketing"

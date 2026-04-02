@@ -8,6 +8,7 @@ EWOUR_CRM.url/
 LOCAL_DEVELOPMENT.MD/
 migrate_accounts_executive.py/
 migrate_db.py/
+debuglog.txt/
 __pycache__/
 
 # =========================

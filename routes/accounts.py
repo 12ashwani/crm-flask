@@ -30,7 +30,10 @@ ACCOUNT_REMARK_OPTIONS = [
 # 🔐 ACCESS CONTROL
 # =========================
 def require_accounts():
-    if current_user.role != "accounts":
+    role = (getattr(current_user, "role", "") or "").strip().lower()
+    dept = (getattr(current_user, "department", "") or "").strip().lower()
+
+    if role != "accounts" and dept != "accounts":
         flash("Access denied. Accounts only.", "danger")
         return False
     session["last_panel"] = "accounts"
@@ -66,6 +69,14 @@ def get_accounts_data():
 
 
 def compute_payment_summary(leads):
+    def normalize_status(value):
+        text = (value or "").strip().lower()
+        if text in {"received", "done", "paid"}:
+            return "received"
+        if text == "failed":
+            return "failed"
+        return "pending"
+
     summary = {
         'total': len(leads),
         'received': 0,
@@ -75,8 +86,8 @@ def compute_payment_summary(leads):
         'pending_amount': 0.0,
     }
     for lead in leads:
-        govt_status = lead.get('govt_payment_status')
-        prof_status = lead.get('professional_payment_status')
+        govt_status = normalize_status(lead.get('govt_payment_status'))
+        prof_status = normalize_status(lead.get('professional_payment_status'))
 
         total_amount = float(lead.get('total_amount') or 0)
         govt_amount = float(lead.get('govt_amount') or 0)
@@ -87,7 +98,7 @@ def compute_payment_summary(leads):
         summary['received_amount'] += collected_total
         summary['pending_amount'] += pending_total
 
-        if govt_status == 'done' and prof_status == 'done':
+        if govt_status == 'received' and prof_status == 'received':
             summary['received'] += 1
         elif govt_status == 'failed' or prof_status == 'failed':
             summary['failed'] += 1

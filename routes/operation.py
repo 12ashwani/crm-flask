@@ -30,7 +30,10 @@ OPERATION_REMARK_OPTIONS = [
 # 🔐 ACCESS CONTROL
 # =========================
 def require_operations():
-    if current_user.role != "operations":
+    role = (getattr(current_user, "role", "") or "").strip().lower()
+    dept = (getattr(current_user, "department", "") or "").strip().lower()
+
+    if role != "operations" and dept != "operations":
         flash("Access denied. Operations only.", "danger")
         return False
     session["last_panel"] = "operations"

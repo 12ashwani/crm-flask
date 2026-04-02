@@ -305,6 +305,7 @@
       display: flex;
       align-items: center;
       gap: 20px;
+      padding-right: 64px;
     }
 
     .user-badge {
@@ -339,6 +340,22 @@
       justify-content: center;
       font-size: 14px;
       font-weight: 700;
+    }
+
+    .theme-toggle {
+      top: 14px !important;
+      right: 24px !important;
+      border-radius: 12px !important;
+      padding: 10px 12px !important;
+      background: var(--bg-secondary) !important;
+      border: 1px solid var(--border-light) !important;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--accent) !important;
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
     }
 
     /* CONTENT */
@@ -1159,6 +1176,15 @@
       .content {
         padding: 20px;
       }
+
+      .topbar-right {
+        padding-right: 56px;
+      }
+
+      .theme-toggle {
+        top: 12px !important;
+        right: 16px !important;
+      }
     }
   </style>
   {% include 'partials/theme_toggle.html' %}
@@ -1316,7 +1342,7 @@
               {% else %}
                 {% set overall_status = 'new' %}
               {% endif %}
-              <tr data-status="{{ lead.dashboard_status }}" style="--row-index: {{ loop.index }}">
+              <tr data-status="{{ overall_status }}" style="--row-index: {{ loop.index }}">
                 <td style="color:var(--text-muted);">{{ loop.index }}</td>
                 <td>
                   <div class="company-cell">
@@ -1469,10 +1495,6 @@
     document.getElementById('sidebar').classList.toggle('open');
   }
   
-  @media (max-width: 900px) {
-    document.getElementById('menuToggle').style.display = 'block';
-  }
-
   function openModal(id) { document.getElementById(id).style.display = 'flex'; }
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
   
@@ -1518,14 +1540,17 @@
   
   // Mobile menu
   if(window.innerWidth <= 900) {
-    document.getElementById('menuToggle').style.display = 'block';
+    const menuToggle = document.getElementById('menuToggle');
+    if (menuToggle) menuToggle.style.display = 'block';
   }
   window.addEventListener('resize', () => {
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
     if(window.innerWidth <= 900) {
-      document.getElementById('menuToggle').style.display = 'block';
+      if (menuToggle) menuToggle.style.display = 'block';
     } else {
-      document.getElementById('menuToggle').style.display = 'none';
-      document.getElementById('sidebar').classList.remove('open');
+      if (menuToggle) menuToggle.style.display = 'none';
+      if (sidebar) sidebar.classList.remove('open');
     }
   });
 
@@ -1538,6 +1563,10 @@
     }
     if (select) {
       select.addEventListener('change', () => syncAccountRemark(select.value));
+    }
+    const activePill = document.querySelector('.pill.active');
+    if (activePill) {
+      filterPill('all', activePill);
     }
   });
 </script>
