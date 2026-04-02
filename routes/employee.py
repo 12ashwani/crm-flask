@@ -107,6 +107,24 @@ def get_attendance_status_from_check_in(check_in_time):
     return "half_day" if check_in_time > half_day_cutoff else "present"
 
 
+def calculate_working_hours_for_day(date_value, check_in_time, check_out_time):
+    start_dt = datetime.strptime(
+        f"{date_value} {check_in_time}", "%Y-%m-%d %H:%M"
+    )
+    end_dt = datetime.strptime(
+        f"{date_value} {check_out_time}", "%Y-%m-%d %H:%M"
+    )
+    cutoff_dt = datetime.strptime(
+        f"{date_value} {STANDARD_CHECK_OUT}", "%Y-%m-%d %H:%M"
+    )
+    effective_end_dt = min(end_dt, cutoff_dt)
+
+    if effective_end_dt <= start_dt:
+        raise ValueError("Check-out time must be after check-in time.")
+
+    return round((effective_end_dt - start_dt).total_seconds() / 3600, 2)
+
+
 def build_leave_context():
     all_requests = get_leave_requests(employee_id=current_user.employee_id)
     pending_requests = [leave for leave in all_requests if leave["status"] == "pending"]
@@ -145,6 +163,57 @@ def build_attendance_dashboard_context():
         "standard_check_out": STANDARD_CHECK_OUT,
         "half_day_cutoff": HALF_DAY_CUTOFF,
     }
+
+
+def build_employee_layout_context():
+    now = datetime.now()
+    context = {
+        "now": now,
+        "pending_leaves": 0,
+        "upcoming_holidays": 0,
+        "attendance_status": None,
+    }
+
+    if not getattr(current_user, "is_authenticated", False):
+        return context
+
+    today = now.date()
+
+    try:
+        context["upcoming_holidays"] = len(
+            get_holidays(start_date=str(today))
+        )
+    except Exception:
+        pass
+
+    department = getattr(current_user, "department", None)
+    employee_id = getattr(current_user, "employee_id", None)
+
+    if department != "admin" and employee_id:
+        try:
+            context["pending_leaves"] = len(
+                get_pending_leave_requests(employee_id=employee_id)
+            )
+        except Exception:
+            pass
+
+    if department in PERSONAL_ATTENDANCE_DEPARTMENTS and employee_id:
+        try:
+            today_record = get_attendance_records(
+                date=str(today),
+                employee_id=employee_id,
+            )
+            if today_record:
+                context["attendance_status"] = today_record[0].get("status")
+        except Exception:
+            pass
+
+    return context
+
+
+@employee_bp.context_processor
+def inject_employee_layout_context():
+    return build_employee_layout_context()
 
 
 @employee_bp.route("/dashboard")
@@ -239,7 +308,11 @@ def check_out():
         flash("Check-out time must be after check-in time.", "warning")
         return redirect(url_for("employee.attendance"))
 
-    working_hours = round((end_dt - start_dt).total_seconds() / 3600, 2)
+    working_hours = calculate_working_hours_for_day(
+        today,
+        check_in_value,
+        check_out_time,
+    )
 
     mark_attendance(
         employee_id=current_user.employee_id,

@@ -346,7 +346,7 @@
         <table>
           <thead>
             <tr>
-              <th>Lead</th><th>Employee</th><th>Department</th><th>Status</th><th>File</th><th>Payment</th><th>Date</th><th>Fee</th>
+              <th>Lead</th><th>Employee</th><th>Department</th><th>Workflow</th><th>File</th><th>Payment</th><th>Remarks</th><th>Last Update</th><th>Date</th><th>Fee</th>
             </tr>
           </thead>
           <tbody id="leadRowsBody"></tbody>
@@ -479,7 +479,7 @@
       const rows = payload.lead_rows || [];
       document.getElementById('leadCountPill').textContent = `${rows.length} records`;
       if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);">No leads found for filters.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);">No leads found for filters.</td></tr>';
         return;
       }
       tbody.innerHTML = rows.map(row => `
@@ -487,9 +487,11 @@
           <td><strong>${row.company_name}</strong><div style="color:var(--muted);font-size:11px;">${row.service}</div></td>
           <td>${row.employee_name}</td>
           <td>${row.team}</td>
-          <td>${row.status}</td>
+          <td><strong>${row.workflow_status_label}</strong><div style="color:var(--muted);font-size:11px;">${row.pending_label}</div></td>
           <td><span class="badge ${badgeClassFile(row.file_status_bucket)}">${row.file_status_bucket}</span></td>
-          <td><span class="badge ${badgeClassPayment(row.payment_bucket)}">${row.payment_bucket}</span></td>
+          <td><span class="badge ${badgeClassPayment(row.payment_bucket)}">${row.payment_bucket}</span><div style="color:var(--muted);font-size:11px;margin-top:4px;">Govt: ${row.govt_fee_status_label} · Cert: ${row.certificate_status}</div></td>
+          <td><div style="font-size:11px;line-height:1.5;">Ops: ${row.operation_remark}<br>Acc: ${row.account_remark}<br>Dept: ${row.department_remark}</div></td>
+          <td><div style="font-size:11px;line-height:1.5;">${row.last_updated_by_name}<br>${row.last_updated_at_display}</div></td>
           <td>${row.date || '-'}</td>
           <td>${money(row.total_fee)}</td>
         </tr>

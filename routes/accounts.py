@@ -16,6 +16,15 @@ from database import (
 
 accounts_bp = Blueprint("accounts", __name__, url_prefix="/accounts")
 
+ACCOUNT_REMARK_OPTIONS = [
+    "certificate done",
+    "gov fee done",
+    "government fee pending",
+    "professional fee pending",
+    "all fee pendig",
+    "all peymentds don",
+]
+
 
 # =========================
 # 🔐 ACCESS CONTROL
@@ -105,7 +114,8 @@ def payments():
         leads=leads,
         accounts_employees=employees,
         summary=summary,
-        query=query
+        query=query,
+        account_remark_options=ACCOUNT_REMARK_OPTIONS,
     )
 
 
@@ -152,7 +162,11 @@ def mark_govt(lead_id):
         return redirect(url_for("index"))
 
     try:
-        update_payment_status(lead_id, govt="received")
+        update_payment_status(
+            lead_id,
+            govt="received",
+            updated_by=current_user.employee_id,
+        )
         flash("Government fee marked as RECEIVED.", "success")
     except Exception as e:
         flash(str(e), "danger")
@@ -170,7 +184,11 @@ def mark_prof(lead_id):
         return redirect(url_for("index"))
 
     try:
-        update_payment_status(lead_id, prof="received")
+        update_payment_status(
+            lead_id,
+            prof="received",
+            updated_by=current_user.employee_id,
+        )
         flash("Professional fee marked as RECEIVED.", "success")
     except Exception as e:
         flash(str(e), "danger")
@@ -219,6 +237,7 @@ def mark_received(lead_id):
             total_amount=total_amount,
             govt_amount=govt_amount,
             professional_amount=professional_amount,
+            updated_by=current_user.employee_id,
         )
         if collected_total == total_amount and total_amount > 0:
             flash("Payment details saved. Total fee fully collected.", "success")
@@ -243,7 +262,11 @@ def mark_pending(lead_id):
         return redirect(url_for("index"))
 
     try:
-        update_payment_status(lead_id, status="pending")
+        update_payment_status(
+            lead_id,
+            status="pending",
+            updated_by=current_user.employee_id,
+        )
         flash("Payment marked as PENDING.", "warning")
     except Exception as e:
         flash(str(e), "danger")
@@ -266,7 +289,12 @@ def mark_failed(lead_id):
 
     try:
         # You can choose govt or prof failure based on your UI later
-        update_payment_status(lead_id, govt="failed", remarks=reason)
+        update_payment_status(
+            lead_id,
+            govt="failed",
+            remarks=reason,
+            updated_by=current_user.employee_id,
+        )
 
         flash("Payment marked as FAILED.", "danger")
     except Exception as e:
@@ -292,8 +320,16 @@ def add_remark(lead_id):
         flash("Remark cannot be empty.", "warning")
         return redirect(url_for("accounts.payments"))
 
+    if remark not in ACCOUNT_REMARK_OPTIONS:
+        flash("Please select a valid accounts remark.", "warning")
+        return redirect(url_for("accounts.payments"))
+
     try:
-        update_payment_status(lead_id, remarks=remark)
+        update_payment_status(
+            lead_id,
+            remarks=remark,
+            updated_by=current_user.employee_id,
+        )
         flash("Remark added successfully.", "success")
     except Exception as e:
         flash(str(e), "danger")

@@ -1442,6 +1442,18 @@
     <form method="POST" id="remark-form" action="">
       <div class="modal-body">
         <label class="fl">Remark <span style="color:var(--accent);">*</span></label>
+        <select
+          name="remark_option"
+          id="account-remark-select"
+          class="fi"
+          onchange="syncAccountRemark(this.value)"
+          required
+        >
+          <option value="" selected disabled>Select remark...</option>
+          {% for option in account_remark_options %}
+          <option value="{{ option }}">{{ option|title }}</option>
+          {% endfor %}
+        </select>
         <textarea name="remark" class="fi" placeholder="Enter your remark…" required></textarea>
       </div>
       <div class="modal-footer">
@@ -1470,8 +1482,23 @@
   
   function openReceived(id) { document.getElementById('received-form').action = `/accounts/payment/received/${id}`; openModal('received-modal'); }
   function openFailed(id) { document.getElementById('failed-form').action = `/accounts/payment/failed/${id}`; openModal('failed-modal'); }
-  function openRemark(id) { document.getElementById('remark-form').action = `/accounts/payment/remark/${id}`; openModal('remark-modal'); }
+  function openRemark(id) {
+    document.getElementById('remark-form').action = `/accounts/payment/remark/${id}`;
+    const select = document.getElementById('account-remark-select');
+    if (select) {
+      select.selectedIndex = 0;
+    }
+    syncAccountRemark('');
+    openModal('remark-modal');
+  }
   function submitPending(id) { const f = document.getElementById('pending-form'); f.action = `/accounts/payment/pending/${id}`; f.submit(); }
+
+  function syncAccountRemark(value) {
+    const textarea = document.querySelector('#remark-form textarea[name="remark"]');
+    if (textarea) {
+      textarea.value = value || '';
+    }
+  }
   
   function filterPill(status, el) {
     document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
@@ -1499,6 +1526,18 @@
     } else {
       document.getElementById('menuToggle').style.display = 'none';
       document.getElementById('sidebar').classList.remove('open');
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const textarea = document.querySelector('#remark-form textarea[name="remark"]');
+    const select = document.getElementById('account-remark-select');
+    if (textarea) {
+      textarea.style.display = 'none';
+      textarea.required = false;
+    }
+    if (select) {
+      select.addEventListener('change', () => syncAccountRemark(select.value));
     }
   });
 </script>

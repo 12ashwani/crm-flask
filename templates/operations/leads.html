@@ -1092,8 +1092,10 @@
               <th>Contact</th>
               <th>Login ID</th>
               <th>Password</th>
-              <th>Status</th>
-              <th>Remarks</th>
+              <th>Workflow</th>
+              <th>Operations Remark</th>
+              <th>Accounts View</th>
+              <th>Pending / Update</th>
               <th>Actions</th>
              </tr>
           </thead>
@@ -1119,12 +1121,21 @@
                 </td>
                 <td class="login-cell"><i class="fas fa-user-lock"></i> {{ lead.client_login or '—' }}</td>
                 <td class="password-cell"><i class="fas fa-key"></i> {{ lead.client_password or '—' }}</td>
+                <td class="remarks-cell">
+                  <div><i class="fas fa-building-columns"></i> Govt Fee: {{ lead.govt_fee_status_label or 'Pending' }}</div>
+                  <div><i class="fas fa-wallet"></i> Payment: {{ lead.payment_status_label or 'Pending' }}</div>
+                  <div><i class="fas fa-file-circle-check"></i> Certificate: {{ lead.certificate_status or 'Pending' }}</div>
+                  <div><i class="fas fa-comment-medical"></i> {{ lead.account_remark or 'â€”' }}</div>
+                </td>
+                <td class="remarks-cell">
+                  <div>{{ lead.pending_label or 'â€”' }}</div>
+                  <div><i class="fas fa-user-pen"></i> {{ lead.last_updated_by_name or 'â€”' }}</div>
+                  <div><i class="fas fa-clock"></i> {{ lead.last_updated_at_display or 'â€”' }}</div>
+                </td>
                 <td>
-                  {% set st = lead.file_status | lower if lead.file_status else '' %}
-                  {% if st == 'done' %}    <span class="badge badge-done"><i class="fas fa-check-circle"></i> Done</span>
-                  {% elif st == 'failed' %}<span class="badge badge-failed"><i class="fas fa-times-circle"></i> Failed</span>
-                  {% elif st == 'pending' %}<span class="badge badge-pending"><i class="fas fa-clock"></i> Pending</span>
-                  {% else %}              <span class="badge badge-new"><i class="fas fa-sparkles"></i> New</span>
+                  <span class="badge badge-pending">{{ lead.workflow_status_label or lead.status or 'Pending' }}</span>
+                  {% if lead.certificate_status == 'Done' %}
+                  <div class="contact-phone"><i class="fas fa-certificate"></i> Certificate Done</div>
                   {% endif %}
                 </td>
                 <td class="remarks-cell">
@@ -1136,20 +1147,20 @@
                     <button class="act-btn done" onclick="openModal('done-modal'); document.getElementById('done-form').action='/operations/done/{{ lead.id }}'"><i class="fas fa-check"></i> Done</button>
                     <button class="act-btn pending" onclick="submitForm('/operations/pending/{{ lead.id }}')"><i class="fas fa-hourglass-start"></i> Pending</button>
                     <button class="act-btn failed" onclick="openModal('fail-modal'); document.getElementById('fail-form').action='/operations/failed/{{ lead.id }}'"><i class="fas fa-times"></i> Failed</button>
-                    <button class="act-btn remark" onclick="openModal('remark-modal'); document.getElementById('remark-form').action='/operations/remark/{{ lead.id }}'"><i class="fas fa-comment"></i> Remark</button>
+                    <button class="act-btn remark" onclick="openOperationRemark({{ lead.id }})"><i class="fas fa-comment"></i> Remark</button>
                   </div>
                 </td>
               </tr>
               {% endfor %}
             {% else %}
-              <tr><td colspan="9">
+              <tr><td colspan="11">
                 <div class="empty-state">
                   <i class="fas fa-inbox"></i>
                   <p>No leads assigned to you yet.</p>
                 </div>
               </td></tr>
             {% endif %}
-            <tr id="no-results"><td colspan="9"><i class="fas fa-filter"></i> No leads match this filter.</td></tr>
+            <tr id="no-results"><td colspan="11"><i class="fas fa-filter"></i> No leads match this filter.</td></tr>
           </tbody>
         </table>
       </div>
@@ -1213,6 +1224,18 @@
     <form method="POST" id="remark-form" action="">
       <div class="modal-body">
         <label class="fl"><i class="fas fa-sticky-note"></i> Remark <span style="color: var(--accent);">*</span></label>
+        <select
+          name="remark_option"
+          id="operation-remark-select"
+          class="fi"
+          onchange="syncOperationRemark(this.value)"
+          required
+        >
+          <option value="" selected disabled>Select remark...</option>
+          {% for option in operation_remark_options %}
+          <option value="{{ option }}">{{ option|title }}</option>
+          {% endfor %}
+        </select>
         <textarea name="remark" class="fi" placeholder="Enter your remark…" required></textarea>
       </div>
       <div class="modal-footer">
@@ -1243,6 +1266,35 @@
     f.action = action;
     f.submit();
   }
+
+  function syncOperationRemark(value) {
+    const textarea = document.querySelector('#remark-form textarea[name="remark"]');
+    if (textarea) {
+      textarea.value = value || '';
+    }
+  }
+
+  function openOperationRemark(leadId) {
+    document.getElementById('remark-form').action = `/operations/remark/${leadId}`;
+    const select = document.getElementById('operation-remark-select');
+    if (select) {
+      select.selectedIndex = 0;
+    }
+    syncOperationRemark('');
+    openModal('remark-modal');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const textarea = document.querySelector('#remark-form textarea[name="remark"]');
+    const select = document.getElementById('operation-remark-select');
+    if (textarea) {
+      textarea.style.display = 'none';
+      textarea.required = false;
+    }
+    if (select) {
+      select.addEventListener('change', () => syncOperationRemark(select.value));
+    }
+  });
 
   let active = 'all';
   function filterPill(status, el) {

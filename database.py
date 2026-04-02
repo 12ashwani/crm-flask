@@ -73,6 +73,214 @@ LATEST_OPERATION_REMARK_SELECT = """
     ) AS operation_remark
 """
 
+LATEST_OPERATION_REMARK_AT_SELECT = """
+    (
+        SELECT r.created_at
+        FROM operation_remarks r
+        WHERE r.lead_id = l.id
+        ORDER BY r.created_at DESC, r.id DESC
+        LIMIT 1
+    ) AS operation_remark_created_at
+"""
+
+LATEST_OPERATION_REMARK_BY_SELECT = """
+    (
+        SELECT e.name
+        FROM operation_remarks r
+        LEFT JOIN employees e ON e.id = r.employee_id
+        WHERE r.lead_id = l.id
+        ORDER BY r.created_at DESC, r.id DESC
+        LIMIT 1
+    ) AS operation_remark_by_name
+"""
+
+
+def _normalize_status_text(value):
+    return (value or "").strip().lower()
+
+
+def _normalize_payment_status(value):
+    status = _normalize_status_text(value)
+    if status in {"received", "done", "paid"}:
+        return "Paid"
+    if status == "failed":
+        return "Failed"
+    return "Pending"
+
+
+def _matches_any(value, options):
+    normalized = _normalize_status_text(value)
+    return normalized in {_normalize_status_text(option) for option in options}
+
+
+def _parse_datetime_value(value):
+    if value in (None, ""):
+        return None
+    if isinstance(value, datetime):
+        return value
+    if hasattr(value, "year") and hasattr(value, "month") and hasattr(value, "day"):
+        return datetime(value.year, value.month, value.day)
+
+    text = str(value).strip()
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(text, fmt)
+        except ValueError:
+            continue
+    return None
+
+
+def _format_datetime_display(value):
+    parsed = _parse_datetime_value(value)
+    if not parsed:
+        return ""
+    return parsed.strftime("%d %b %Y %I:%M %p")
+
+
+def _build_workflow_fields(row):
+    lead_status = _normalize_status_text(row.get("status"))
+    file_status = _normalize_status_text(row.get("file_status"))
+    pending_department = row.get("pending_department") or "Marketing"
+    account_remark = row.get("account_remark") or ""
+
+    certificate_done = _matches_any(
+        account_remark,
+        {"certificate done", "certificate received", "certificate downloaded"},
+    )
+    professional_fee_pending = _matches_any(
+        account_remark,
+        {"professional fee pending"},
+    )
+    government_fee_pending = _matches_any(
+        account_remark,
+        {"government fee pending", "gov fee pending"},
+    )
+
+    govt_status_label = _normalize_payment_status(row.get("govt_payment_status"))
+    prof_status_label = _normalize_payment_status(row.get("professional_payment_status"))
+
+    if certificate_done:
+        workflow_status = "Certificate Done"
+        certificate_status = "Done"
+    elif professional_fee_pending or (
+        govt_status_label == "Paid" and prof_status_label == "Pending"
+    ):
+        workflow_status = "Professional Fee Pending"
+        certificate_status = "Pending"
+    elif government_fee_pending or govt_status_label == "Pending":
+        workflow_status = "Government Fee Pending"
+        certificate_status = "Pending"
+    elif lead_status == "pending":
+        workflow_status = f"Pending at {pending_department}"
+        certificate_status = "Pending"
+    elif lead_status == "completed":
+        workflow_status = "Completed"
+        certificate_status = "Done"
+    elif file_status == "failed" or lead_status == "failed":
+        workflow_status = "Failed"
+        certificate_status = "Pending"
+    elif file_status == "done":
+        workflow_status = "Ready for Accounts"
+        certificate_status = "Pending"
+    elif file_status == "pending":
+        workflow_status = "Pending at Operations"
+        certificate_status = "Pending"
+    elif lead_status == "assigned to accounts":
+        workflow_status = "Pending at Accounts"
+        certificate_status = "Pending"
+    elif lead_status == "assigned to operations":
+        workflow_status = "Pending at Operations"
+        certificate_status = "Pending"
+    else:
+        workflow_status = row.get("status") or "Pending at Marketing"
+        certificate_status = "Pending"
+
+    if workflow_status.startswith("Pending at "):
+        pending_label = workflow_status
+    elif lead_status == "new":
+        pending_label = "Pending at Marketing"
+    else:
+        pending_label = f"Pending at {pending_department}" if lead_status == "pending" else ""
+
+    if workflow_status in {"Certificate Done", "Professional Fee Pending", "Government Fee Pending"}:
+        department_remark = row.get("account_remark") or row.get("operation_remark") or ""
+    elif pending_department == "Operations":
+        department_remark = row.get("operation_remark") or row.get("account_remark") or ""
+    elif pending_department == "Accounts":
+        department_remark = row.get("account_remark") or row.get("operation_remark") or ""
+    else:
+        department_remark = row.get("operation_remark") or row.get("account_remark") or ""
+
+    payment_status_label = "Pending"
+    if govt_status_label == "Failed" or prof_status_label == "Failed":
+        payment_status_label = "Failed"
+    elif govt_status_label == "Paid" and prof_status_label == "Paid":
+        payment_status_label = "Paid"
+    elif govt_status_label == "Paid" or prof_status_label == "Paid":
+        payment_status_label = "Partial"
+
+    return {
+        "govt_fee_status_label": govt_status_label,
+        "professional_fee_status_label": prof_status_label,
+        "workflow_status_label": workflow_status,
+        "pending_label": pending_label,
+        "certificate_status": certificate_status,
+        "department_remark": department_remark,
+        "payment_status_label": payment_status_label,
+    }
+
+
+def _build_last_updated_fields(row):
+    candidates = [
+        (
+            _parse_datetime_value(row.get("payment_updated_at")),
+            row.get("payment_updated_by_name") or row.get("account_executive_name"),
+        ),
+        (
+            _parse_datetime_value(row.get("operation_updated_at")),
+            row.get("operation_updated_by_name") or row.get("operation_executive_name"),
+        ),
+        (
+            _parse_datetime_value(row.get("operation_remark_created_at")),
+            row.get("operation_remark_by_name") or row.get("operation_executive_name"),
+        ),
+        (
+            _parse_datetime_value(row.get("payment_date")),
+            row.get("payment_updated_by_name") or row.get("account_executive_name"),
+        ),
+        (
+            _parse_datetime_value(row.get("created_at")),
+            row.get("marketing_executive_name"),
+        ),
+    ]
+
+    latest_timestamp = None
+    latest_name = ""
+
+    for timestamp, name in candidates:
+        if not timestamp:
+            continue
+        if latest_timestamp is None or timestamp > latest_timestamp:
+            latest_timestamp = timestamp
+            latest_name = name or ""
+
+    return {
+        "last_updated_by_name": latest_name,
+        "last_updated_at": latest_timestamp,
+        "last_updated_at_display": _format_datetime_display(latest_timestamp),
+    }
+
+
+def enrich_lead_row(row):
+    enriched = dict(row)
+    enriched.update(_build_workflow_fields(enriched))
+    enriched.update(_build_last_updated_fields(enriched))
+    return enriched
+
+
+def enrich_lead_rows(rows):
+    return [enrich_lead_row(row) for row in rows]
+
 # =========================================================
 # TABLE CREATION
 # =========================================================
@@ -135,8 +343,11 @@ def create_tables():
             filing_date DATE,
             operation_executive INT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            updated_by INT,
             FOREIGN KEY(lead_id) REFERENCES leads(id),
-            FOREIGN KEY(operation_executive) REFERENCES employees(id)
+            FOREIGN KEY(operation_executive) REFERENCES employees(id),
+            FOREIGN KEY(updated_by) REFERENCES employees(id)
         )
     ''')
 
@@ -153,8 +364,11 @@ def create_tables():
             remarks TEXT,
             account_executive INT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            updated_by INT,
             FOREIGN KEY(lead_id) REFERENCES leads(id),
-            FOREIGN KEY(account_executive) REFERENCES employees(id)
+            FOREIGN KEY(account_executive) REFERENCES employees(id),
+            FOREIGN KEY(updated_by) REFERENCES employees(id)
         )
     ''')
 
@@ -278,6 +492,42 @@ def create_tables():
         conn.commit()
     except:
         pass  # Column already exists
+
+    try:
+        cur.execute("ALTER TABLE operations ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+        conn.commit()
+    except:
+        pass
+
+    try:
+        cur.execute("ALTER TABLE operations ADD COLUMN updated_by INT")
+        conn.commit()
+    except:
+        pass
+
+    try:
+        cur.execute("ALTER TABLE operations ADD CONSTRAINT fk_operations_updated_by FOREIGN KEY (updated_by) REFERENCES employees(id)")
+        conn.commit()
+    except:
+        pass
+
+    try:
+        cur.execute("ALTER TABLE payments ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
+        conn.commit()
+    except:
+        pass
+
+    try:
+        cur.execute("ALTER TABLE payments ADD COLUMN updated_by INT")
+        conn.commit()
+    except:
+        pass
+
+    try:
+        cur.execute("ALTER TABLE payments ADD CONSTRAINT fk_payments_updated_by FOREIGN KEY (updated_by) REFERENCES employees(id)")
+        conn.commit()
+    except:
+        pass
     
     cur.close()
     conn.close()
@@ -373,7 +623,8 @@ def update_operation(
         file_status: str = 'done',
         filing_date: Optional[str] = None,
         client_login: Optional[str] = None,
-        client_password: Optional[str] = None):
+        client_password: Optional[str] = None,
+        updated_by: Optional[int] = None):
     """Update operation details and keep the lead in the correct workflow stage."""
     conn = get_db_connection()
     cur = conn.cursor()
@@ -397,13 +648,15 @@ def update_operation(
         SET file_status=%s,
             filing_date=COALESCE(%s, filing_date),
             client_login=COALESCE(%s, client_login),
-            client_password=COALESCE(%s, client_password)
+            client_password=COALESCE(%s, client_password),
+            updated_by=COALESCE(%s, updated_by)
         WHERE lead_id=%s
     ''', (
         normalized_status,
         effective_filing_date,
         client_login,
         client_password,
+        updated_by,
         lead_id
     ))
     cur.execute("""
@@ -530,6 +783,8 @@ def get_admin_leads_overview(
             o.client_password,
             o.filing_date,
             o.operation_executive,
+            o.updated_at AS operation_updated_at,
+            o.updated_by AS operation_updated_by,
             p.govt_payment_status,
             p.professional_payment_status,
             p.total_amount,
@@ -538,10 +793,16 @@ def get_admin_leads_overview(
             p.payment_date,
             p.remarks AS account_remark,
             p.account_executive,
+            p.updated_at AS payment_updated_at,
+            p.updated_by AS payment_updated_by,
             m.name AS marketing_executive_name,
             op.name AS operation_executive_name,
             acc.name AS account_executive_name,
+            opu.name AS operation_updated_by_name,
+            acu.name AS payment_updated_by_name,
             {LATEST_OPERATION_REMARK_SELECT},
+            {LATEST_OPERATION_REMARK_AT_SELECT},
+            {LATEST_OPERATION_REMARK_BY_SELECT},
             {LEAD_PENDING_DEPARTMENT_SELECT},
             {LEAD_PAYMENT_SELECT},
             ({current_team_select}) AS current_team,
@@ -553,6 +814,8 @@ def get_admin_leads_overview(
         LEFT JOIN employees m ON l.marketing_executive = m.id
         LEFT JOIN employees op ON o.operation_executive = op.id
         LEFT JOIN employees acc ON p.account_executive = acc.id
+        LEFT JOIN employees opu ON o.updated_by = opu.id
+        LEFT JOIN employees acu ON p.updated_by = acu.id
     """
 
     conditions = []
@@ -583,7 +846,7 @@ def get_admin_leads_overview(
     rows = cur.fetchall()
     cur.close()
     conn.close()
-    return rows
+    return enrich_lead_rows(rows)
 # =========================================================
 # DASHBOARDS
 # =========================================================
@@ -608,6 +871,24 @@ def get_department_dashboard(role: str, employee_id: Optional[int] = None) -> Li
         cur.execute("""
             SELECT l.*, e.name as marketing_executive_name,
                    op.name as operation_executive_name,
+                   o.file_status,
+                   o.client_login,
+                   o.client_password,
+                   o.filing_date,
+                   p.govt_payment_status,
+                   p.professional_payment_status,
+                   p.payment_date,
+                   p.remarks AS account_remark,
+                   p.total_amount,
+                   p.govt_amount,
+                   p.professional_amount,
+                   opu.name AS operation_updated_by_name,
+                   acu.name AS payment_updated_by_name,
+                   o.updated_at AS operation_updated_at,
+                   p.updated_at AS payment_updated_at,
+                   """ + LATEST_OPERATION_REMARK_SELECT + """,
+                   """ + LATEST_OPERATION_REMARK_AT_SELECT + """,
+                   """ + LATEST_OPERATION_REMARK_BY_SELECT + """,
                    """ + LEAD_PENDING_DEPARTMENT_SELECT + """,
                    """ + LEAD_PAYMENT_SELECT + """
             FROM leads l
@@ -615,6 +896,8 @@ def get_department_dashboard(role: str, employee_id: Optional[int] = None) -> Li
             LEFT JOIN operations o ON l.id = o.lead_id
             LEFT JOIN employees op ON o.operation_executive = op.id
             LEFT JOIN payments p ON l.id = p.lead_id
+            LEFT JOIN employees opu ON o.updated_by = opu.id
+            LEFT JOIN employees acu ON p.updated_by = acu.id
             WHERE l.marketing_executive=%s
             ORDER BY (l.status = 'New') DESC, l.created_at DESC
         """, (employee_id,))
@@ -628,9 +911,20 @@ def get_department_dashboard(role: str, employee_id: Optional[int] = None) -> Li
                    o.filing_date,
                    o.operation_executive,
                    o.created_at as operation_created_at,
+                   o.updated_at AS operation_updated_at,
                    e.name as operation_executive_name,
                    m.name as marketing_executive_name,
+                   p.govt_payment_status,
+                   p.professional_payment_status,
+                   p.payment_date,
+                   p.remarks AS account_remark,
+                   p.updated_at AS payment_updated_at,
+                   acc.name AS account_executive_name,
+                   opu.name AS operation_updated_by_name,
+                   acu.name AS payment_updated_by_name,
                    """ + LATEST_OPERATION_REMARK_SELECT + """,
+                   """ + LATEST_OPERATION_REMARK_AT_SELECT + """,
+                   """ + LATEST_OPERATION_REMARK_BY_SELECT + """,
                    """ + LEAD_PENDING_DEPARTMENT_SELECT + """,
                    """ + LEAD_PAYMENT_SELECT + """
             FROM leads l
@@ -638,6 +932,9 @@ def get_department_dashboard(role: str, employee_id: Optional[int] = None) -> Li
             LEFT JOIN employees e ON o.operation_executive = e.id
             LEFT JOIN employees m ON l.marketing_executive = m.id
             LEFT JOIN payments p ON l.id = p.lead_id
+            LEFT JOIN employees acc ON p.account_executive = acc.id
+            LEFT JOIN employees opu ON o.updated_by = opu.id
+            LEFT JOIN employees acu ON p.updated_by = acu.id
             WHERE o.operation_executive=%s
             ORDER BY (l.status = 'New') DESC, l.created_at DESC
         """, (employee_id,))
@@ -655,12 +952,20 @@ def get_department_dashboard(role: str, employee_id: Optional[int] = None) -> Li
                    p.remarks as account_remark,
                    p.account_executive,
                    p.created_at as payment_created_at,
+                   p.updated_at AS payment_updated_at,
                    o.client_login,
                    o.client_password,
+                   o.file_status,
+                   o.filing_date,
+                   o.updated_at AS operation_updated_at,
                    e.name as account_executive_name,
                    m.name as marketing_executive_name,
                    op.name as operation_executive_name,
+                   opu.name AS operation_updated_by_name,
+                   acu.name AS payment_updated_by_name,
                    """ + LATEST_OPERATION_REMARK_SELECT + """,
+                   """ + LATEST_OPERATION_REMARK_AT_SELECT + """,
+                   """ + LATEST_OPERATION_REMARK_BY_SELECT + """,
                    """ + LEAD_PENDING_DEPARTMENT_SELECT + """,
                    """ + LEAD_PAYMENT_SELECT + """
             FROM leads l
@@ -669,6 +974,8 @@ def get_department_dashboard(role: str, employee_id: Optional[int] = None) -> Li
             LEFT JOIN employees e ON p.account_executive = e.id
             LEFT JOIN employees m ON l.marketing_executive = m.id
             LEFT JOIN employees op ON o.operation_executive = op.id
+            LEFT JOIN employees opu ON o.updated_by = opu.id
+            LEFT JOIN employees acu ON p.updated_by = acu.id
             WHERE p.account_executive=%s
             ORDER BY l.created_at DESC
         """, (employee_id,))
@@ -676,7 +983,7 @@ def get_department_dashboard(role: str, employee_id: Optional[int] = None) -> Li
     rows = cur.fetchall()
     cur.close()
     conn.close()
-    return rows
+    return enrich_lead_rows(rows)
 
 # =========================================================
 # DEFAULT ADMIN
@@ -740,10 +1047,18 @@ def get_leads_for_accounts():
                p.account_executive,
                o.client_login,
                o.client_password,
+               o.file_status,
+               o.filing_date,
+               o.updated_at AS operation_updated_at,
+               p.updated_at AS payment_updated_at,
                e.name as account_executive_name,
                m.name as marketing_executive_name,
                op.name as operation_executive_name,
+               opu.name AS operation_updated_by_name,
+               acu.name AS payment_updated_by_name,
                """ + LATEST_OPERATION_REMARK_SELECT + """,
+               """ + LATEST_OPERATION_REMARK_AT_SELECT + """,
+               """ + LATEST_OPERATION_REMARK_BY_SELECT + """,
                """ + LEAD_PENDING_DEPARTMENT_SELECT + """,
                """ + LEAD_PAYMENT_SELECT + """
         FROM leads l
@@ -752,6 +1067,8 @@ def get_leads_for_accounts():
         LEFT JOIN employees e ON p.account_executive = e.id
         LEFT JOIN employees m ON l.marketing_executive = m.id
         LEFT JOIN employees op ON o.operation_executive = op.id
+        LEFT JOIN employees opu ON o.updated_by = opu.id
+        LEFT JOIN employees acu ON p.updated_by = acu.id
         WHERE l.status IN ('New','Ready for Accounts', 'Assigned to Accounts', 'Pending', 'Completed', 'Failed')
         ORDER BY (l.status = 'New') DESC, l.created_at DESC
     """)
@@ -759,7 +1076,7 @@ def get_leads_for_accounts():
     rows = cur.fetchall()
     cur.close()
     conn.close()
-    return rows
+    return enrich_lead_rows(rows)
 # =========================================================
 # UPDATE PAYMENT STATUS
 # =========================================================
@@ -773,6 +1090,7 @@ def update_payment_status(
     total_amount=None,
     govt_amount=None,
     professional_amount=None,
+    updated_by=None,
 ):
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -841,16 +1159,27 @@ def update_payment_status(
     if remarks:
         cursor.execute("""
             UPDATE payments 
-            SET remarks=%s 
+            SET remarks=%s,
+                updated_by=COALESCE(%s, updated_by)
             WHERE lead_id=%s
-        """, (remarks, lead_id))
+        """, (remarks, updated_by, lead_id))
+
+    if updated_by is not None and not remarks and all(
+        value is None for value in (amount, total_amount, govt_amount, professional_amount, govt, prof, status)
+    ):
+        cursor.execute("""
+            UPDATE payments
+            SET updated_by=%s
+            WHERE lead_id=%s
+        """, (updated_by, lead_id))
 
     if any(value is not None for value in (amount, total_amount, govt_amount, professional_amount, govt, prof, status)):
         cursor.execute("""
             UPDATE payments
-            SET payment_date=%s
+            SET payment_date=%s,
+                updated_by=COALESCE(%s, updated_by)
             WHERE lead_id=%s
-        """, (datetime.now().strftime('%Y-%m-%d'), lead_id))
+        """, (datetime.now().strftime('%Y-%m-%d'), updated_by, lead_id))
 
     # Get latest values
     cursor.execute("""
@@ -907,6 +1236,11 @@ def add_operation_remark(lead_id, employee_id, remark):
         INSERT INTO operation_remarks (lead_id, employee_id, remark, created_at)
         VALUES (%s, %s, %s, NOW())
     """, (lead_id, employee_id, remark))
+    cur.execute("""
+        UPDATE operations
+        SET updated_by=%s
+        WHERE lead_id=%s
+    """, (employee_id, lead_id))
     conn.commit()
     cur.close()
     conn.close()

@@ -1377,7 +1377,8 @@
               <th>Company</th>
               <th>Created By</th>
               <th>Assigned To</th>
-              <th>Status</th>
+              <th>Workflow</th>
+              <th>Cross-Team Detail</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -1410,18 +1411,18 @@
                 {% endif %}
               </td>
               <td>
-                {% set s = lead.status | lower if lead.status else '' %}
-                {% if 'new' in s %}
-                  <span class="badge badge-new"><i class="bi bi-star-fill"></i> New</span>
-                {% elif 'assigned' in s %}
-                  <span class="badge badge-assigned"><i class="bi bi-person-check-fill"></i> Assigned</span>
-                {% elif 'progress' in s %}
-                  <span class="badge badge-progress"><i class="bi bi-arrow-repeat"></i> Progress</span>
-                {% elif 'closed' in s %}
-                  <span class="badge badge-closed"><i class="bi bi-check-circle-fill"></i> Closed</span>
-                {% else %}
-                  <span class="badge badge-pending">{{ lead.status or 'Pending' }}</span>
+                <span class="badge badge-pending">{{ lead.workflow_status_label or lead.status or 'Pending' }}</span>
+                {% if lead.pending_label %}
+                <div style="font-size:11px;color:var(--muted2);margin-top:6px;">{{ lead.pending_label }}</div>
                 {% endif %}
+              </td>
+              <td>
+                <div style="font-size:11px;line-height:1.55;color:var(--muted2);max-width:240px;">
+                  <div><i class="bi bi-person-lock"></i> {{ lead.client_login or '—' }}</div>
+                  <div><i class="bi bi-key"></i> {{ lead.client_password or '—' }}</div>
+                  <div><i class="bi bi-chat-left-text"></i> Ops: {{ lead.operation_remark or '—' }}</div>
+                  <div><i class="bi bi-bank"></i> Accounts: {{ lead.account_remark or '—' }}</div>
+                </div>
               </td>
               <td>
                 {% if lead.status != 'Assigned to Operations' %}
@@ -1538,12 +1539,18 @@
             <label><i class="bi bi-tag"></i> Service *</label>
             <select name="service" required>
               <option value="" disabled selected>Select service...</option>
-              <option value="Plastic">Plastic</option>
-              <option value="Battery">Battery</option>
+              <option value="Plastic">Plastic EPR</option>
+              <option value="Battery">Battery EPR</option>
               <option value="E-Waste">E-Waste</option>
               <option value="BIS">BIS</option>
               <option value="LMPC">LMPC</option>
               <option value="CDSCO">CDSCO</option>
+              <option value="MSME">MSME</option>
+              <option value="IEC">IEC</option>
+              <option value="WPC">WPC</option>
+              <option value="ISO">ISO</option>
+              <option value="TRADE MARK">TRADE MARK</option>
+
             </select>
           </div>
           <div class="form-group">

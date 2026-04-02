@@ -15,6 +15,16 @@ from database import (
 
 operations_bp = Blueprint("operations", __name__, url_prefix="/operations")
 
+OPERATION_REMARK_OPTIONS = [
+    "gov fee pending",
+    "documents pending",
+    "query",
+    "file pending at gov department",
+    "certificate done",
+    "file auto approved",
+    "file rejected",
+]
+
 
 # =========================
 # 🔐 ACCESS CONTROL
@@ -66,7 +76,11 @@ def dashboard():
         return redirect(url_for("index"))
 
     leads = get_my_leads()
-    return render_template("operations/dashboard.html", leads=leads)
+    return render_template(
+        "operations/dashboard.html",
+        leads=leads,
+        operation_remark_options=OPERATION_REMARK_OPTIONS,
+    )
 
 
 # =========================
@@ -79,7 +93,11 @@ def my_leads():
         return redirect(url_for("index"))
 
     leads = get_my_leads()
-    return render_template("operations/leads.html", leads=leads)
+    return render_template(
+        "operations/leads.html",
+        leads=leads,
+        operation_remark_options=OPERATION_REMARK_OPTIONS,
+    )
 
 
 @operations_bp.route("/download")
@@ -110,7 +128,8 @@ def mark_done(lead_id):
             file_status="done",
             filing_date=request.form.get("filing_date"),
             client_login=request.form.get("client_login"),
-            client_password=request.form.get("client_password")
+            client_password=request.form.get("client_password"),
+            updated_by=current_user.employee_id,
         )
         flash("Lead marked as DONE.", "success")
     except Exception as e:
@@ -129,7 +148,11 @@ def mark_pending(lead_id):
         return redirect(url_for("index"))
 
     try:
-        update_operation(lead_id, file_status="pending")
+        update_operation(
+            lead_id,
+            file_status="pending",
+            updated_by=current_user.employee_id,
+        )
         flash("Lead marked as PENDING.", "warning")
     except Exception as e:
         flash(f"Error: {str(e)}", "danger")
@@ -150,7 +173,8 @@ def mark_failed(lead_id):
     try:
         update_operation(
             lead_id,
-            file_status="failed"
+            file_status="failed",
+            updated_by=current_user.employee_id,
         )
         if reason:
             add_operation_remark(lead_id, current_user.employee_id, reason)
@@ -173,6 +197,10 @@ def add_remark(lead_id):
     remark = request.form.get("remark", "").strip()
     if not remark:
         flash("Remark cannot be empty.", "warning")
+        return redirect(url_for("operations.my_leads"))
+
+    if remark not in OPERATION_REMARK_OPTIONS:
+        flash("Please select a valid operation remark.", "warning")
         return redirect(url_for("operations.my_leads"))
 
     try:

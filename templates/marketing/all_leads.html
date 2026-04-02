@@ -1379,7 +1379,11 @@
               <th>Company</th>
               <th>Service</th>
               <th>Contact Person</th>
-              <th>Status</th>
+              <th>Workflow Status</th>
+              <th>Ops Access</th>
+              <th>Operations Remark</th>
+              <th>Accounts Update</th>
+              <th>Pending / Update</th>
               <th>Assigned To</th>
               <th>Actions</th>
             </tr>
@@ -1414,13 +1418,28 @@
                   {% endif %}
                 </td>
                 <td>
-                  {% set s = (lead.status or 'new') | lower %}
-                  {% if 'new' in s %}<span class="badge badge-new"><i class="bi bi-star-fill"></i> New</span>
-                  {% elif 'assigned' in s %}<span class="badge badge-assigned"><i class="bi bi-person-check-fill"></i> Assigned</span>
-                  {% elif 'progress' in s %}<span class="badge badge-progress"><i class="bi bi-arrow-repeat"></i> In Progress</span>
-                  {% elif 'closed' in s %}<span class="badge badge-closed"><i class="bi bi-check-circle-fill"></i> Closed</span>
-                  {% else %}<span class="badge badge-pending">{{ lead.status }}</span>
+                  <span class="badge badge-pending">{{ lead.workflow_status_label or lead.status or 'Pending' }}</span>
+                  {% if lead.certificate_status == 'Done' %}
+                  <div class="p-detail"><i class="bi bi-award"></i> Certificate Done</div>
                   {% endif %}
+                </td>
+                <td>
+                  <div class="p-detail"><i class="bi bi-person-badge"></i> {{ lead.client_login or '—' }}</div>
+                  <div class="p-detail"><i class="bi bi-key"></i> {{ lead.client_password or '—' }}</div>
+                  <div class="p-detail"><i class="bi bi-folder-check"></i> {{ lead.file_status or '—' }}</div>
+                </td>
+                <td>
+                  <div class="p-detail">{{ lead.operation_remark or '—' }}</div>
+                </td>
+                <td>
+                  <div class="p-detail"><i class="bi bi-bank"></i> Govt Fee: {{ lead.govt_fee_status_label or 'Pending' }}</div>
+                  <div class="p-detail"><i class="bi bi-credit-card"></i> Payment: {{ lead.payment_status_label or 'Pending' }}</div>
+                  <div class="p-detail"><i class="bi bi-chat-left-text"></i> {{ lead.account_remark or '—' }}</div>
+                </td>
+                <td>
+                  <div class="p-detail">{{ lead.pending_label or '—' }}</div>
+                  <div class="p-detail"><i class="bi bi-person"></i> {{ lead.last_updated_by_name or '—' }}</div>
+                  <div class="p-detail"><i class="bi bi-clock-history"></i> {{ lead.last_updated_at_display or '—' }}</div>
                 </td>
                 <td>
                   <form method="POST" action="{{ url_for('marketing.assign_ops', lead_id=lead.id) }}" class="assign-form">
@@ -1445,14 +1464,14 @@
               </tr>
               {% endfor %}
             {% else %}
-              <tr><td colspan="7">
+              <tr><td colspan="11">
                 <div class="empty-state">
                   <i class="bi bi-inbox"></i>
                   <p>No leads found. Create your first lead!</p>
                 </div>
               </td></tr>
             {% endif %}
-            <tr id="no-results"><td colspan="7">
+            <tr id="no-results"><td colspan="11">
               <div class="empty-state">
                 <i class="bi bi-search"></i>
                 <p>No leads match your search</p>

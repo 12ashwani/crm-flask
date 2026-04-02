@@ -1,4 +1,5 @@
 import csv
+import csv
 import io
 from datetime import datetime
 
@@ -59,11 +60,17 @@ def build_admin_leads_export(rows):
             "client_login",
             "client_password",
             "file_status",
+            "workflow_status_label",
+            "pending_label",
+            "certificate_status",
             "govt_payment_status",
             "professional_payment_status",
             "payment_date",
             "operation_remark",
             "account_remark",
+            "department_remark",
+            "last_updated_by_name",
+            "last_updated_at_display",
             "pending_department",
             "total_fee",
             "govt_fee",
@@ -145,6 +152,10 @@ def _filter_leads(rows, *, team="", employee_id=None, status="", date_from="", d
                     str(lead.get("account_executive_name") or ""),
                     str(lead.get("file_status") or ""),
                     str(lead.get("status") or ""),
+                    str(lead.get("workflow_status_label") or ""),
+                    str(lead.get("operation_remark") or ""),
+                    str(lead.get("account_remark") or ""),
+                    str(lead.get("department_remark") or ""),
                 ]
             ).lower()
             if search_text not in haystack:
@@ -155,9 +166,14 @@ def _filter_leads(rows, *, team="", employee_id=None, status="", date_from="", d
 
 
 def _get_file_status_bucket(lead):
+    workflow_status = _normalize_text(lead.get("workflow_status_label"))
     file_status = _normalize_text(lead.get("file_status"))
     lead_status = _normalize_text(lead.get("status"))
 
+    if workflow_status == "certificate done":
+        return "Completed"
+    if workflow_status in {"professional fee pending", "government fee pending"}:
+        return "Pending"
     if file_status in {"done", "completed"} or lead_status == "completed":
         return "Completed"
     if file_status in {"in progress", "in_progress", "processing"} or lead_status in {"assigned to operations", "assigned to accounts"}:
@@ -166,6 +182,14 @@ def _get_file_status_bucket(lead):
 
 
 def _compute_payment_bucket(lead):
+    payment_label = _normalize_text(lead.get("payment_status_label"))
+    if payment_label == "failed":
+        return "Pending"
+    if payment_label == "paid":
+        return "Paid"
+    if payment_label == "partial":
+        return "Partial"
+
     total_fee = _safe_float(lead.get("total_fee"))
     paid = _safe_float(lead.get("paid_amount"))
 
@@ -256,8 +280,17 @@ def _build_analytics_payload(filtered_leads, all_statuses):
                 "company_name": lead.get("company_name") or "Unnamed Lead",
                 "service": lead.get("service") or "-",
                 "status": lead.get("status") or "-",
+                "workflow_status_label": lead.get("workflow_status_label") or lead.get("status") or "-",
+                "pending_label": lead.get("pending_label") or "-",
+                "certificate_status": lead.get("certificate_status") or "-",
                 "file_status_bucket": _get_file_status_bucket(lead),
                 "payment_bucket": _compute_payment_bucket(lead),
+                "govt_fee_status_label": lead.get("govt_fee_status_label") or "Pending",
+                "operation_remark": lead.get("operation_remark") or "-",
+                "account_remark": lead.get("account_remark") or "-",
+                "department_remark": lead.get("department_remark") or "-",
+                "last_updated_by_name": lead.get("last_updated_by_name") or "-",
+                "last_updated_at_display": lead.get("last_updated_at_display") or "-",
                 "date": _serialize_date(lead.get("date")),
                 "employee_name": lead.get("current_employee_name") or "Unassigned",
                 "team": lead.get("current_team") or "Marketing",

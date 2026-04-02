@@ -657,11 +657,11 @@
       {% if current_department in ['hr', 'admin'] %}
       <div class="employee-nav-section">Administration</div>
       <nav class="employee-nav">
-        <a href="{{ url_for('holidays.manage') }}" class="{% if request.endpoint == 'holidays.manage' %}active{% endif %}">
+        <a href="{{ url_for('hr.holidays') }}" class="{% if request.endpoint == 'hr.holidays' %}active{% endif %}">
           <i class="bi bi-calendar-plus-fill"></i>
           <span>Manage Holidays</span>
         </a>
-        <a href="{{ url_for('holidays.add') }}" class="{% if request.endpoint == 'holidays.add' %}active{% endif %}">
+        <a href="{{ url_for('hr.holidays') }}#add-holiday" class="{% if request.endpoint == 'hr.holidays' %}active{% endif %}">
           <i class="bi bi-plus-circle-fill"></i>
           <span>Add New Holiday</span>
         </a>

@@ -1053,8 +1053,9 @@
               <th>Service</th>
               <th>Contact</th>
               <th>Portal Login</th>
-              <th>Status</th>
+              <th>Workflow</th>
               <th>Remarks</th>
+              <th>Accounts</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -1083,19 +1084,15 @@
                   <div><i class="fas fa-key"></i> {{ lead.client_password or '—' }}</div>
                 </td>
                 <td>
-                  {% set st = lead.file_status | lower if lead.file_status else '' %}
-                  {% if st == 'done' %}
-                    <span class="badge badge-done"><i class="fas fa-check-circle"></i> Done</span>
-                  {% elif st == 'failed' %}
-                    <span class="badge badge-failed"><i class="fas fa-times-circle"></i> Failed</span>
-                  {% elif st == 'pending' %}
-                    <span class="badge badge-pending"><i class="fas fa-clock"></i> Pending</span>
-                  {% else %}
-                    <span class="badge badge-new"><i class="fas fa-sparkles"></i> New</span>
-                  {% endif %}
+                  <span class="badge badge-pending">{{ lead.workflow_status_label or lead.status or 'Pending' }}</span>
                 </td>
                 <td style="font-size:12px;color:var(--muted-light);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
                   <i class="fas fa-comment-dots"></i> {{ lead.operation_remark or '—' }}
+                </td>
+                <td style="font-size:11px;color:var(--muted-light);line-height:1.5;">
+                  <div>Govt: {{ lead.govt_fee_status_label or 'Pending' }}</div>
+                  <div>Payment: {{ lead.payment_status_label or 'Pending' }}</div>
+                  <div>{{ lead.account_remark or '—' }}</div>
                 </td>
                 <td>
                   <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -1114,7 +1111,7 @@
               {% endfor %}
             {% else %}
               <tr>
-                <td colspan="7">
+                <td colspan="8">
                   <div class="empty-state">
                     <i class="fas fa-inbox"></i>
                     <p>No leads assigned to you yet.</p>
