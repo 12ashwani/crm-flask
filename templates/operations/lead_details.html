@@ -1005,7 +1005,6 @@
     <a href="{{ url_for('operations.dashboard') }}"><i class="fas fa-chart-line"></i> Dashboard</a>
     <a href="{{ url_for('operations.my_leads') }}" class="active"><i class="fas fa-folder-open"></i> My Leads</a>
     <a href="{{ url_for('attendance') }}"><i class="fas fa-calendar-check"></i> Attendance</a>
-    <a href="{{ url_for('operations.leave_management') }}"><i class="fas fa-umbrella-beach"></i> Leave Management</a>
   </nav>
   <div class="sidebar-footer">
     <div class="sf-name"><i class="fas fa-user-astronaut"></i> {{ current_user.name or current_user.username }}</div>
@@ -1151,6 +1150,9 @@
           <button type="submit" class="act-btn pending"><i class="fas fa-hourglass-half"></i> Mark Pending</button>
         </form>
         <button class="act-btn failed" onclick="openModal('fail-modal')"><i class="fas fa-times-circle"></i> Mark Failed</button>
+        {% if lead.status == 'Ready for Accounts' %}
+        <button class="act-btn success" onclick="openAssignModal({{ lead.id }})"><i class="fas fa-arrow-right"></i> Assign to Accounts</button>
+        {% endif %}
         <button class="act-btn remark" onclick="openModal('remark-modal')"><i class="fas fa-comment-dots"></i> Add Remark</button>
         <a href="{{ url_for('operations.my_leads') }}" class="act-btn" style="margin-left: auto;"><i class="fas fa-arrow-left"></i> Back to Leads</a>
       </div>
@@ -1234,6 +1236,31 @@
   </div>
 </div>
 
+<!-- ASSIGN TO ACCOUNTS MODAL -->
+<div id="assign-accounts-modal" class="modal-backdrop-custom">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3><i class="fas fa-user-tie"></i> Assign to Accounts</h3>
+      <button class="modal-close" onclick="closeModal('assign-accounts-modal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form method="POST" id="assign-accounts-form" action="{{ url_for('operations.assign_accounts', lead_id=lead.id) }}">
+      <div class="modal-body">
+        <label class="fl"><i class="fas fa-user-circle"></i> Select Account Executive <span style="color: var(--accent);">*</span></label>
+        <select name="account_executive" class="fi" required>
+          <option value="" disabled selected>Pick account executive...</option>
+          {% for emp in accounts_employees %}
+          <option value="{{ emp.id }}">{{ emp.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal btn-cancel" onclick="closeModal('assign-accounts-modal')">Cancel</button>
+        <button type="submit" class="btn-modal btn-success-m"><i class="fas fa-arrow-right"></i> Assign</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
   function openModal(id) {
     document.getElementById(id).style.display = 'flex';
@@ -1243,6 +1270,12 @@
     document.getElementById(id).style.display = 'none';
     document.body.style.overflow = '';
   }
+
+  function openAssignModal(leadId) {
+    document.getElementById('assign-accounts-form').action = `/operations/assign_accounts/${leadId}`;
+    openModal('assign-accounts-modal');
+  }
+
   document.querySelectorAll('.modal-backdrop-custom').forEach(m => {
     m.addEventListener('click', e => {
       if (e.target === m) closeModal(m.id);

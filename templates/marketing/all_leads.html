@@ -79,6 +79,7 @@
       min-height: 100vh;
       display: flex;
       transition: all 0.3s ease;
+      overflow-x: hidden;  /* 👈 PREVENT PAGE HORIZONTAL SCROLL */
     }
 
     /* SIDEBAR */
@@ -229,7 +230,7 @@
       top: 50%;
       transform: translateY(-50%);
       width: 3px;
-      height: 24px;
+      height: 18px;
       background: var(--gradient-primary);
       border-radius: 0 4px 4px 0;
       animation: slideInLeft 0.3s ease;
@@ -320,6 +321,7 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      overflow-x: hidden;  /* 👈 PREVENT MAIN AREA FROM SCROLLING */
     }
 
     /* TOPBAR */
@@ -718,16 +720,47 @@
       box-shadow: var(--shadow-lg);
     }
 
+    /* 👇 FIXED: HORIZONTAL SCROLL INSIDE THIS WRAPPER */
     .table-wrap {
       overflow-x: auto;
+      width: 100%;
+      scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
     }
 
+    /* 👇 NO min-width, table width = content width */
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 13px;
     }
 
+    /* 👇 Prevent wrapping → keeps horizontal scroll */
+    th, td {
+      white-space: nowrap;
+    }
+
+    /* 👇 Custom scrollbar (like Accounts page) */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--surface2);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+    }
+
+    /* Rest of the original styling (row animations, cells, etc.) */
     thead tr {
       border-bottom: 2px solid var(--border);
       background: var(--surface2);

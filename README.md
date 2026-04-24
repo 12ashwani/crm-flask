@@ -5,7 +5,7 @@ This system helps manage leads across **Marketing**, **Operations**, **Accounts*
 
 ---
 
-# ✨ Features
+# ✨ Features 
 
 ## 👤 Authentication
 - Secure login system  

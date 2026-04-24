@@ -671,6 +671,9 @@ def update_operation(
 # =========================================================
 
 def assign_to_accounts(lead_id: int, account_executive_id: int):
+    """ ⚠️ DEPRECATED - Use assign_to_accounts_from_operations() instead.
+        This function is kept for backwards compatibility but should not be used directly.
+        Only Operations team can assign files to Accounts."""
     conn = get_db_connection()
     cur = conn.cursor()
 
@@ -690,6 +693,55 @@ def assign_to_accounts(lead_id: int, account_executive_id: int):
     conn.commit()
     cur.close()
     conn.close()
+
+
+def assign_to_accounts_from_operations(lead_id: int, account_executive_id: int):
+    """✅ CORRECT WORKFLOW - Operations assigns to Accounts after completing work.
+       This function enforces the workflow: Marketing → Operations → Accounts
+       
+       Prerequisites:
+       - Lead must be in status 'Ready for Accounts' (Operations marked work as done)
+       - Only Operations team can call this
+       - Account executive is selected from the accounts department
+       
+       Updates:
+       - Creates/updates payment record with assigned account executive
+       - Updates lead status to 'Assigned to Accounts'
+    """
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Verify lead is in correct status (Ready for Accounts)
+    cur.execute("SELECT status FROM leads WHERE id=%s", (lead_id,))
+    result = cur.fetchone()
+    if not result:
+        cur.close()
+        conn.close()
+        raise ValueError(f"Lead {lead_id} not found")
+    
+    current_status = result[0]
+    if current_status != 'Ready for Accounts':
+        cur.close()
+        conn.close()
+        raise ValueError(f"Lead must be in 'Ready for Accounts' status. Current status: {current_status}")
+
+    # Ensure payment row exists + assign exec
+    cur.execute("""
+        INSERT INTO payments (lead_id, account_executive)
+        VALUES (%s, %s)
+        ON DUPLICATE KEY UPDATE account_executive=VALUES(account_executive)
+    """, (lead_id, account_executive_id))
+
+    # Update lead stage
+    cur.execute("""
+        UPDATE leads SET status='Assigned to Accounts'
+        WHERE id=%s
+    """, (lead_id,))
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
 
 def update_payment(
         lead_id: int,
@@ -1030,48 +1082,108 @@ def create_default_admin():
 # =========================================================
 # CUSTOM QUERIES
 # =========================================================
-def get_leads_for_accounts():
+def get_leads_for_accounts(employee_id=None):
+    """✅ Fetch leads assigned to Accounts team.
+    
+    If employee_id is provided: Return only leads assigned to that account executive
+    If employee_id is None: Return all leads in Accounts workflow (unassigned)
+    
+    Only shows leads in appropriate Accounts statuses:
+    - 'Assigned to Accounts': Lead assigned to specific account executive
+    - 'Pending': Currently being processed by Accounts 
+    - 'Completed': Payment completed
+    - 'Failed': Lead failed in Accounts
+    
+    Accounts team CANNOT see:
+    - 'New': Marketing leads (not yet assigned to Operations)
+    - 'Assigned to Operations': Currently with Operations
+    - 'Ready for Accounts': Operations completed, waiting for assignment
+    """
     conn = get_db_connection()
     cur = conn.cursor(dictionary=True)
 
-    cur.execute("""
-        SELECT l.*, 
-               p.govt_payment_status,
-               p.professional_payment_status,
-               p.total_amount,
-               p.govt_amount,
-               p.professional_amount,
-               p.payment_date,
-               p.remarks,
-               p.remarks as account_remark,
-               p.account_executive,
-               o.client_login,
-               o.client_password,
-               o.file_status,
-               o.filing_date,
-               o.updated_at AS operation_updated_at,
-               p.updated_at AS payment_updated_at,
-               e.name as account_executive_name,
-               m.name as marketing_executive_name,
-               op.name as operation_executive_name,
-               opu.name AS operation_updated_by_name,
-               acu.name AS payment_updated_by_name,
-               """ + LATEST_OPERATION_REMARK_SELECT + """,
-               """ + LATEST_OPERATION_REMARK_AT_SELECT + """,
-               """ + LATEST_OPERATION_REMARK_BY_SELECT + """,
-               """ + LEAD_PENDING_DEPARTMENT_SELECT + """,
-               """ + LEAD_PAYMENT_SELECT + """
-        FROM leads l
-        LEFT JOIN payments p ON l.id = p.lead_id
-        LEFT JOIN operations o ON l.id = o.lead_id
-        LEFT JOIN employees e ON p.account_executive = e.id
-        LEFT JOIN employees m ON l.marketing_executive = m.id
-        LEFT JOIN employees op ON o.operation_executive = op.id
-        LEFT JOIN employees opu ON o.updated_by = opu.id
-        LEFT JOIN employees acu ON p.updated_by = acu.id
-        WHERE l.status IN ('New','Ready for Accounts', 'Assigned to Accounts', 'Pending', 'Completed', 'Failed')
-        ORDER BY (l.status = 'New') DESC, l.created_at DESC
-    """)
+    if employee_id:
+        # Show only leads assigned to this account executive
+        cur.execute("""
+            SELECT l.*, 
+                   p.govt_payment_status,
+                   p.professional_payment_status,
+                   p.total_amount,
+                   p.govt_amount,
+                   p.professional_amount,
+                   p.payment_date,
+                   p.remarks,
+                   p.remarks as account_remark,
+                   p.account_executive,
+                   o.client_login,
+                   o.client_password,
+                   o.file_status,
+                   o.filing_date,
+                   o.updated_at AS operation_updated_at,
+                   p.updated_at AS payment_updated_at,
+                   e.name as account_executive_name,
+                   m.name as marketing_executive_name,
+                   op.name as operation_executive_name,
+                   opu.name AS operation_updated_by_name,
+                   acu.name AS payment_updated_by_name,
+                   """ + LATEST_OPERATION_REMARK_SELECT + """,
+                   """ + LATEST_OPERATION_REMARK_AT_SELECT + """,
+                   """ + LATEST_OPERATION_REMARK_BY_SELECT + """,
+                   """ + LEAD_PENDING_DEPARTMENT_SELECT + """,
+                   """ + LEAD_PAYMENT_SELECT + """
+            FROM leads l
+            LEFT JOIN payments p ON l.id = p.lead_id
+            LEFT JOIN operations o ON l.id = o.lead_id
+            LEFT JOIN employees e ON p.account_executive = e.id
+            LEFT JOIN employees m ON l.marketing_executive = m.id
+            LEFT JOIN employees op ON o.operation_executive = op.id
+            LEFT JOIN employees opu ON o.updated_by = opu.id
+            LEFT JOIN employees acu ON p.updated_by = acu.id
+            WHERE p.account_executive=%s 
+              AND l.status IN ('Assigned to Accounts', 'Pending', 'Completed', 'Failed')
+            ORDER BY (l.status = 'Pending') DESC, l.created_at DESC
+        """, (employee_id,))
+    else:
+        # Show all leads waiting for Accounts assignment (Ready for Accounts status)
+        # This would be for admin/viewing purposes only
+        cur.execute("""
+            SELECT l.*, 
+                   p.govt_payment_status,
+                   p.professional_payment_status,
+                   p.total_amount,
+                   p.govt_amount,
+                   p.professional_amount,
+                   p.payment_date,
+                   p.remarks,
+                   p.remarks as account_remark,
+                   p.account_executive,
+                   o.client_login,
+                   o.client_password,
+                   o.file_status,
+                   o.filing_date,
+                   o.updated_at AS operation_updated_at,
+                   p.updated_at AS payment_updated_at,
+                   e.name as account_executive_name,
+                   m.name as marketing_executive_name,
+                   op.name as operation_executive_name,
+                   opu.name AS operation_updated_by_name,
+                   acu.name AS payment_updated_by_name,
+                   """ + LATEST_OPERATION_REMARK_SELECT + """,
+                   """ + LATEST_OPERATION_REMARK_AT_SELECT + """,
+                   """ + LATEST_OPERATION_REMARK_BY_SELECT + """,
+                   """ + LEAD_PENDING_DEPARTMENT_SELECT + """,
+                   """ + LEAD_PAYMENT_SELECT + """
+            FROM leads l
+            LEFT JOIN payments p ON l.id = p.lead_id
+            LEFT JOIN operations o ON l.id = o.lead_id
+            LEFT JOIN employees e ON p.account_executive = e.id
+            LEFT JOIN employees m ON l.marketing_executive = m.id
+            LEFT JOIN employees op ON o.operation_executive = op.id
+            LEFT JOIN employees opu ON o.updated_by = opu.id
+            LEFT JOIN employees acu ON p.updated_by = acu.id
+            WHERE l.status IN ('Assigned to Accounts', 'Pending', 'Completed', 'Failed')
+            ORDER BY (l.status = 'Pending') DESC, l.created_at DESC
+        """)
 
     rows = cur.fetchall()
     cur.close()

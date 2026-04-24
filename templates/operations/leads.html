@@ -75,6 +75,8 @@
       display: flex;
       position: relative;
       transition: var(--transition);
+      /* FIX: prevent entire page from scrolling horizontally */
+      overflow-x: hidden;
     }
 
     /* Animated background */
@@ -271,6 +273,8 @@
       flex-direction: column;
       position: relative;
       z-index: 2;
+      /* FIX: prevent main area from expanding beyond viewport */
+      overflow-x: hidden;
     }
 
     .topbar {
@@ -587,7 +591,7 @@
       font-size: 14px;
     }
 
-    /* Table - IMPROVED FONTS */
+    /* Table - IMPROVED FONTS & HORIZONTAL SCROLL FIX */
     .table-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -600,14 +604,37 @@
     .table-card:hover {
       box-shadow: var(--shadow-md);
     }
+    /* FIX: horizontal scroll inside wrapper */
     .table-wrap {
       overflow-x: auto;
+      scrollbar-width: thin;
+      -webkit-overflow-scrolling: touch;
     }
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 13px;
       font-family: 'Inter', sans-serif;
+    }
+    /* FIX: prevent cell content wrapping → keeps table wide */
+    th, td {
+      white-space: nowrap;
+    }
+    /* Custom scrollbar styling (like Accounts page) */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--surface2);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent2);
     }
     thead tr {
       border-bottom: 1px solid var(--border-light);
@@ -1018,7 +1045,6 @@
     <a href="{{ url_for('operations.dashboard') }}"><i class="fas fa-chart-line"></i> Dashboard</a>
     <a href="{{ url_for('operations.my_leads') }}" class="active"><i class="fas fa-folder-open"></i> My Leads</a>
     <a href="{{ url_for('attendance') }}"><i class="fas fa-calendar-check"></i> Attendance</a>
-    <a href="{{ url_for('operations.leave_management') }}"><i class="fas fa-umbrella-beach"></i> Leave Management</a>
   </nav>
   <div class="sidebar-footer">
     <div class="sf-name"><i class="fas fa-user-astronaut"></i> {{ current_user.name or current_user.username }}</div>
@@ -1125,12 +1151,12 @@
                   <div><i class="fas fa-building-columns"></i> Govt Fee: {{ lead.govt_fee_status_label or 'Pending' }}</div>
                   <div><i class="fas fa-wallet"></i> Payment: {{ lead.payment_status_label or 'Pending' }}</div>
                   <div><i class="fas fa-file-circle-check"></i> Certificate: {{ lead.certificate_status or 'Pending' }}</div>
-                  <div><i class="fas fa-comment-medical"></i> {{ lead.account_remark or 'â€”' }}</div>
+                  <div><i class="fas fa-comment-medical"></i> {{ lead.account_remark or '—' }}</div>
                 </td>
                 <td class="remarks-cell">
-                  <div>{{ lead.pending_label or 'â€”' }}</div>
-                  <div><i class="fas fa-user-pen"></i> {{ lead.last_updated_by_name or 'â€”' }}</div>
-                  <div><i class="fas fa-clock"></i> {{ lead.last_updated_at_display or 'â€”' }}</div>
+                  <div>{{ lead.pending_label or '—' }}</div>
+                  <div><i class="fas fa-user-pen"></i> {{ lead.last_updated_by_name or '—' }}</div>
+                  <div><i class="fas fa-clock"></i> {{ lead.last_updated_at_display or '—' }}</div>
                 </td>
                 <td>
                   <span class="badge badge-pending">{{ lead.workflow_status_label or lead.status or 'Pending' }}</span>
@@ -1147,6 +1173,9 @@
                     <button class="act-btn done" onclick="openModal('done-modal'); document.getElementById('done-form').action='/operations/done/{{ lead.id }}'"><i class="fas fa-check"></i> Done</button>
                     <button class="act-btn pending" onclick="submitForm('/operations/pending/{{ lead.id }}')"><i class="fas fa-hourglass-start"></i> Pending</button>
                     <button class="act-btn failed" onclick="openModal('fail-modal'); document.getElementById('fail-form').action='/operations/failed/{{ lead.id }}'"><i class="fas fa-times"></i> Failed</button>
+                    {% if lead.status == 'Ready for Accounts' %}
+                    <button class="act-btn success" onclick="openAssignModal({{ lead.id }})"><i class="fas fa-arrow-right"></i> Assign to Accounts</button>
+                    {% endif %}
                     <button class="act-btn remark" onclick="openOperationRemark({{ lead.id }})"><i class="fas fa-comment"></i> Remark</button>
                   </div>
                 </td>
@@ -1246,6 +1275,31 @@
   </div>
 </div>
 
+<!-- ASSIGN TO ACCOUNTS MODAL -->
+<div id="assign-accounts-modal" class="modal-backdrop-custom">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <h3><i class="fas fa-user-tie"></i> Assign to Accounts</h3>
+      <button class="modal-close" onclick="closeModal('assign-accounts-modal')"><i class="fas fa-times"></i></button>
+    </div>
+    <form method="POST" id="assign-accounts-form" action="">
+      <div class="modal-body">
+        <label class="fl"><i class="fas fa-user-circle"></i> Select Account Executive <span style="color: var(--accent);">*</span></label>
+        <select name="account_executive" class="fi" required>
+          <option value="" disabled selected>Pick account executive...</option>
+          {% for emp in accounts_employees %}
+          <option value="{{ emp.id }}">{{ emp.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-modal btn-cancel" onclick="closeModal('assign-accounts-modal')">Cancel</button>
+        <button type="submit" class="btn-modal btn-success"><i class="fas fa-arrow-right"></i> Assign</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
   function openModal(id) {
     document.getElementById(id).style.display = 'flex';
@@ -1282,6 +1336,11 @@
     }
     syncOperationRemark('');
     openModal('remark-modal');
+  }
+
+  function openAssignModal(leadId) {
+    document.getElementById('assign-accounts-form').action = `/operations/assign_accounts/${leadId}`;
+    openModal('assign-accounts-modal');
   }
 
   document.addEventListener('DOMContentLoaded', () => {

@@ -7,10 +7,12 @@ from flask_login import login_required, current_user
 from database import (
     update_operation,
     get_department_dashboard,
-    add_operation_remark,  # new DB function
+    add_operation_remark,
     get_export_rows,
     get_scoped_lead,
     return_lead_to_previous_stage,
+    assign_to_accounts_from_operations,
+    get_employees_by_department,
 )
 
 operations_bp = Blueprint("operations", __name__, url_prefix="/operations")
@@ -79,9 +81,11 @@ def dashboard():
         return redirect(url_for("index"))
 
     leads = get_my_leads()
+    accounts_employees = get_employees_by_department("accounts")
     return render_template(
         "operations/dashboard.html",
         leads=leads,
+        accounts_employees=accounts_employees,
         operation_remark_options=OPERATION_REMARK_OPTIONS,
     )
 
@@ -96,9 +100,11 @@ def my_leads():
         return redirect(url_for("index"))
 
     leads = get_my_leads()
+    accounts_employees = get_employees_by_department("accounts")
     return render_template(
         "operations/leads.html",
         leads=leads,
+        accounts_employees=accounts_employees,
         operation_remark_options=OPERATION_REMARK_OPTIONS,
     )
 
@@ -225,6 +231,7 @@ def lead_details(lead_id):
         return redirect(url_for("index"))
 
     leads = get_my_leads()
+    accounts_employees = get_employees_by_department("accounts")
     # ✅ Use 'id' key from leads table
     lead = next((l for l in leads if l.get('id') == lead_id), None)
 
@@ -232,7 +239,44 @@ def lead_details(lead_id):
         flash("Lead not found.", "danger")
         return redirect(url_for("operations.my_leads"))
 
-    return render_template("operations/lead_details.html", lead=lead)
+    return render_template(
+        "operations/lead_details.html",
+        lead=lead,
+        accounts_employees=accounts_employees,
+    )
+
+
+# =========================
+# ✅ ASSIGN TO ACCOUNTS EXECUTIVE
+# =========================
+@operations_bp.route("/assign_accounts/<int:lead_id>", methods=["POST"])
+@login_required
+def assign_accounts(lead_id):
+    """✅ CORRECT WORKFLOW - Operations assigns file to Accounts after completion.
+    
+    This endpoint:
+    1. Validates lead is in 'Ready for Accounts' status
+    2. Assigns the lead to selected Accounts Executive
+    3. Updates status to 'Assigned to Accounts'
+    
+    Prerequisites:
+    - Lead must be marked as 'Done' by Operations (status: 'Ready for Accounts')
+    - User must be in Operations department
+    - Account executive must be selected
+    """
+    if not require_operations():
+        return redirect(url_for("index"))
+
+    try:
+        account_exec_id = int(request.form.get("account_executive"))
+        assign_to_accounts_from_operations(lead_id, account_exec_id)
+        flash("✅ Lead assigned to Accounts successfully.", "success")
+    except ValueError as e:
+        flash(f"❌ Cannot assign: {str(e)}", "warning")
+    except Exception as e:
+        flash(f"❌ Error: {str(e)}", "danger")
+
+    return redirect(url_for("operations.my_leads"))
 
 
 # =========================

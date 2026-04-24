@@ -629,6 +629,7 @@
           {% endif %}
         </a>
         {% endif %}
+        {% if current_department == 'employee' %}
         <a href="{{ url_for('employee.leave_request') }}" class="{% if request.endpoint == 'employee.leave_request' %}active{% endif %}">
           <i class="bi bi-send-plus-fill"></i>
           <span>Apply Leave</span>
@@ -644,6 +645,7 @@
           <i class="bi bi-pie-chart-fill"></i>
           <span>Leave Balance</span>
         </a>
+        {% endif %}
         <a href="{{ url_for('employee.holidays') }}" class="{% if request.endpoint == 'employee.holidays' %}active{% endif %}">
           <i class="bi bi-calendar2-week-fill"></i>
           <span>Holidays</span>

@@ -1203,10 +1203,9 @@
         <div class="card">
           <div class="card-hdr"><h3>Payment Details</h3></div>
           <div class="amount-hero">
-            <div class="amount-label">Amount Collected</div>
-            {% set total_amount = (lead.govt_amount or 0) + (lead.professional_amount or 0) %}
-            {% if total_amount %}
-              <div class="amount-value">₹ {{ total_amount }}</div>
+            <div class="amount-label">Invoice Value</div>
+            {% if lead.invoice_value %}
+              <div class="amount-value">₹ {{ lead.invoice_value }}</div>
             {% else %}
               <div class="amount-value no-amt">No amount recorded</div>
             {% endif %}
@@ -1215,24 +1214,28 @@
             <div class="kv-row">
               <span class="kv-key">Status</span>
               <span class="kv-val">
-                {% if ps == 'received' %}<span class="badge badge-received">Received</span>
-                {% elif ps == 'pending' %}<span class="badge badge-pending">Pending</span>
+                {% if lead.payment_status_label == 'All Payments Received' %}<span class="badge badge-received">All Payments Received</span>
+                {% elif lead.payment_status_label == 'Pending Payment' %}<span class="badge badge-pending">Pending Payment</span>
                 {% elif ps == 'failed'  %}<span class="badge badge-failed">Failed</span>
                 {% else %}              <span class="badge badge-new">New</span>
                 {% endif %}
               </span>
             </div>
             <div class="kv-row">
-              <span class="kv-key">Total Fee</span>
-              <span class="kv-val mono">₹ {{ lead.total_amount or 0 }}</span>
+              <span class="kv-key">Invoice Value</span>
+              <span class="kv-val mono">₹ {{ lead.invoice_value or 0 }}</span>
             </div>
             <div class="kv-row">
               <span class="kv-key">Government Fee</span>
-              <span class="kv-val mono">₹ {{ lead.govt_amount or 0 }} | {{ lead.govt_payment_status or 'pending' }}</span>
+              <span class="kv-val mono">₹ {{ lead.gov_fee or 0 }}</span>
             </div>
             <div class="kv-row">
               <span class="kv-key">Professional Fee</span>
-              <span class="kv-val mono">₹ {{ lead.professional_amount or 0 }} | {{ lead.professional_payment_status or 'pending' }}</span>
+              <span class="kv-val mono">₹ {{ lead.professional_fee or 0 }}</span>
+            </div>
+            <div class="kv-row">
+              <span class="kv-key">Pending Payment</span>
+              <span class="kv-val mono">₹ {{ lead.pending_payment or 0 }}</span>
             </div>
             {% if lead.payment_date %}
             <div class="kv-row">
@@ -1273,22 +1276,6 @@
             </button>
           </div>
 
-          <!-- Assign Exec -->
-          <div class="panel-section">
-            <div class="section-label">Assign Account Executive</div>
-            <form method="POST" action="{{ url_for('accounts.assign', lead_id=lead.id) }}">
-              <select name="account_executive" class="full-select" required>
-                <option value="" disabled {% if not lead.get('account_executive') %}selected{% endif %}>Pick executive…</option>
-                {% for emp in accounts_employees %}
-                <option value="{{ emp.id }}" {% if lead.get('account_executive') == emp.id %}selected{% endif %}>
-                  {{ emp.name }}
-                </option>
-                {% endfor %}
-              </select>
-              <button type="submit" class="action-btn a-blue" style="margin-bottom:0;">→ Assign</button>
-            </form>
-          </div>
-
           <!-- Add Remark -->
           <div class="panel-section">
             <div class="section-label">Add Remark</div>
@@ -1314,17 +1301,25 @@
     </div>
     <form method="POST" action="{{ url_for('accounts.mark_received', lead_id=lead.id) }}">
       <div class="modal-body">
-        <label class="fl">Total Fee</label>
-        <input type="number" name="total_amount" class="fi"
-               placeholder="e.g. 20000" step="0.01" min="0"
-               value="{{ lead.total_amount or '' }}"/>
-        <label class="fl" style="margin-top:16px;">Government Fee</label>
-        <input type="number" name="govt_amount" class="fi"
-               placeholder="e.g. 15000" step="0.01" min="0"
-               value="{{ lead.govt_amount or '' }}"/>
+        <label class="fl">Government Fee</label>
+        <input type="number" name="gov_fee" class="fi js-gov-fee"
+               placeholder="e.g. 1500" step="0.01" min="0"
+               value="{{ lead.gov_fee or '' }}"/>
         <label class="fl" style="margin-top:16px;">Professional Fee</label>
-        <input type="number" name="professional_amount" class="fi"
-               placeholder="e.g. 5000" step="0.01" min="0"
+        <input type="number" name="professional_fee" class="fi js-prof-fee"
+               placeholder="e.g. 2500" step="0.01" min="0"
+               value="{{ lead.professional_fee or '' }}"/>
+        <label class="fl" style="margin-top:16px;">Invoice Value</label>
+        <input type="number" name="invoice_value_preview" class="fi js-invoice-value"
+               placeholder="Auto calculated" step="0.01" min="0"
+               value="{{ lead.invoice_value or '' }}" readonly/>
+        <label class="fl" style="margin-top:16px;">Government Fee Received</label>
+        <input type="number" name="gov_fee_received" class="fi"
+               placeholder="e.g. 1500" step="0.01" min="0"
+               value="{{ lead.govt_amount or '' }}"/>
+        <label class="fl" style="margin-top:16px;">Professional Fee Received</label>
+        <input type="number" name="professional_fee_received" class="fi"
+               placeholder="e.g. 1000" step="0.01" min="0"
                value="{{ lead.professional_amount or '' }}"/>
       </div>
       <div class="modal-footer">
@@ -1361,6 +1356,25 @@
   document.querySelectorAll('.modal-bd').forEach(m => {
     m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
   });
+
+  const receivedForm = document.querySelector('#received-modal form');
+  if (receivedForm) {
+    const govInput = receivedForm.querySelector('.js-gov-fee');
+    const profInput = receivedForm.querySelector('.js-prof-fee');
+    const invoiceInput = receivedForm.querySelector('.js-invoice-value');
+
+    const updateInvoiceValue = () => {
+      const gov = parseFloat(govInput?.value || '0') || 0;
+      const prof = parseFloat(profInput?.value || '0') || 0;
+      if (invoiceInput) {
+        invoiceInput.value = (gov + prof).toFixed(2);
+      }
+    };
+
+    govInput?.addEventListener('input', updateInvoiceValue);
+    profInput?.addEventListener('input', updateInvoiceValue);
+    updateInvoiceValue();
+  }
 </script>
 </body>
 </html>

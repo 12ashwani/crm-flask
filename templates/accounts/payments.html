@@ -14,34 +14,35 @@
     }
 
     :root {
-      --bg-primary: #fafbfe;
-      --bg-secondary: #ffffff;
-      --bg-tertiary: #f8f9fc;
-      --accent: #6366f1;
-      --accent-light: #818cf8;
-      --accent-dark: #4f46e5;
-      --accent-glow: rgba(99, 102, 241, 0.2);
-      --success: #10b981;
-      --success-light: #34d399;
-      --success-glow: rgba(16, 185, 129, 0.2);
-      --warning: #f59e0b;
-      --warning-light: #fbbf24;
-      --warning-glow: rgba(245, 158, 11, 0.2);
-      --danger: #ef4444;
-      --danger-light: #f87171;
-      --danger-glow: rgba(239, 68, 68, 0.2);
-      --info: #3b82f6;
-      --info-light: #60a5fa;
-      --text-primary: #111827;
-      --text-secondary: #6b7280;
-      --text-muted: #9ca3af;
-      --border-light: #e5e7eb;
-      --border-lighter: #f3f4f6;
+      /* Refreshed Theme – Deep Indigo & Emerald Accents */
+      --bg-primary: #e8eef5;
+      --bg-secondary: #fafbfc;
+      --bg-tertiary: #e8eef5;
+      --accent: #2563eb;        /* vibrant blue for primary actions */
+      --accent-light: #3b82f6;
+      --accent-dark: #1d4ed8;
+      --accent-glow: rgba(37, 99, 235, 0.15);
+      --success: #059669;        /* emerald green */
+      --success-light: #10b981;
+      --success-glow: rgba(5, 150, 105, 0.15);
+      --warning: #d97706;        /* warm amber */
+      --warning-light: #f59e0b;
+      --warning-glow: rgba(217, 119, 6, 0.15);
+      --danger: #dc2626;         /* vivid red */
+      --danger-light: #ef4444;
+      --danger-glow: rgba(220, 38, 38, 0.15);
+      --info: #0ea5e9;
+      --info-light: #38bdf8;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --border-light: #e2e8f0;
+      --border-lighter: #f1f5f9;
       --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
       --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-      --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+      --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.2);
       --radius-sm: 8px;
       --radius-md: 12px;
       --radius-lg: 16px;
@@ -59,7 +60,7 @@
       overflow-x: hidden;
     }
 
-    /* Animated Background */
+    /* Animated Background - more subtle with new gradient */
     .bg-animation {
       position: fixed;
       top: 0;
@@ -77,8 +78,8 @@
       height: 200%;
       top: -50%;
       left: -50%;
-      background: radial-gradient(circle at 30% 50%, rgba(99, 102, 241, 0.03) 0%, transparent 50%),
-                  radial-gradient(circle at 70% 80%, rgba(16, 185, 129, 0.02) 0%, transparent 50%);
+      background: radial-gradient(circle at 30% 50%, rgba(37, 99, 235, 0.04) 0%, transparent 60%),
+                  radial-gradient(circle at 70% 80%, rgba(5, 150, 105, 0.03) 0%, transparent 60%);
       animation: bgMove 20s ease-in-out infinite;
     }
 
@@ -107,7 +108,7 @@
     .sidebar-logo {
       padding: 28px 24px;
       border-bottom: 1px solid var(--border-lighter);
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.02) 0%, rgba(99, 102, 241, 0.05) 100%);
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.02) 0%, rgba(37, 99, 235, 0.05) 100%);
     }
 
     .brand {
@@ -127,13 +128,13 @@
       color: #fff;
       font-weight: 800;
       font-size: 20px;
-      box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
       transition: all 0.3s ease;
     }
 
     .brand-mark:hover {
       transform: scale(1.05);
-      box-shadow: 0 12px 28px rgba(99, 102, 241, 0.4);
+      box-shadow: 0 12px 28px rgba(37, 99, 235, 0.35);
     }
 
     .brand-text {
@@ -194,13 +195,13 @@
 
     nav a:hover {
       color: var(--accent);
-      background: rgba(99, 102, 241, 0.08);
+      background: rgba(37, 99, 235, 0.08);
       transform: translateX(4px);
     }
 
     nav a.active {
       color: var(--accent);
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
       font-weight: 600;
     }
 
@@ -220,7 +221,7 @@
     .sidebar-footer {
       margin: 20px;
       padding: 20px;
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(99, 102, 241, 0.02) 100%);
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(37, 99, 235, 0.02) 100%);
       border-radius: var(--radius-lg);
       border: 1px solid var(--border-lighter);
     }
@@ -261,7 +262,7 @@
     .logout-link:hover {
       color: var(--danger);
       border-color: var(--danger);
-      background: rgba(239, 68, 68, 0.05);
+      background: rgba(220, 38, 38, 0.05);
       transform: translateX(4px);
     }
 
@@ -286,7 +287,7 @@
       top: 0;
       z-index: 50;
       backdrop-filter: blur(10px);
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(255, 255, 255, 0.96);
     }
 
     .topbar-title {
@@ -294,8 +295,8 @@
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--text-muted);
-      background: var(--bg-tertiary);
+      color: var(--accent-dark);
+      background: rgba(37, 99, 235, 0.08);
       padding: 6px 14px;
       border-radius: 40px;
       font-family: 'Space Mono', monospace;
@@ -457,24 +458,24 @@
     }
 
     .flash.success {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+      background: linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(5, 150, 105, 0.05));
       border-color: var(--success);
       color: var(--success);
     }
 
     .flash.danger {
-      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
+      background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(220, 38, 38, 0.05));
       border-color: var(--danger);
       color: var(--danger);
     }
 
     .flash.warning {
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));
+      background: linear-gradient(135deg, rgba(217, 119, 6, 0.1), rgba(217, 119, 6, 0.05));
       border-color: var(--warning);
       color: var(--warning);
     }
 
-    /* STAT CARDS */
+    /* STAT CARDS - Improved gradients */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -536,10 +537,10 @@
       transform: scale(1.1) rotate(5deg);
     }
 
-    .sc-total .stat-icon-wrap { background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05)); }
-    .sc-received .stat-icon-wrap { background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05)); }
-    .sc-pending .stat-icon-wrap { background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05)); }
-    .sc-failed .stat-icon-wrap { background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05)); }
+    .sc-total .stat-icon-wrap { background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(37, 99, 235, 0.05)); }
+    .sc-received .stat-icon-wrap { background: linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(5, 150, 105, 0.05)); }
+    .sc-pending .stat-icon-wrap { background: linear-gradient(135deg, rgba(217, 119, 6, 0.1), rgba(217, 119, 6, 0.05)); }
+    .sc-failed .stat-icon-wrap { background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(220, 38, 38, 0.05)); }
 
     .stat-label {
       font-size: 11px;
@@ -610,7 +611,7 @@
     .pill.active {
       border-color: var(--accent);
       color: var(--accent);
-      background: rgba(99, 102, 241, 0.1);
+      background: rgba(37, 99, 235, 0.1);
     }
 
     .search-form {
@@ -711,7 +712,7 @@
     }
 
     thead tr {
-      background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(99, 102, 241, 0.02) 100%);
+      background: linear-gradient(135deg, var(--bg-tertiary) 0%, rgba(37, 99, 235, 0.02) 100%);
     }
 
     th {
@@ -745,7 +746,7 @@
     }
 
     tbody tr:hover {
-      background: linear-gradient(90deg, rgba(99, 102, 241, 0.04) 0%, transparent 100%);
+      background: linear-gradient(90deg, rgba(37, 99, 235, 0.04) 0%, transparent 100%);
       transform: scale(1.01);
     }
 
@@ -768,8 +769,8 @@
       width: 44px;
       height: 44px;
       border-radius: var(--radius-md);
-      background: linear-gradient(135deg, var(--accent-glow), rgba(99, 102, 241, 0.05));
-      border: 1px solid rgba(99, 102, 241, 0.2);
+      background: linear-gradient(135deg, var(--accent-glow), rgba(37, 99, 235, 0.05));
+      border: 1px solid rgba(37, 99, 235, 0.2);
       color: var(--accent);
       display: flex;
       align-items: center;
@@ -820,10 +821,10 @@
       background: currentColor;
     }
 
-    .badge-received { background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05)); color: var(--success); }
-    .badge-pending { background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05)); color: var(--warning); }
-    .badge-failed { background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05)); color: var(--danger); }
-    .badge-new { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.05)); color: var(--accent); }
+    .badge-received { background: linear-gradient(135deg, rgba(5, 150, 105, 0.15), rgba(5, 150, 105, 0.05)); color: var(--success); }
+    .badge-pending { background: linear-gradient(135deg, rgba(217, 119, 6, 0.15), rgba(217, 119, 6, 0.05)); color: var(--warning); }
+    .badge-failed { background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(220, 38, 38, 0.05)); color: var(--danger); }
+    .badge-new { background: linear-gradient(135deg, rgba(37, 99, 235, 0.15), rgba(37, 99, 235, 0.05)); color: var(--accent); }
 
     /* Amount */
     .amt {
@@ -831,7 +832,7 @@
       font-size: 12px;
       font-weight: 800;
       color: var(--success);
-      background: rgba(16, 185, 129, 0.1);
+      background: rgba(5, 150, 105, 0.1);
       padding: 4px 12px;
       border-radius: 20px;
       display: inline-block;
@@ -855,47 +856,6 @@
       justify-content: center;
       font-size: 11px;
       font-weight: 700;
-    }
-
-    /* Assign Form */
-    .assign-form {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .mini-select {
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-light);
-      border-radius: 40px;
-      color: var(--text-primary);
-      font-family: 'Space Mono', monospace;
-      font-size: 10px;
-      padding: 7px 12px;
-      outline: none;
-      cursor: pointer;
-      max-width: 130px;
-    }
-
-    .mini-select:focus {
-      border-color: var(--accent);
-    }
-
-    .mini-btn {
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
-      border: none;
-      color: #fff;
-      font-family: 'Inter', sans-serif;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 7px 14px;
-      border-radius: 40px;
-      cursor: pointer;
-      transition: all 0.25s ease;
-    }
-
-    .mini-btn:hover {
-      transform: scale(0.96);
     }
 
     /* Action Buttons */
@@ -925,11 +885,11 @@
       transform: translateY(-2px);
     }
 
-    .act-btn.received:hover { border-color: var(--success); color: var(--success); background: rgba(16, 185, 129, 0.1); }
-    .act-btn.pending:hover { border-color: var(--warning); color: var(--warning); background: rgba(245, 158, 11, 0.1); }
-    .act-btn.failed:hover { border-color: var(--danger); color: var(--danger); background: rgba(239, 68, 68, 0.1); }
-    .act-btn.remark:hover { border-color: var(--accent); color: var(--accent); background: rgba(99, 102, 241, 0.1); }
-    .act-btn.view:hover { border-color: var(--info); color: var(--info); background: rgba(59, 130, 246, 0.1); }
+    .act-btn.received:hover { border-color: var(--success); color: var(--success); background: rgba(5, 150, 105, 0.1); }
+    .act-btn.pending:hover { border-color: var(--warning); color: var(--warning); background: rgba(217, 119, 6, 0.1); }
+    .act-btn.failed:hover { border-color: var(--danger); color: var(--danger); background: rgba(220, 38, 38, 0.1); }
+    .act-btn.remark:hover { border-color: var(--accent); color: var(--accent); background: rgba(37, 99, 235, 0.1); }
+    .act-btn.view:hover { border-color: var(--info); color: var(--info); background: rgba(14, 165, 233, 0.1); }
 
     /* Table Footer */
     .table-footer {
@@ -1325,7 +1285,7 @@
         <table>
           <thead>
             <tr>
-              <th>#</th><th>Company</th><th>Service</th><th>Login ID</th><th>Password</th><th>Ops Remark</th><th>Accounts Remark</th><th>Assigned To</th><th>Total Fee</th><th>Govt Paid</th><th>Prof Paid</th><th>Collected Fee</th><th>Pending Amount</th><th>Payment Status</th><th>Assign Exec</th><th>Actions</th>
+              <th>#</th><th>Company</th><th>Service</th><th>Login ID</th><th>Password</th><th>Ops Remark</th><th>Accounts Remark</th><th>Assigned To</th><th>Invoice Value</th><th>Government Fee</th><th>Professional Fee</th><th>Pending Payment</th><th>Payment Status</th><th>Assign Exec</th><th>Actions</th>
             </tr>
           </thead>
           <tbody id="leads-tbody">
@@ -1370,33 +1330,20 @@
                   <span style="font-size:11px;color:var(--text-muted);">— unassigned</span>
                   {% endif %}
                 </td>
-                <td>{% if lead.total_amount %}<span class="amt">₹ {{ lead.total_amount }}</span>{% else %}—{% endif %}</td>
-                <td>{% if lead.govt_amount is not none and lead.govt_amount != 0 %}<span class="amt">₹ {{ lead.govt_amount }}</span>{% else %}—{% endif %}</td>
-                <td>{% if lead.professional_amount is not none and lead.professional_amount != 0 %}<span class="amt">₹ {{ lead.professional_amount }}</span>{% else %}—{% endif %}</td>
-                <td>{% set collected_total = (lead.govt_amount or 0) + (lead.professional_amount or 0) %}{% if collected_total %}<span class="amt">₹ {{ collected_total }}</span>{% else %}—{% endif %}</td>
-                <td>{% set pending_amount = ((lead.total_amount or 0) - collected_total) if (lead.total_amount is not none) else 0 %}{% if pending_amount > 0 %}<span class="amt">₹ {{ pending_amount }}</span>{% else %}₹ 0{% endif %}</td>
+                <td>{% if lead.invoice_value %}<span class="amt">₹ {{ lead.invoice_value }}</span>{% else %}₹ 0{% endif %}</td>
+                <td>{% if lead.gov_fee %}<span class="amt">₹ {{ lead.gov_fee }}</span>{% else %}₹ 0{% endif %}</td>
+                <td>{% if lead.professional_fee %}<span class="amt">₹ {{ lead.professional_fee }}</span>{% else %}₹ 0{% endif %}</td>
+                <td>{% if lead.pending_payment %}<span class="amt">₹ {{ lead.pending_payment }}</span>{% else %}₹ 0{% endif %}</td>
                 <td>
-                  {% if lead.status == 'Completed' %}
-                    <span class="badge badge-received">Received</span>
+                  {% if lead.payment_status_label == 'All Payments Received' %}
+                    <span class="badge badge-received">All Payments Received</span>
                   {% elif lead.status == 'Failed' %}
                     <span class="badge badge-failed">Failed</span>
-                  {% elif lead.status == 'Pending' %}
-                    <span class="badge badge-pending">Pending</span>
+                  {% elif lead.payment_status_label == 'Pending Payment' %}
+                    <span class="badge badge-pending">Pending Payment</span>
                   {% else %}
                     <span class="badge badge-new">New</span>
                   {% endif %}
-                  <div style="margin-top:5px;font-size:10px;">Govt: {{ lead.govt_payment_status or '—' }}<br>Prof: {{ lead.professional_payment_status or '—' }}</div>
-                </td>
-                <td>
-                  <form method="POST" action="{{ url_for('accounts.assign', lead_id=lead.id) }}" class="assign-form">
-                    <select name="account_executive" class="mini-select" required>
-                      <option value="" disabled selected>Pick exec…</option>
-                      {% for emp in accounts_employees %}
-                      <option value="{{ emp.id }}" {% if lead.get('account_executive') == emp.id %}selected{% endif %}>{{ emp.name }}</option>
-                      {% endfor %}
-                    </select>
-                    <button type="submit" class="mini-btn"><i class="bi bi-arrow-right"></i></button>
-                  </form>
                 </td>
                 <td>
                   <div class="act-cell">
@@ -1410,9 +1357,9 @@
               </tr>
               {% endfor %}
             {% else %}
-              <tr><td colspan="16"><div class="empty-state"><div class="ei">📭</div><p>No leads ready for accounts yet.</p></div></td></tr>
+              <tr><td colspan="15"><div class="empty-state"><div class="ei">📭</div><p>No leads ready for accounts yet.</p></div></td></tr>
             {% endif %}
-            <tr id="no-results"><td colspan="16" style="text-align:center;padding:32px;"><i class="bi bi-search"></i> No leads match this filter.</td></tr>
+            <tr id="no-results"><td colspan="15" style="text-align:center;padding:32px;"><i class="bi bi-search"></i> No leads match this filter.</td></tr>
           </tbody>
         </table>
       </div>
@@ -1431,12 +1378,16 @@
     <div class="modal-hdr"><h3><i class="bi bi-check-circle-fill"></i> Mark Payment Received</h3><button class="modal-close" onclick="closeModal('received-modal')">✕</button></div>
     <form method="POST" id="received-form" action="">
       <div class="modal-body">
-        <label class="fl">Total Fee</label>
-        <input type="number" name="total_amount" class="fi" placeholder="e.g. 20000" step="0.01" min="0"/>
         <label class="fl">Government Fee</label>
-        <input type="number" name="govt_amount" class="fi" placeholder="e.g. 15000" step="0.01" min="0"/>
+        <input type="number" name="gov_fee" class="fi js-gov-fee" placeholder="e.g. 1500" step="0.01" min="0"/>
         <label class="fl">Professional Fee</label>
-        <input type="number" name="professional_amount" class="fi" placeholder="e.g. 5000" step="0.01" min="0"/>
+        <input type="number" name="professional_fee" class="fi js-prof-fee" placeholder="e.g. 2500" step="0.01" min="0"/>
+        <label class="fl">Invoice Value</label>
+        <input type="number" name="invoice_value_preview" class="fi js-invoice-value" placeholder="Auto calculated" step="0.01" min="0" readonly/>
+        <label class="fl">Government Fee Received</label>
+        <input type="number" name="gov_fee_received" class="fi" placeholder="e.g. 1500" step="0.01" min="0"/>
+        <label class="fl">Professional Fee Received</label>
+        <input type="number" name="professional_fee_received" class="fi" placeholder="e.g. 1000" step="0.01" min="0"/>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn-m btn-cancel" onclick="closeModal('received-modal')">Cancel</button>
@@ -1557,6 +1508,26 @@
   document.addEventListener('DOMContentLoaded', () => {
     const textarea = document.querySelector('#remark-form textarea[name="remark"]');
     const select = document.getElementById('account-remark-select');
+    const receivedForm = document.getElementById('received-form');
+
+    function bindInvoiceCalculator(form) {
+      if (!form) return;
+      const govInput = form.querySelector('.js-gov-fee');
+      const profInput = form.querySelector('.js-prof-fee');
+      const invoiceInput = form.querySelector('.js-invoice-value');
+      if (!govInput || !profInput || !invoiceInput) return;
+
+      const updateInvoice = () => {
+        const gov = parseFloat(govInput.value || '0') || 0;
+        const prof = parseFloat(profInput.value || '0') || 0;
+        invoiceInput.value = (gov + prof).toFixed(2);
+      };
+
+      govInput.addEventListener('input', updateInvoice);
+      profInput.addEventListener('input', updateInvoice);
+      updateInvoice();
+    }
+
     if (textarea) {
       textarea.style.display = 'none';
       textarea.required = false;
@@ -1568,6 +1539,7 @@
     if (activePill) {
       filterPill('all', activePill);
     }
+    bindInvoiceCalculator(receivedForm);
   });
 </script>
 </body>
