@@ -424,6 +424,38 @@ def leave_requests():
     )
 
 
+@hr_bp.route("/leave/approve/<int:leave_id>", methods=["POST"])
+@login_required
+def approve_leave(leave_id):
+
+    if not require_hr():
+        return redirect_to_role_dashboard()
+
+    update_leave_status(
+        leave_id=leave_id,
+        status="approved",
+        approved_by=current_user.employee_id,
+    )
+    flash("Leave request approved.", "success")
+    return redirect(url_for("hr.leave_requests"))
+
+
+@hr_bp.route("/leave/reject/<int:leave_id>", methods=["POST"])
+@login_required
+def reject_leave(leave_id):
+
+    if not require_hr():
+        return redirect_to_role_dashboard()
+
+    update_leave_status(
+        leave_id=leave_id,
+        status="rejected",
+        approved_by=current_user.employee_id,
+    )
+    flash("Leave request rejected.", "success")
+    return redirect(url_for("hr.leave_requests"))
+
+
 # =========================================================
 # PAYROLL
 # =========================================================
